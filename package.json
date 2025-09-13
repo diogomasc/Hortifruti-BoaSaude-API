@@ -1,0 +1,28 @@
+{
+  "name": "hortifruti-boasaude-api",
+  "version": "1.0.0",
+  "description": "API RESTful para gestão do marketplace de assinatura de hortifrúti com Node, Fastify e Drizzle ORM desenvolvida durante disciplina de Eng. de Software no IFBA 2025.2",
+  "main": "index.js",
+  "scripts": {
+     "dev": "node --watch src/server.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diogomasc/Hortifruti-BoaSaude-API.git"
+  },
+  "keywords": [],
+  "author": "Diogo Mascarenhas Ferreira Santos",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/diogomasc/Hortifruti-BoaSaude-API/issues"
+  },
+  "homepage": "https://github.com/diogomasc/Hortifruti-BoaSaude-API#readme",
+  "dependencies": {
+    "fastify": "^5.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.3",
+    "typescript": "^5.9.2"
+  }
+}
