@@ -4,7 +4,9 @@
   "description": "API RESTful para gestão do marketplace de assinatura de hortifrúti com Node, Fastify e Drizzle ORM desenvolvida durante disciplina de Eng. de Software no IFBA 2025.2",
   "main": "index.js",
   "scripts": {
-     "dev": "node --watch src/server.ts"
+    "dev": "tsx --watch src/server.ts",
+    "build": "tsup src --out-dir build",
+    "start": "node build/server.js"
   },
   "repository": {
     "type": "git",
@@ -19,10 +21,28 @@
   },
   "homepage": "https://github.com/diogomasc/Hortifruti-BoaSaude-API#readme",
   "dependencies": {
-    "fastify": "^5.6.0"
+    "@faker-js/faker": "9.9.0",
+    "@fastify/swagger": "9.5.1",
+    "@fastify/swagger-ui": "5.2.3",
+    "argon2": "0.44.0",
+    "dotenv": "17.2.2",
+    "drizzle-orm": "0.44.5",
+    "fastify": "5.6.0",
+    "fastify-type-provider-zod": "5.1.0",
+    "jsonwebtoken": "9.0.2",
+    "pg": "8.16.3",
+    "pino-pretty": "13.1.1",
+    "zod": "4.1.9"
   },
   "devDependencies": {
-    "@types/node": "^24.3.3",
-    "typescript": "^5.9.2"
+    "@types/jsonwebtoken": "9.0.10",
+    "@types/node": "24.5.2",
+    "@types/supertest": "6.0.3",
+    "@vitest/coverage-v8": "3.2.4",
+    "drizzle-kit": "^1.0.0-beta.1-fd5d1e8",
+    "supertest": "7.1.4",
+    "tsx": "4.20.5",
+    "typescript": "5.9.2",
+    "vitest": "3.2.4"
   }
 }
