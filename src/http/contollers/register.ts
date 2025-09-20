@@ -76,7 +76,7 @@ export const registerController: FastifyPluginAsyncZod = async (server) => {
     "/register",
     {
       schema: {
-        tags: ["auth"],
+        tags: ["Authentication"],
         summary: "Register a new user",
         description: "Create a new user account as consumer, producer or admin",
         body: registerBodySchema,

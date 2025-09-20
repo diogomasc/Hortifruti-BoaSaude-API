@@ -35,6 +35,15 @@ export function buildApp() {
           "API para gerenciar usuários, produtos e pedidos do sistema Hortifruti Boa Saúde",
         version: "1.0.0",
       },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+          },
+        },
+      },
     },
     transform: jsonSchemaTransform,
   });
