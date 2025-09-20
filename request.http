@@ -11,7 +11,7 @@ Content-Type: application/json
   "password": "admin123456",
   "firstName": "João",
   "lastName": "Administrador",
-  "phone": "(11) 99999-1111",
+  "phone": "11999991111",
   "role": "admin"
 }
 
@@ -25,9 +25,9 @@ Content-Type: application/json
   "password": "senha123456",
   "firstName": "Maria",
   "lastName": "Silva",
-  "phone": "(11) 98888-2222",
+  "phone": "11988882222",
   "role": "consumer",
-  "cpf": "123.456.789-00",
+  "cpf": "12345678900",
   "birthDate": "1990-05-15"
 }
 
@@ -41,9 +41,9 @@ Content-Type: application/json
   "password": "produtor123",
   "firstName": "Carlos",
   "lastName": "Santos",
-  "phone": "(11) 97777-3333",
+  "phone": "11977773333",
   "role": "producer",
-  "cnpj": "12.345.678/0001-90",
+  "cnpj": "12345678000190",
   "shopName": "Fazenda Orgânica Santos",
   "shopDescription": "Produtos frescos e orgânicos direto da fazenda. Especializada em hortaliças e frutas da estação."
 }

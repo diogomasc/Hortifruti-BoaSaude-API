@@ -10,11 +10,25 @@ const registerBodySchema = z
     password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
     firstName: z.string().min(1, "Nome é obrigatório"),
     lastName: z.string().min(1, "Sobrenome é obrigatório"),
-    phone: z.string().optional(),
+    phone: z
+      .string()
+      .regex(/^\d+$/, "Telefone deve conter apenas números")
+      .length(11, "Telefone deve ter 11 dígitos")
+      .optional()
+      .describe(
+        "Telefone do usuário (opcional). Envie apenas números, sem formatação com DDD (ex: 11999999999)"
+      ),
     role: z.enum(["consumer", "producer", "admin"]).default("consumer"),
 
     // Campos específicos para consumidores
-    cpf: z.string().optional(),
+    cpf: z
+      .string()
+      .regex(/^\d+$/, "CPF deve conter apenas números")
+      .length(11, "CPF deve ter 11 dígitos")
+      .optional()
+      .describe(
+        "CPF do consumidor (obrigatório apenas para role 'consumer'). Envie apenas números, sem formatação (ex: 12345678900)"
+      ),
     birthDate: z
       .string()
       .regex(
@@ -27,7 +41,14 @@ const registerBodySchema = z
       ),
 
     // Campos específicos para produtores
-    cnpj: z.string().optional(),
+    cnpj: z
+      .string()
+      .regex(/^\d+$/, "CNPJ deve conter apenas números")
+      .length(14, "CNPJ deve ter 14 dígitos")
+      .optional()
+      .describe(
+        "CNPJ do produtor (obrigatório apenas para role 'producer'). Envie apenas números, sem formatação (ex: 12345678000190)"
+      ),
     shopName: z.string().optional(),
     shopDescription: z.string().optional(),
   })
