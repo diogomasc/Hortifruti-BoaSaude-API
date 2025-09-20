@@ -18,7 +18,7 @@ export interface User {
 export interface CreateUserData {
   email: string;
   passwordHash: string;
-  role: "consumer" | "producer";
+  role: "consumer" | "producer" | "admin";
   firstName: string;
   lastName: string;
   phone?: string;

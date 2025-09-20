@@ -8,7 +8,7 @@ interface RegisterUseCaseRequest {
   firstName: string;
   lastName: string;
   phone?: string;
-  role: "consumer" | "producer";
+  role: "consumer" | "producer" | "admin";
   cpf?: string;
   birthDate?: string;
   cnpj?: string;

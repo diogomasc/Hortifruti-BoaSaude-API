@@ -1,19 +1,49 @@
-# GET /products
-GET http://localhost:3333/products
+# ========================================
+# REGISTRO DE USUÁRIOS
+# ========================================
 
-###
-# GET /products/:id
-GET http://localhost:3333/products/id
-
-###
-# POST /products
-POST http://localhost:3333/products
+# POST /register - Registro de Admin
+POST http://localhost:3333/register
 Content-Type: application/json
 
 {
-  "name": "Product 4",
-  "category": "Categoria 1",
-  "quantity": 10,
-  "price": 300,
-  "description": "Product 3 description"
+  "email": "admin@hortifruti.com",
+  "password": "admin123456",
+  "firstName": "João",
+  "lastName": "Administrador",
+  "phone": "(11) 99999-1111",
+  "role": "admin"
+}
+
+###
+# POST /register - Registro de Consumer (Consumidor)
+POST http://localhost:3333/register
+Content-Type: application/json
+
+{
+  "email": "consumidor@email.com",
+  "password": "senha123456",
+  "firstName": "Maria",
+  "lastName": "Silva",
+  "phone": "(11) 98888-2222",
+  "role": "consumer",
+  "cpf": "123.456.789-00",
+  "birthDate": "1990-05-15"
+}
+
+###
+# POST /register - Registro de Producer (Produtor)
+POST http://localhost:3333/register
+Content-Type: application/json
+
+{
+  "email": "produtor@fazenda.com",
+  "password": "produtor123",
+  "firstName": "Carlos",
+  "lastName": "Santos",
+  "phone": "(11) 97777-3333",
+  "role": "producer",
+  "cnpj": "12.345.678/0001-90",
+  "shopName": "Fazenda Orgânica Santos",
+  "shopDescription": "Produtos frescos e orgânicos direto da fazenda. Especializada em hortaliças e frutas da estação."
 }

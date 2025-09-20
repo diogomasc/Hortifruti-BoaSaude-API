@@ -11,11 +11,20 @@ const registerBodySchema = z
     firstName: z.string().min(1, "Nome é obrigatório"),
     lastName: z.string().min(1, "Sobrenome é obrigatório"),
     phone: z.string().optional(),
-    role: z.enum(["consumer", "producer"]).default("consumer"),
+    role: z.enum(["consumer", "producer", "admin"]).default("consumer"),
 
     // Campos específicos para consumidores
     cpf: z.string().optional(),
-    birthDate: z.string().optional(),
+    birthDate: z
+      .string()
+      .regex(
+        /^\d{4}-\d{2}-\d{2}$/,
+        "Data de nascimento deve estar no formato YYYY-MM-DD"
+      )
+      .optional()
+      .describe(
+        "Data de nascimento do consumidor (opcional). Formato obrigatório: YYYY-MM-DD (ex: 1990-01-15)"
+      ),
 
     // Campos específicos para produtores
     cnpj: z.string().optional(),
@@ -32,6 +41,7 @@ const registerBodySchema = z
       if (data.role === "producer" && !data.cnpj) {
         return false;
       }
+      // Admin não precisa de CPF nem CNPJ
       return true;
     },
     {
@@ -47,7 +57,7 @@ export const registerController: FastifyPluginAsyncZod = async (server) => {
       schema: {
         tags: ["auth"],
         summary: "Register a new user",
-        description: "Create a new user account as consumer or producer",
+        description: "Create a new user account as consumer, producer or admin",
         body: registerBodySchema,
         response: {
           201: z
