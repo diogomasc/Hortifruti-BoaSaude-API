@@ -23,6 +23,16 @@ export class DrizzleUsersRepository implements UsersRepository {
     };
   }
 
+  async findById(id: string): Promise<User | null> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+
+    return user ? this.mapDrizzleUserToUser(user) : null;
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     const [user] = await db
       .select()

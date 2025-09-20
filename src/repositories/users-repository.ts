@@ -30,6 +30,7 @@ export interface CreateUserData {
 }
 
 export interface UsersRepository {
+  findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   findByCpf(cpf: string): Promise<User | null>;
   findByCnpj(cnpj: string): Promise<User | null>;

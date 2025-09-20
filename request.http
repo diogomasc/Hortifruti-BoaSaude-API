@@ -1,4 +1,25 @@
 # ========================================
+# AUTENTICAÇÃO
+# ========================================
+
+# POST /login - Login do usuário
+POST http://localhost:3333/login
+Content-Type: application/json
+
+{
+  "email": "consumidor@email.com",
+  "password": "senha123456"
+}
+
+###
+
+# GET /profile - Perfil do usuário (rota protegida)
+GET http://localhost:3333/profile
+Authorization: Bearer SEU_TOKEN_JWT_AQUI
+
+###
+
+# ========================================
 # REGISTRO DE USUÁRIOS
 # ========================================
 
