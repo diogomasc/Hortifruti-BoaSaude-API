@@ -8,10 +8,39 @@ import {
   date,
   numeric,
   pgEnum,
+  integer,
 } from "drizzle-orm/pg-core";
 
 // Enum para tipos de usuário
 export const userRole = pgEnum("user_roles", ["consumer", "producer", "admin"]);
+
+// Enum para categorias de produtos
+export const productCategory = pgEnum("product_categories", [
+  "frutas",
+  "legumes", 
+  "verduras",
+  "ervas",
+  "graos",
+  "tuberculos",
+  "hortalicas",
+  "organicos",
+  "ovos",
+  "mel",
+  "cogumelos",
+  "temperos",
+  "sementes",
+  "castanhas",
+  "integrais",
+  "conservas",
+  "compotas",
+  "polpa_fruta",
+  "polpa_vegetal",
+  "sazonal",
+  "flores_comestiveis",
+  "vegano",
+  "kits",
+  "outros"
+]);
 
 // Tabela unificada de Usuários
 export const users = pgTable(
@@ -73,3 +102,26 @@ export const wallets = pgTable(
     userIdx: uniqueIndex("wallet_user_idx").on(table.userId),
   })
 );
+
+// Tabela de Produtos
+export const products = pgTable("products", {
+  id: uuid().primaryKey().defaultRandom(),
+  title: text().notNull(),
+  description: text().notNull(),
+  price: numeric({ precision: 10, scale: 2 }).notNull(),
+  category: productCategory().notNull(),
+  producerId: uuid("producer_id")
+    .notNull()
+    .references(() => users.id),
+  quantity: integer().notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Tabela de Imagens de Produtos
+export const productImages = pgTable("product_images", {
+  id: uuid().primaryKey().defaultRandom(),
+  productId: uuid("product_id")
+    .notNull()
+    .references(() => products.id, { onDelete: "cascade" }),
+  imageUrl: text("image_url").notNull(),
+});

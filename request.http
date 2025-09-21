@@ -1,0 +1,82 @@
+### Variáveis
+@baseUrl = http://localhost:3333
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlMGNiOWRmYy01ZmZhLTQ0YmEtOTkyNy00YjNkYzM5MjBhZDAiLCJyb2xlIjoicHJvZHVjZXIiLCJpYXQiOjE3NTg0MzU2MDMsImV4cCI6MTc1OTA0MDQwM30.Gl99QtcC3jnbbz7tLmNKrLahozMVj4mMUogrPADH8Kw
+
+### 1. Listar produtos (público - sem autenticação)
+GET {{baseUrl}}/products
+Content-Type: application/json
+
+###
+
+### 2. Obter produto por ID (público - sem autenticação)
+GET {{baseUrl}}/products/ea2cbac5-4693-41b6-b83c-9a0dce829fa3
+Content-Type: application/json
+
+###
+
+### 3. Criar produto (requer autenticação + role producer)
+POST {{baseUrl}}/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Maçã Normal",
+  "description": "Maçã crocante",
+  "price": "2.30",
+  "category": "frutas",
+  "quantity": 10
+}
+
+###
+
+### 4. Listar produtos do produtor (requer autenticação + role producer)
+GET {{baseUrl}}/products/me
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### 5. Atualizar produto (requer autenticação + role producer)
+PUT {{baseUrl}}/products/ea2cbac5-4693-41b6-b83c-9a0dce829fa3
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Maçã Atualizada",
+  "description": "Maçã Atualizada descricao",
+  "price": "3.50",
+  "category": "frutas",
+  "quantity": 15
+}
+
+###
+
+### 6. Deletar produto (requer autenticação + role producer)
+DELETE {{baseUrl}}/products/ea2cbac5-4693-41b6-b83c-9a0dce829fa3
+Authorization: Bearer {{token}}
+
+###
+
+### 7. Adicionar imagem ao produto (requer autenticação + role producer)
+POST {{baseUrl}}/products/28998665-6173-48f1-9cf5-03c9733f8d20/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="maca-1.png"
+Content-Type: image/png
+
+< ./img/maca-2.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### 8. Listar imagens do produto (requer autenticação + role producer)
+GET {{baseUrl}}/products/28998665-6173-48f1-9cf5-03c9733f8d20/images
+Authorization: Bearer {{token}}
+
+###
+
+### 9. Deletar imagem do produto (requer autenticação + role producer)
+DELETE {{baseUrl}}/products/28998665-6173-48f1-9cf5-03c9733f8d20/images/eaf19751-ca68-40ec-9083-b22d6cb9f9bf
+Authorization: Bearer {{token}}

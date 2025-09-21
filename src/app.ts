@@ -7,8 +7,10 @@ import {
 } from "fastify-type-provider-zod";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
+import fastifyStatic from "@fastify/static";
 import { appRoutes } from "./http/routes";
 import { env } from "./env";
+import { join } from "path";
 
 export function buildApp() {
   const app = Fastify({
@@ -50,6 +52,12 @@ export function buildApp() {
 
   app.register(fastifySwaggerUi, {
     routePrefix: "/docs",
+  });
+
+  // Servir arquivos estáticos (imagens de produtos)
+  app.register(fastifyStatic, {
+    root: join(process.cwd(), "uploads"),
+    prefix: "/uploads/",
   });
 
   // Checa os dados de entrada
