@@ -1,6 +1,6 @@
 ### Variáveis
 @baseUrl = http://localhost:3333
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlMGNiOWRmYy01ZmZhLTQ0YmEtOTkyNy00YjNkYzM5MjBhZDAiLCJyb2xlIjoicHJvZHVjZXIiLCJpYXQiOjE3NTg0MzU2MDMsImV4cCI6MTc1OTA0MDQwM30.Gl99QtcC3jnbbz7tLmNKrLahozMVj4mMUogrPADH8Kw
+@token = SEU_TOKEN_JWT_AQUI
 
 ### 1. Listar produtos (público - sem autenticação)
 GET {{baseUrl}}/products
@@ -9,7 +9,7 @@ Content-Type: application/json
 ###
 
 ### 2. Obter produto por ID (público - sem autenticação)
-GET {{baseUrl}}/products/ea2cbac5-4693-41b6-b83c-9a0dce829fa3
+GET {{baseUrl}}/products/[productId1]
 Content-Type: application/json
 
 ###
@@ -20,9 +20,9 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "title": "Maçã Normal",
-  "description": "Maçã crocante",
-  "price": "2.30",
+  "title": "Nome do Produto",
+  "description": "Descrição do produto",
+  "price": "2.50",
   "category": "frutas",
   "quantity": 10
 }
@@ -37,13 +37,13 @@ Authorization: Bearer {{token}}
 ###
 
 ### 5. Atualizar produto (requer autenticação + role producer)
-PUT {{baseUrl}}/products/ea2cbac5-4693-41b6-b83c-9a0dce829fa3
+PUT {{baseUrl}}/products/[productId1]
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "title": "Maçã Atualizada",
-  "description": "Maçã Atualizada descricao",
+  "title": "Produto Atualizado",
+  "description": "Descrição atualizada do produto",
   "price": "3.50",
   "category": "frutas",
   "quantity": 15
@@ -52,31 +52,79 @@ Authorization: Bearer {{token}}
 ###
 
 ### 6. Deletar produto (requer autenticação + role producer)
-DELETE {{baseUrl}}/products/ea2cbac5-4693-41b6-b83c-9a0dce829fa3
+DELETE {{baseUrl}}/products/[productId1]
 Authorization: Bearer {{token}}
 
 ###
 
-### 7. Adicionar imagem ao produto (requer autenticação + role producer)
-POST {{baseUrl}}/products/28998665-6173-48f1-9cf5-03c9733f8d20/images
+### 7a. Adicionar imagem ao primeiro produto
+POST {{baseUrl}}/products/[productId1]/images
 Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"; filename="maca-1.png"
+Content-Disposition: form-data; name="image"; filename="imagem-1.png"
 Content-Type: image/png
 
-< ./img/maca-2.png
+< ./img/maca-1.png
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ###
 
-### 8. Listar imagens do produto (requer autenticação + role producer)
-GET {{baseUrl}}/products/28998665-6173-48f1-9cf5-03c9733f8d20/images
+### 7b. Adicionar segunda imagem ao primeiro produto
+POST {{baseUrl}}/products/[productId1]/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="imagem-2.jpg"
+Content-Type: image/jpeg
+
+< ./img/maca-2.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### 7c. Adicionar imagem ao segundo produto
+POST {{baseUrl}}/products/[productId2]/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="imagem-3.png"
+Content-Type: image/png
+
+< ./img/maca-1.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### 7d. Adicionar segunda imagem ao segundo produto
+POST {{baseUrl}}/products/[productId2]/images
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="imagem-4.jpg"
+Content-Type: image/jpeg
+
+< ./img/maca-3.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+### 8a. Listar imagens do primeiro produto (requer autenticação + role producer)
+GET {{baseUrl}}/products/[productId1]/images
+Authorization: Bearer {{token}}
+
+###
+
+### 8b. Listar imagens do segundo produto (requer autenticação + role producer)
+GET {{baseUrl}}/products/[productId2]/images
 Authorization: Bearer {{token}}
 
 ###
 
 ### 9. Deletar imagem do produto (requer autenticação + role producer)
-DELETE {{baseUrl}}/products/28998665-6173-48f1-9cf5-03c9733f8d20/images/eaf19751-ca68-40ec-9083-b22d6cb9f9bf
+DELETE {{baseUrl}}/products/[productId1]/images/[imageId]
 Authorization: Bearer {{token}}
