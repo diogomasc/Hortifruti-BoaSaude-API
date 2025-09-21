@@ -78,8 +78,9 @@ export const registerController: FastifyPluginAsyncZod = async (server) => {
     {
       schema: {
         tags: ["Authentication"],
-        summary: "Register a new user",
-        description: "Create a new user account as consumer, producer or admin",
+        summary: "Registrar um novo usuário",
+        description:
+          "Criar uma nova conta de usuário como consumidor, produtor ou admin",
         body: registerBodySchema,
         response: {
           201: z
@@ -108,7 +109,10 @@ export const registerController: FastifyPluginAsyncZod = async (server) => {
         // Instanciar dependências
         const usersRepository = new DrizzleUsersRepository();
         const walletsRepository = new DrizzleWalletsRepository();
-        const registerUseCase = new RegisterUseCase(usersRepository, walletsRepository);
+        const registerUseCase = new RegisterUseCase(
+          usersRepository,
+          walletsRepository
+        );
 
         // Executar use case
         const { user } = await registerUseCase.execute(request.body);

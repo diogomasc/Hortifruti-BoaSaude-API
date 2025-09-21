@@ -2,7 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { makeGetUserCompleteProfileUseCase } from "../../../use-cases/factories/make-get-user-complete-profile-use-case";
 import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
-import { ensureAuthenticated } from "../../../utils/auth-guard";
+import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
 
 // Schema para documentação Swagger
 export const getUserProfileSchema = {
@@ -83,7 +83,7 @@ export const getUserProfileSchema = {
 
 export async function getUserProfile(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const userId = ensureAuthenticated(request, reply);
+    const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
     const getUserCompleteProfileUseCase = makeGetUserCompleteProfileUseCase();
 

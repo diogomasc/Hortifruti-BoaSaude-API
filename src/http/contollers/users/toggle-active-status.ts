@@ -2,7 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { makeToggleUserActiveStatusUseCase } from "../../../use-cases/factories/make-toggle-user-active-status-use-case";
 import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
-import { ensureAuthenticated } from "../../../utils/auth-guard";
+import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
 
 // Schema para documentação Swagger
 export const toggleUserActiveStatusSchema = {
@@ -52,7 +52,7 @@ export async function toggleUserActiveStatus(request: FastifyRequest, reply: Fas
   const { isActive } = toggleActiveStatusBodySchema.parse(request.body);
 
   try {
-    const userId = ensureAuthenticated(request, reply);
+    const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
     const toggleUserActiveStatusUseCase = makeToggleUserActiveStatusUseCase();
 

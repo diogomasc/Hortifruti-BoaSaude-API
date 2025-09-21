@@ -2,7 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { makeDeleteUserUseCase } from "../../../use-cases/factories/make-delete-user-use-case";
 import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
-import { ensureAuthenticated } from "../../../utils/auth-guard";
+import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
 
 // Schema para documentação Swagger
 export const deleteUserSchema = {
@@ -28,7 +28,7 @@ export const deleteUserSchema = {
 
 export async function deleteUser(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const userId = ensureAuthenticated(request, reply);
+    const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
     const deleteUserUseCase = makeDeleteUserUseCase();
 

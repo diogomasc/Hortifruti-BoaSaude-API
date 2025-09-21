@@ -3,7 +3,7 @@ import { z } from "zod";
 import { makeUpdateUserProfileUseCase } from "../../../use-cases/factories/make-update-user-profile-use-case";
 import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
 import { UserAlreadyExistsError } from "../../../use-cases/errors/user-already-exists-error";
-import { ensureAuthenticated } from "../../../utils/auth-guard";
+import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
 
 // Schema para documentação Swagger
 export const updateUserProfileSchema = {
@@ -127,7 +127,7 @@ export async function updateUserProfile(request: FastifyRequest, reply: FastifyR
   } = updateUserProfileBodySchema.parse(request.body);
 
   try {
-    const userId = ensureAuthenticated(request, reply);
+    const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
     const updateUserProfileUseCase = makeUpdateUserProfileUseCase();
 
