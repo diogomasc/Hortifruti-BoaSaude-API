@@ -83,4 +83,42 @@ export class DrizzleUsersRepository implements UsersRepository {
 
     return this.mapDrizzleUserToUser(user);
   }
+
+  async update(id: string, data: Partial<CreateUserData>): Promise<User> {
+    const updateData: any = {};
+    
+    if (data.email) updateData.email = data.email;
+    if (data.firstName) updateData.firstName = data.firstName;
+    if (data.lastName) updateData.lastName = data.lastName;
+    if (data.phone !== undefined) updateData.phone = data.phone || null;
+    if (data.cpf !== undefined) updateData.cpf = data.cpf || null;
+    if (data.birthDate !== undefined) updateData.birthDate = data.birthDate || null;
+    if (data.cnpj !== undefined) updateData.cnpj = data.cnpj || null;
+    if (data.shopName !== undefined) updateData.shopName = data.shopName || null;
+    if (data.shopDescription !== undefined) updateData.shopDescription = data.shopDescription || null;
+
+    const [user] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+
+    return this.mapDrizzleUserToUser(user);
+  }
+
+  async updateActiveStatus(id: string, isActive: boolean): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ isActive })
+      .where(eq(users.id, id))
+      .returning();
+
+    return this.mapDrizzleUserToUser(user);
+  }
+
+  async delete(id: string): Promise<void> {
+    await db
+      .delete(users)
+      .where(eq(users.id, id));
+  }
 }

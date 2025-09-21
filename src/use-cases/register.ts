@@ -1,5 +1,6 @@
 import { hash } from "argon2";
 import type { UsersRepository } from "../repositories/users-repository";
+import type { WalletsRepository } from "../repositories/wallets-repository";
 import { UserAlreadyExistsError } from "./errors/user-already-exists-error";
 
 interface RegisterUseCaseRequest {
@@ -28,7 +29,10 @@ interface RegisterUseCaseResponse {
 }
 
 export class RegisterUseCase {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(
+    private usersRepository: UsersRepository,
+    private walletsRepository: WalletsRepository
+  ) {}
 
   async execute({
     email,
@@ -82,6 +86,14 @@ export class RegisterUseCase {
       shopName,
       shopDescription,
     });
+
+    // Criar wallet automaticamente se for produtor
+    if (role === "producer") {
+      await this.walletsRepository.create({
+        userId: user.id,
+        balance: "0",
+      });
+    }
 
     return {
       user: {

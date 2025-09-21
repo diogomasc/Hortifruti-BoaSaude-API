@@ -2,6 +2,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { RegisterUseCase } from "../../use-cases/register";
 import { DrizzleUsersRepository } from "../../repositories/drizzle-users-repository";
+import { DrizzleWalletsRepository } from "../../repositories/drizzle-wallets-repository";
 import { UserAlreadyExistsError } from "../../use-cases/errors/user-already-exists-error";
 
 const registerBodySchema = z
@@ -106,7 +107,8 @@ export const registerController: FastifyPluginAsyncZod = async (server) => {
       try {
         // Instanciar dependências
         const usersRepository = new DrizzleUsersRepository();
-        const registerUseCase = new RegisterUseCase(usersRepository);
+        const walletsRepository = new DrizzleWalletsRepository();
+        const registerUseCase = new RegisterUseCase(usersRepository, walletsRepository);
 
         // Executar use case
         const { user } = await registerUseCase.execute(request.body);
