@@ -44,8 +44,27 @@ erDiagram
         timestamp updated_at
     }
     
+    PRODUCTS {
+        uuid id PK
+        text title
+        text description
+        numeric price
+        product_categories category
+        uuid producer_id FK
+        integer quantity
+        timestamp created_at
+    }
+    
+    PRODUCT_IMAGES {
+        uuid id PK
+        uuid product_id FK
+        text image_url
+    }
+    
     USERS ||--o{ ADDRESSES : "has"
     USERS ||--o| WALLETS : "owns (producer only)"
+    USERS ||--o{ PRODUCTS : "produces (producer only)"
+    PRODUCTS ||--o{ PRODUCT_IMAGES : "has"
 ```
 
 ## Estrutura das Tabelas
@@ -117,6 +136,61 @@ erDiagram
 └─────────────────────────────────────┘
 ```
 
+### 4. Produtos
+
+#### `products` - Produtos dos Produtores
+```
+┌─────────────────────────────────────┐
+│               products              │
+├─────────────────────────────────────┤
+│ id (UUID, PK)                       │
+│ title (TEXT)                        │
+│ description (TEXT)                  │
+│ price (NUMERIC(10,2))               │
+│ category (product_categories ENUM)  │
+│   - "frutas"                        │
+│   - "legumes"                       │
+│   - "verduras"                      │
+│   - "ervas"                         │
+│   - "graos"                         │
+│   - "tuberculos"                    │
+│   - "hortalicas"                    │
+│   - "organicos"                     │
+│   - "ovos"                          │
+│   - "mel"                           │
+│   - "cogumelos"                     │
+│   - "temperos"                      │
+│   - "sementes"                      │
+│   - "castanhas"                     │
+│   - "integrais"                     │
+│   - "conservas"                     │
+│   - "compotas"                      │
+│   - "polpa_fruta"                   │
+│   - "polpa_vegetal"                 │
+│   - "sazonal"                       │
+│   - "flores_comestiveis"            │
+│   - "vegano"                        │
+│   - "kits"                          │
+│   - "outros"                        │
+│ producer_id (UUID, FK)              │
+│ quantity (INTEGER, DEFAULT 0)       │
+│ created_at (TIMESTAMP)              │
+└─────────────────────────────────────┘
+```
+
+### 5. Imagens de Produtos
+
+#### `product_images` - Imagens dos Produtos
+```
+┌─────────────────────────────────────┐
+│            product_images           │
+├─────────────────────────────────────┤
+│ id (UUID, PK)                       │
+│ product_id (UUID, FK)               │
+│ image_url (TEXT)                    │
+└─────────────────────────────────────┘
+```
+
 ## Observações Técnicas
 
 1. **Tabela Unificada de Usuários**: O sistema utiliza uma única tabela `users` com um enum `user_roles` para distinguir entre consumidores, produtores e administradores. Campos específicos por role são nullable e validados na aplicação.
@@ -130,9 +204,17 @@ erDiagram
 
 4. **Relacionamento de Endereços**: A tabela `addresses` se relaciona com a tabela unificada `users` através do campo `user_id`, permitindo que qualquer tipo de usuário tenha endereços.
 
-5. **Carteiras Exclusivas**: Apenas produtores possuem carteiras, com relacionamento 1:N entre `users` e `wallets` (um produtor pode ter múltiplas carteiras no futuro).
+5. **Carteiras Exclusivas**: Apenas produtores possuem carteiras, com relacionamento 1:1 entre `users` e `wallets` (um produtor possui uma carteira).
 
-6. **Índices de Performance**: Todos os campos de email e documentos (CPF/CNPJ) possuem índices únicos para otimização de consultas e garantia de unicidade.
+6. **Sistema de Produtos**: Apenas produtores podem criar produtos. Cada produto pertence a um produtor específico e possui uma categoria definida pelo enum `product_categories`.
+
+7. **Categorias de Produtos**: O enum `product_categories` define 24 categorias específicas para hortifrúti, incluindo frutas, legumes, verduras, produtos orgânicos, kits e outros.
+
+8. **Imagens de Produtos**: Cada produto pode ter múltiplas imagens através da tabela `product_images`, com relacionamento 1:N e cascade delete (quando um produto é deletado, suas imagens também são removidas).
+
+9. **Armazenamento de Imagens**: As imagens são armazenadas fisicamente na pasta `uploads/products/` e referenciadas na base de dados através da URL.
+
+10. **Índices de Performance**: Todos os campos de email e documentos (CPF/CNPJ) possuem índices únicos para otimização de consultas e garantia de unicidade.
 ---
 
 **Data de Atualização**: 27/01/2025  
