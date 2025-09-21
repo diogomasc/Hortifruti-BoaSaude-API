@@ -27,16 +27,17 @@ interface GetUserCompleteProfileUseCaseResponse {
       balance: string;
       updatedAt: Date;
     };
-    addresses: Array<{
+    addresses: {
       id: string;
+      userId: string;
       street: string;
-      number?: string;
+      number: string;
       complement?: string;
       city: string;
       state: string;
       country: string;
-      zipCode?: string;
-    }>;
+      zipCode: string;
+    }[];
   };
 }
 
@@ -71,8 +72,9 @@ export class GetUserCompleteProfileUseCase {
 
     // Buscar endereços
     const userAddresses = await this.addressesRepository.findByUserId(userId);
-    const addresses = userAddresses.map(address => ({
+    const addresses = userAddresses.map((address) => ({
       id: address.id,
+      userId: address.userId,
       street: address.street,
       number: address.number,
       complement: address.complement,

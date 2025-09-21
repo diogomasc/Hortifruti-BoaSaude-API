@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "../database/client";
 import { addresses } from "../database/schema";
 import type { Address, CreateAddressData, AddressesRepository } from "./addresses-repository";
@@ -9,12 +9,12 @@ export class DrizzleAddressesRepository implements AddressesRepository {
       id: drizzleAddress.id,
       userId: drizzleAddress.userId,
       street: drizzleAddress.street,
-      number: drizzleAddress.number || undefined,
+      number: drizzleAddress.number,
       complement: drizzleAddress.complement || undefined,
       city: drizzleAddress.city,
       state: drizzleAddress.state,
       country: drizzleAddress.country,
-      zipCode: drizzleAddress.zipCode || undefined,
+      zipCode: drizzleAddress.zipCode,
     };
   }
 
@@ -27,18 +27,31 @@ export class DrizzleAddressesRepository implements AddressesRepository {
     return addressList.map(this.mapDrizzleAddressToAddress);
   }
 
+  async findByIdAndUserId(id: string, userId: string): Promise<Address | null> {
+    const [address] = await db
+      .select()
+      .from(addresses)
+      .where(and(eq(addresses.id, id), eq(addresses.userId, userId)));
+
+    if (!address) {
+      return null;
+    }
+
+    return this.mapDrizzleAddressToAddress(address);
+  }
+
   async create(data: CreateAddressData): Promise<Address> {
     const [address] = await db
       .insert(addresses)
       .values({
         userId: data.userId,
         street: data.street,
-        number: data.number || null,
+        number: data.number,
         complement: data.complement || null,
         city: data.city,
         state: data.state,
         country: data.country,
-        zipCode: data.zipCode || null,
+        zipCode: data.zipCode,
       })
       .returning();
 
@@ -50,12 +63,12 @@ export class DrizzleAddressesRepository implements AddressesRepository {
       .update(addresses)
       .set({
         street: data.street,
-        number: data.number || null,
+        number: data.number,
         complement: data.complement || null,
         city: data.city,
         state: data.state,
         country: data.country,
-        zipCode: data.zipCode || null,
+        zipCode: data.zipCode,
       })
       .where(eq(addresses.id, id))
       .returning();

@@ -4,6 +4,7 @@ import { getUserProfile, getUserProfileSchema } from "./get-profile";
 import { updateUserProfile, updateUserProfileSchema } from "./update-profile";
 import { toggleUserActiveStatus, toggleUserActiveStatusSchema } from "./toggle-active-status";
 import { deleteUser, deleteUserSchema } from "./delete-user";
+import { addressesRoutes } from "../addresses/routes";
 
 export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook("onRequest", verifyJWT);
@@ -19,4 +20,7 @@ export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
 
   // DELETE /users/me → Deleta o usuário autenticado
   app.delete("/me", { schema: deleteUserSchema }, deleteUser);
+
+  // Rotas de endereços
+  app.register(addressesRoutes, { prefix: "/me/addresses" });
 };
