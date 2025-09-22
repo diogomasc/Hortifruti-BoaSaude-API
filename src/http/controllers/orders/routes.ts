@@ -1,36 +1,46 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { verifyJWT } from "../../middlewares/get-authenticated-user-from-request";
-import { verifyUserRole } from "../../middlewares/verify-user-role";
-import { createOrder } from "./create-order";
-import { getOrderById } from "./get-order-by-id";
-import { listOrders } from "./list-orders";
-import { updateOrderStatus } from "./update-order-status";
+import { createOrder, createOrderBodySchema, createOrderResponseSchema } from "./create-order";
+import { listOrders, listOrdersResponseSchema } from "./list-orders";
+import { getOrderById, getOrderParamsSchema, getOrderResponseSchema } from "./get-order-by-id";
+import { updateOrderStatus, updateOrderStatusParamsSchema, updateOrderStatusBodySchema, updateOrderStatusResponseSchema } from "./update-order-status";
 
-export async function ordersRoutes(app: FastifyInstance) {
-  // Rotas que requerem apenas autenticação (qualquer usuário logado)
-  await app.register(async function (app) {
-    app.addHook("onRequest", verifyJWT);
+// Schema para criar pedido
+export const createOrderSchema = {
+  body: createOrderBodySchema,
+  response: createOrderResponseSchema,
+};
 
-    // GET /orders → Listar pedidos do usuário
-    app.get("/", listOrders);
+// Schema para listar pedidos
+export const listOrdersSchema = {
+  response: listOrdersResponseSchema,
+};
 
-    // GET /orders/:orderId → Obter pedido específico por ID
-    app.get("/:orderId", getOrderById);
-  });
+// Schema para obter pedido por ID
+export const getOrderByIdSchema = {
+  params: getOrderParamsSchema,
+  response: getOrderResponseSchema,
+};
 
-  // Rotas que requerem role específico de consumer
-  await app.register(async function (app) {
-    app.addHook("preHandler", verifyUserRole("consumer"));
+// Schema para atualizar status do pedido
+export const updateOrderStatusSchema = {
+  params: updateOrderStatusParamsSchema,
+  body: updateOrderStatusBodySchema,
+  response: updateOrderStatusResponseSchema,
+};
 
-    // POST /orders → Criar novo pedido (apenas consumers)
-    app.post("/", createOrder);
-  });
+export const ordersRoutes: FastifyPluginAsyncZod = async (app) => {
+  app.addHook("onRequest", verifyJWT);
 
-  // Rotas que requerem role específico de producer
-  await app.register(async function (app) {
-    app.addHook("preHandler", verifyUserRole("producer"));
+  // GET /orders → Lista todos os pedidos do usuário autenticado
+  app.get("/", { schema: listOrdersSchema }, listOrders);
 
-    // PATCH /orders/:orderId/status → Atualizar status do pedido (apenas producers)
-    app.patch("/:orderId/status", updateOrderStatus);
-  });
+  // POST /orders → Cria um novo pedido vinculado ao usuário autenticado
+  app.post("/", { schema: createOrderSchema }, createOrder);
+
+  // GET /orders/{orderId} → Obtém detalhes de um pedido específico
+  app.get("/:orderId", { schema: getOrderByIdSchema }, getOrderById);
+
+  // PATCH /orders/{orderId}/status → Atualiza o status de um pedido
+  app.patch("/:orderId/status", { schema: updateOrderStatusSchema }, updateOrderStatus);
 };
