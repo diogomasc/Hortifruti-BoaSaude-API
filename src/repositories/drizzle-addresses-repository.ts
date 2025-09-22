@@ -18,6 +18,19 @@ export class DrizzleAddressesRepository implements AddressesRepository {
     };
   }
 
+  async findById(id: string): Promise<Address | null> {
+    const [address] = await db
+      .select()
+      .from(addresses)
+      .where(eq(addresses.id, id));
+
+    if (!address) {
+      return null;
+    }
+
+    return this.mapDrizzleAddressToAddress(address);
+  }
+
   async findByUserId(userId: string): Promise<Address[]> {
     const addressList = await db
       .select()

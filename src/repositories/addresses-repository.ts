@@ -22,6 +22,7 @@ export interface CreateAddressData {
 }
 
 export interface AddressesRepository {
+  findById(id: string): Promise<Address | null>;
   findByUserId(userId: string): Promise<Address[]>;
   findByIdAndUserId(id: string, userId: string): Promise<Address | null>;
   create(data: CreateAddressData): Promise<Address>;

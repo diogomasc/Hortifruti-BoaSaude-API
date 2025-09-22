@@ -117,11 +117,76 @@ export const products = pgTable("products", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-// Tabela de Imagens de Produtos
+// Tabela de Imagens dos Produtos
 export const productImages = pgTable("product_images", {
   id: uuid().primaryKey().defaultRandom(),
   productId: uuid("product_id")
     .notNull()
     .references(() => products.id, { onDelete: "cascade" }),
   imageUrl: text("image_url").notNull(),
+});
+
+// Enum para status de pedidos
+export const orderStatus = pgEnum("order_status", ["PENDING", "COMPLETED", "REJECTED"]);
+
+// Enum para status de assinaturas
+export const subscriptionStatus = pgEnum("subscription_status", ["ACTIVE", "PAUSED", "CANCELLED"]);
+
+// Enum para frequência de assinaturas
+export const subscriptionFrequency = pgEnum("subscription_frequency", [
+  "WEEKLY", 
+  "BIWEEKLY", 
+  "MONTHLY", 
+  "QUARTERLY"
+]);
+
+// Tabela de Pedidos
+export const orders = pgTable("orders", {
+  id: uuid().primaryKey().defaultRandom(),
+  consumerId: uuid("consumer_id")
+    .notNull()
+    .references(() => users.id),
+  deliveryAddressId: uuid("delivery_address_id")
+    .notNull()
+    .references(() => addresses.id),
+  status: orderStatus().notNull().default("PENDING"),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+});
+
+// Tabela de Itens do Pedido
+export const orderItems = pgTable("order_items", {
+  id: uuid().primaryKey().defaultRandom(),
+  orderId: uuid("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }),
+  productId: uuid("product_id")
+    .notNull()
+    .references(() => products.id),
+  producerId: uuid("producer_id")
+    .notNull()
+    .references(() => users.id),
+  quantity: integer().notNull(),
+  unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
+});
+
+// Tabela de Assinaturas
+export const subscriptions = pgTable("subscriptions", {
+  id: uuid().primaryKey().defaultRandom(),
+  consumerId: uuid("consumer_id")
+    .notNull()
+    .references(() => users.id),
+  orderId: uuid("order_id")
+    .notNull()
+    .references(() => orders.id),
+  status: subscriptionStatus().notNull().default("ACTIVE"),
+  frequency: subscriptionFrequency().notNull(),
+  nextDeliveryDate: timestamp("next_delivery_date", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  pausedAt: timestamp("paused_at", { withTimezone: true }),
+  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
 });
