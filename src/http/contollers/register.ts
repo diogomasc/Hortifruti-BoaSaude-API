@@ -85,7 +85,6 @@ export const registerController: FastifyPluginAsyncZod = async (server) => {
         response: {
           201: z
             .object({
-              message: z.string(),
               user: z.object({
                 id: z.string().uuid(),
                 email: z.string().email(),
@@ -118,7 +117,6 @@ export const registerController: FastifyPluginAsyncZod = async (server) => {
         const { user } = await registerUseCase.execute(request.body);
 
         return reply.status(201).send({
-          message: "Usuário criado com sucesso",
           user: {
             ...user,
             createdAt: user.createdAt.toISOString(),
