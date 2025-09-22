@@ -1,7 +1,5 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { checkRequestJWT } from "../../../hooks/check-request-jwt";
-import { checkUserRole } from "../../../hooks/check-user-role";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import { makeListProductImagesUseCase } from "../../../../use-cases/factories/make-list-product-images-use-case";
 
@@ -9,7 +7,6 @@ export const listProductImagesRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
     "/products/:id/images",
     {
-      preHandler: [checkRequestJWT, checkUserRole("producer")],
       schema: {
         tags: ["Product Images"],
         summary: "Listar imagens do produto",

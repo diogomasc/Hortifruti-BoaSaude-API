@@ -14,17 +14,17 @@ export async function productsRoutes(app: FastifyInstance) {
   // Registrar todas as rotas públicas de produtos (sem autenticação)
   await app.register(listProductsRoute);
   await app.register(getProductByIdRoute);
-  await app.register(listProductImagesRoute);
 
   // Registrar rotas que requerem autenticação de produtor
   await app.register(async function (app) {
     app.addHook("preHandler", verifyUserRole("producer"));
-    
+
     await app.register(listProducerProductsRoute);
     await app.register(createProductRoute);
     await app.register(updateProductRoute);
     await app.register(deleteProductRoute);
     await app.register(addProductImageRoute);
     await app.register(deleteProductImageRoute);
+    await app.register(listProductImagesRoute);
   });
 }
