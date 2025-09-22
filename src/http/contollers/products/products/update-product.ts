@@ -1,7 +1,5 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { checkRequestJWT } from "../../../hooks/check-request-jwt";
-import { checkUserRole } from "../../../hooks/check-user-role";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import { makeUpdateProductUseCase } from "../../../../use-cases/factories/make-update-product-use-case";
 
@@ -9,7 +7,6 @@ export const updateProductRoute: FastifyPluginAsyncZod = async (server) => {
   server.put(
     "/products/:id",
     {
-      preHandler: [checkRequestJWT, checkUserRole("producer")],
       schema: {
         tags: ["Products"],
         summary: "Atualizar produto",

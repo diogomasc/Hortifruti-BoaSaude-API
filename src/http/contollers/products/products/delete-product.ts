@@ -1,7 +1,5 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { checkUserRole } from "../../../hooks/check-user-role";
-import { checkRequestJWT } from "../../../hooks/check-request-jwt";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import { makeDeleteProductUseCase } from "../../../../use-cases/factories/make-delete-product-use-case";
 
@@ -9,7 +7,6 @@ export const deleteProductRoute: FastifyPluginAsyncZod = async (server) => {
   server.delete(
     "/products/:id",
     {
-      preHandler: [checkRequestJWT, checkUserRole("producer")],
       schema: {
         tags: ["Products"],
         summary: "Deletar produto",

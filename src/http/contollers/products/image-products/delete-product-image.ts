@@ -1,7 +1,5 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { checkRequestJWT } from "../../../hooks/check-request-jwt";
-import { checkUserRole } from "../../../hooks/check-user-role";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import { makeDeleteProductImageUseCase } from "../../../../use-cases/factories/make-delete-product-image-use-case";
 
@@ -11,7 +9,6 @@ export const deleteProductImageRoute: FastifyPluginAsyncZod = async (
   server.delete(
     "/products/:id/images/:imageId",
     {
-      preHandler: [checkRequestJWT, checkUserRole("producer")],
       schema: {
         tags: ["Product Images"],
         summary: "Deletar imagem do produto",
