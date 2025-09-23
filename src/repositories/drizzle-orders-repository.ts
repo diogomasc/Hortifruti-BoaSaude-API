@@ -1,7 +1,13 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../database/client";
 import { orders, orderItems, users, products } from "../database/schema";
-import { OrdersRepository, CreateOrderRequest, OrderWithItems } from "./orders-repository";
+import { 
+  OrdersRepository, 
+  CreateOrderRequest, 
+  OrderWithItems, 
+  UpdateOrderItemStatusRequest,
+  OrderItemWithProduct 
+} from "./orders-repository";
 
 export class DrizzleOrdersRepository implements OrdersRepository {
   async create(data: CreateOrderRequest): Promise<OrderWithItems> {
@@ -53,6 +59,9 @@ export class DrizzleOrdersRepository implements OrdersRepository {
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           totalPrice: item.totalPrice,
+          status: item.status,
+          rejectionReason: item.rejectionReason,
+          updatedAt: item.updatedAt,
         })),
       };
     });
@@ -74,15 +83,18 @@ export class DrizzleOrdersRepository implements OrdersRepository {
 
     const order = orderWithItems[0].order;
     const items = orderWithItems
-      .filter((row) => row.item !== null)
-      .map((row) => ({
-        id: row.item!.id,
-        productId: row.item!.productId,
-        producerId: row.item!.producerId,
-        quantity: row.item!.quantity,
-        unitPrice: row.item!.unitPrice,
-        totalPrice: row.item!.totalPrice,
-      }));
+        .filter((row) => row.item !== null)
+        .map((row) => ({
+          id: row.item!.id,
+          productId: row.item!.productId,
+          producerId: row.item!.producerId,
+          quantity: row.item!.quantity,
+          unitPrice: row.item!.unitPrice,
+          totalPrice: row.item!.totalPrice,
+          status: row.item!.status,
+          rejectionReason: row.item!.rejectionReason,
+          updatedAt: row.item!.updatedAt,
+        }));
 
     return {
       id: order.id,
@@ -123,7 +135,7 @@ export class DrizzleOrdersRepository implements OrdersRepository {
     return this.groupOrdersWithItems(ordersWithItems);
   }
 
-  async updateStatus(id: string, status: "PENDING" | "COMPLETED" | "REJECTED"): Promise<void> {
+  async updateStatus(id: string, status: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED"): Promise<void> {
     const updateData: any = {
       status,
       updatedAt: new Date(),
@@ -177,10 +189,144 @@ export class DrizzleOrdersRepository implements OrdersRepository {
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           totalPrice: item.totalPrice,
+          status: item.status,
+          rejectionReason: item.rejectionReason,
+          updatedAt: item.updatedAt,
         });
       }
     }
 
     return Array.from(ordersMap.values());
+  }
+
+  async updateItemStatus(data: UpdateOrderItemStatusRequest): Promise<void> {
+    const updateData: any = {
+      status: data.status,
+      updatedAt: new Date(),
+    };
+
+    if (data.rejectionReason) {
+      updateData.rejectionReason = data.rejectionReason;
+    }
+
+    await db.update(orderItems).set(updateData).where(eq(orderItems.id, data.itemId));
+  }
+
+  async findItemById(itemId: string): Promise<OrderItemWithProduct | null> {
+    const result = await db
+      .select({
+        item: orderItems,
+        product: products,
+        order: orders,
+      })
+      .from(orderItems)
+      .innerJoin(products, eq(orderItems.productId, products.id))
+      .innerJoin(orders, eq(orderItems.orderId, orders.id))
+      .where(eq(orderItems.id, itemId));
+
+    if (result.length === 0) {
+      return null;
+    }
+
+    const row = result[0];
+    return {
+      id: row.item.id,
+      orderId: row.item.orderId,
+      productId: row.item.productId,
+      producerId: row.item.producerId,
+      quantity: row.item.quantity,
+      unitPrice: row.item.unitPrice,
+      totalPrice: row.item.totalPrice,
+      status: row.item.status,
+      rejectionReason: row.item.rejectionReason,
+      updatedAt: row.item.updatedAt,
+      product: {
+        id: row.product.id,
+        title: row.product.title,
+        description: row.product.description,
+        price: row.product.price,
+        category: row.product.category,
+      },
+      order: {
+        id: row.order.id,
+        consumerId: row.order.consumerId,
+        createdAt: row.order.createdAt,
+      },
+    };
+  }
+
+  async findPendingItemsByProducerId(producerId: string): Promise<OrderItemWithProduct[]> {
+    const result = await db
+      .select({
+        item: orderItems,
+        product: products,
+        order: orders,
+      })
+      .from(orderItems)
+      .innerJoin(products, eq(orderItems.productId, products.id))
+      .innerJoin(orders, eq(orderItems.orderId, orders.id))
+      .where(and(
+        eq(orderItems.producerId, producerId),
+        eq(orderItems.status, "PENDING")
+      ));
+
+    return result.map((row) => ({
+      id: row.item.id,
+      orderId: row.item.orderId,
+      productId: row.item.productId,
+      producerId: row.item.producerId,
+      quantity: row.item.quantity,
+      unitPrice: row.item.unitPrice,
+      totalPrice: row.item.totalPrice,
+      status: row.item.status,
+      rejectionReason: row.item.rejectionReason,
+      updatedAt: row.item.updatedAt,
+      product: {
+        id: row.product.id,
+        title: row.product.title,
+        description: row.product.description,
+        price: row.product.price,
+        category: row.product.category,
+      },
+      order: {
+        id: row.order.id,
+        consumerId: row.order.consumerId,
+        createdAt: row.order.createdAt,
+      },
+    }));
+  }
+
+  async recalculateOrderStatus(orderId: string): Promise<"PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED"> {
+    const items = await db
+      .select()
+      .from(orderItems)
+      .where(eq(orderItems.orderId, orderId));
+
+    if (items.length === 0) {
+      return "PENDING";
+    }
+
+    const approvedItems = items.filter(item => item.status === "APPROVED");
+    const rejectedItems = items.filter(item => item.status === "REJECTED");
+    const pendingItems = items.filter(item => item.status === "PENDING");
+
+    let newStatus: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED";
+
+    if (pendingItems.length > 0) {
+      // Se ainda há itens pendentes, o pedido permanece PENDING
+      newStatus = "PENDING";
+    } else if (approvedItems.length === items.length) {
+      // Todos os itens foram aprovados
+      newStatus = "COMPLETED";
+    } else if (rejectedItems.length === items.length) {
+      // Todos os itens foram rejeitados
+      newStatus = "REJECTED";
+    } else {
+      // Alguns aprovados, alguns rejeitados
+      newStatus = "PARTIALLY_COMPLETED";
+    }
+
+    await this.updateStatus(orderId, newStatus);
+    return newStatus;
   }
 }

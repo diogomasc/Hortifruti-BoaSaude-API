@@ -15,8 +15,8 @@ export const updateOrderStatusSchema = {
     orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
   }),
   body: z.object({
-    status: z.enum(["PENDING", "COMPLETED", "REJECTED"], {
-      message: "Status deve ser PENDING, COMPLETED ou REJECTED",
+    status: z.enum(["PENDING", "COMPLETED", "REJECTED", "PARTIALLY_COMPLETED"], {
+      message: "Status deve ser PENDING, COMPLETED, REJECTED ou PARTIALLY_COMPLETED",
     }),
   }),
   response: {

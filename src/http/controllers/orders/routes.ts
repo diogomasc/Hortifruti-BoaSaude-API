@@ -4,6 +4,8 @@ import { createOrder, createOrderSchema } from "./create-order";
 import { listOrders, listOrdersSchema } from "./list-orders";
 import { getOrderById, getOrderByIdSchema } from "./get-order-by-id";
 import { updateOrderStatus, updateOrderStatusSchema } from "./update-order-status";
+import { updateOrderItemStatus, updateOrderItemStatusSchema } from "./update-order-item-status";
+import { listPendingOrderItems, listPendingOrderItemsSchema } from "./list-pending-order-items";
 
 export const ordersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook("onRequest", verifyJWT);
@@ -19,4 +21,10 @@ export const ordersRoutes: FastifyPluginAsyncZod = async (app) => {
 
   // PATCH /orders/{orderId}/status → Atualiza o status de um pedido
   app.patch("/:orderId/status", { schema: updateOrderStatusSchema }, updateOrderStatus);
+
+  // PATCH /orders/{orderId}/items/{itemId}/status → Atualiza o status de um item específico
+  app.patch("/:orderId/items/:itemId/status", { schema: updateOrderItemStatusSchema }, updateOrderItemStatus);
+
+  // GET /orders/items/pending → Lista itens pendentes do produtor autenticado
+  app.get("/items/pending", { schema: listPendingOrderItemsSchema }, listPendingOrderItems);
 };

@@ -22,6 +22,13 @@
       "when": 1758514990964,
       "tag": "0002_opposite_the_hunter",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1758600434812,
+      "tag": "0003_colorful_firebird",
+      "breakpoints": true
     }
   ]
 }

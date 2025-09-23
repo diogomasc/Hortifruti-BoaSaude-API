@@ -127,7 +127,10 @@ export const productImages = pgTable("product_images", {
 });
 
 // Enum para status de pedidos
-export const orderStatus = pgEnum("order_status", ["PENDING", "COMPLETED", "REJECTED"]);
+export const orderStatus = pgEnum("order_status", ["PENDING", "COMPLETED", "REJECTED", "PARTIALLY_COMPLETED"]);
+
+// Enum para status de itens do pedido
+export const orderItemStatus = pgEnum("order_item_status", ["PENDING", "APPROVED", "REJECTED"]);
 
 // Enum para status de assinaturas
 export const subscriptionStatus = pgEnum("subscription_status", ["ACTIVE", "PAUSED", "CANCELLED"]);
@@ -171,6 +174,9 @@ export const orderItems = pgTable("order_items", {
   quantity: integer().notNull(),
   unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
   totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
+  status: orderItemStatus().notNull().default("PENDING"),
+  rejectionReason: text("rejection_reason"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // Tabela de Assinaturas

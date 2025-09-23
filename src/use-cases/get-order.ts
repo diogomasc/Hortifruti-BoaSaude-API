@@ -13,7 +13,7 @@ interface GetOrderUseCaseResponse {
     id: string;
     consumerId: string;
     deliveryAddressId: string;
-    status: "PENDING" | "COMPLETED" | "REJECTED";
+    status: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED";
     totalAmount: string;
     createdAt: Date;
     updatedAt: Date;
