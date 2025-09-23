@@ -11,11 +11,39 @@ export interface CreateOrderRequest {
   }[];
 }
 
+export interface ConsumerData {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  cpf: string | null;
+}
+
+export interface AddressData {
+  id: string;
+  street: string;
+  number: string | null;
+  complement: string | null;
+  city: string;
+  state: string;
+  country: string;
+  zipCode: string | null;
+}
+
 export interface OrderWithItems {
   id: string;
   consumerId: string;
+  consumer: ConsumerData;
   deliveryAddressId: string;
-  status: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED";
+  deliveryAddress: AddressData;
+  status:
+    | "PENDING"
+    | "COMPLETED"
+    | "REJECTED"
+    | "PARTIALLY_COMPLETED"
+    | "PAUSED"
+    | "CANCELLED";
   totalAmount: string;
   createdAt: Date;
   updatedAt: Date;
@@ -69,10 +97,23 @@ export interface OrdersRepository {
   findById(id: string): Promise<OrderWithItems | null>;
   findByConsumerId(consumerId: string): Promise<OrderWithItems[]>;
   findByProducerId(producerId: string): Promise<OrderWithItems[]>;
-  updateStatus(id: string, status: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED"): Promise<void>;
+  updateStatus(
+    id: string,
+    status:
+      | "PENDING"
+      | "COMPLETED"
+      | "REJECTED"
+      | "PARTIALLY_COMPLETED"
+      | "PAUSED"
+      | "CANCELLED"
+  ): Promise<void>;
   findAll(): Promise<OrderWithItems[]>;
   updateItemStatus(data: UpdateOrderItemStatusRequest): Promise<void>;
   findItemById(itemId: string): Promise<OrderItemWithProduct | null>;
-  findPendingItemsByProducerId(producerId: string): Promise<OrderItemWithProduct[]>;
-  recalculateOrderStatus(orderId: string): Promise<"PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED">;
+  findPendingItemsByProducerId(
+    producerId: string
+  ): Promise<OrderItemWithProduct[]>;
+  recalculateOrderStatus(
+    orderId: string
+  ): Promise<"PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED">;
 }

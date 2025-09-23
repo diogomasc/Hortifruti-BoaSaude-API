@@ -1,7 +1,9 @@
-import { OrdersRepository, UpdateOrderItemStatusRequest } from "../repositories/orders-repository";
+import {
+  OrdersRepository,
+  UpdateOrderItemStatusRequest,
+} from "../repositories/orders-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 import { NotAllowedError } from "./errors/not-allowed-error";
-import { InvalidStatusTransitionError } from "./errors/invalid-status-transition-error";
 
 interface UpdateOrderItemStatusUseCaseRequest {
   itemId: string;
@@ -35,10 +37,8 @@ export class UpdateOrderItemStatusUseCase {
       throw new NotAllowedError();
     }
 
-    // Verificar se o item ainda está pendente
-    if (orderItem.status !== "PENDING") {
-      throw new InvalidStatusTransitionError();
-    }
+    // Permitir re-aprovação/re-rejeição de itens
+    // Removida a validação que impedia alterar itens já aprovados/rejeitados
 
     // Validar se rejectionReason é obrigatório quando status é REJECTED
     if (status === "REJECTED" && !rejectionReason) {

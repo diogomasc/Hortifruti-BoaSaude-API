@@ -1,12 +1,20 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../database/client";
-import { orders, orderItems, users, products } from "../database/schema";
-import { 
-  OrdersRepository, 
-  CreateOrderRequest, 
-  OrderWithItems, 
+import {
+  orders,
+  orderItems,
+  users,
+  products,
+  addresses,
+} from "../database/schema";
+import {
+  OrdersRepository,
+  CreateOrderRequest,
+  OrderWithItems,
   UpdateOrderItemStatusRequest,
-  OrderItemWithProduct 
+  OrderItemWithProduct,
+  ConsumerData,
+  AddressData,
 } from "./orders-repository";
 
 export class DrizzleOrdersRepository implements OrdersRepository {
@@ -43,15 +51,48 @@ export class DrizzleOrdersRepository implements OrdersRepository {
         .values(orderItemsData)
         .returning();
 
+      // Buscar dados completos do pedido criado com consumer e address
+      const orderWithData = await tx
+        .select({
+          order: orders,
+          consumer: users,
+          address: addresses,
+        })
+        .from(orders)
+        .innerJoin(users, eq(orders.consumerId, users.id))
+        .innerJoin(addresses, eq(orders.deliveryAddressId, addresses.id))
+        .where(eq(orders.id, order.id))
+        .limit(1);
+
+      const orderData = orderWithData[0];
+
       return {
-        id: order.id,
-        consumerId: order.consumerId,
-        deliveryAddressId: order.deliveryAddressId,
-        status: order.status,
-        totalAmount: order.totalAmount,
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt,
-        completedAt: order.completedAt,
+        id: orderData.order.id,
+        consumerId: orderData.order.consumerId,
+        consumer: {
+          id: orderData.consumer.id,
+          firstName: orderData.consumer.firstName,
+          lastName: orderData.consumer.lastName,
+          email: orderData.consumer.email,
+          phone: orderData.consumer.phone,
+          cpf: orderData.consumer.cpf,
+        },
+        deliveryAddressId: orderData.order.deliveryAddressId,
+        deliveryAddress: {
+          id: orderData.address.id,
+          street: orderData.address.street,
+          number: orderData.address.number,
+          complement: orderData.address.complement,
+          city: orderData.address.city,
+          state: orderData.address.state,
+          country: orderData.address.country,
+          zipCode: orderData.address.zipCode,
+        },
+        status: orderData.order.status,
+        totalAmount: orderData.order.totalAmount,
+        createdAt: orderData.order.createdAt,
+        updatedAt: orderData.order.updatedAt,
+        completedAt: orderData.order.completedAt,
         items: createdItems.map((item) => ({
           id: item.id,
           productId: item.productId,
@@ -72,9 +113,13 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       .select({
         order: orders,
         item: orderItems,
+        consumer: users,
+        address: addresses,
       })
       .from(orders)
       .leftJoin(orderItems, eq(orders.id, orderItems.orderId))
+      .innerJoin(users, eq(orders.consumerId, users.id))
+      .innerJoin(addresses, eq(orders.deliveryAddressId, addresses.id))
       .where(eq(orders.id, id));
 
     if (orderWithItems.length === 0) {
@@ -82,24 +127,44 @@ export class DrizzleOrdersRepository implements OrdersRepository {
     }
 
     const order = orderWithItems[0].order;
+    const consumer = orderWithItems[0].consumer;
+    const address = orderWithItems[0].address;
     const items = orderWithItems
-        .filter((row) => row.item !== null)
-        .map((row) => ({
-          id: row.item!.id,
-          productId: row.item!.productId,
-          producerId: row.item!.producerId,
-          quantity: row.item!.quantity,
-          unitPrice: row.item!.unitPrice,
-          totalPrice: row.item!.totalPrice,
-          status: row.item!.status,
-          rejectionReason: row.item!.rejectionReason,
-          updatedAt: row.item!.updatedAt,
-        }));
+      .filter((row) => row.item !== null)
+      .map((row) => ({
+        id: row.item!.id,
+        productId: row.item!.productId,
+        producerId: row.item!.producerId,
+        quantity: row.item!.quantity,
+        unitPrice: row.item!.unitPrice,
+        totalPrice: row.item!.totalPrice,
+        status: row.item!.status,
+        rejectionReason: row.item!.rejectionReason,
+        updatedAt: row.item!.updatedAt,
+      }));
 
     return {
       id: order.id,
       consumerId: order.consumerId,
+      consumer: {
+        id: consumer.id,
+        firstName: consumer.firstName,
+        lastName: consumer.lastName,
+        email: consumer.email,
+        phone: consumer.phone,
+        cpf: consumer.cpf,
+      },
       deliveryAddressId: order.deliveryAddressId,
+      deliveryAddress: {
+        id: address.id,
+        street: address.street,
+        number: address.number,
+        complement: address.complement,
+        city: address.city,
+        state: address.state,
+        country: address.country,
+        zipCode: address.zipCode,
+      },
       status: order.status,
       totalAmount: order.totalAmount,
       createdAt: order.createdAt,
@@ -114,9 +179,13 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       .select({
         order: orders,
         item: orderItems,
+        consumer: users,
+        address: addresses,
       })
       .from(orders)
       .leftJoin(orderItems, eq(orders.id, orderItems.orderId))
+      .innerJoin(users, eq(orders.consumerId, users.id))
+      .innerJoin(addresses, eq(orders.deliveryAddressId, addresses.id))
       .where(eq(orders.consumerId, consumerId));
 
     return this.groupOrdersWithItems(ordersWithItems);
@@ -127,15 +196,28 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       .select({
         order: orders,
         item: orderItems,
+        consumer: users,
+        address: addresses,
       })
       .from(orders)
       .innerJoin(orderItems, eq(orders.id, orderItems.orderId))
+      .innerJoin(users, eq(orders.consumerId, users.id))
+      .innerJoin(addresses, eq(orders.deliveryAddressId, addresses.id))
       .where(eq(orderItems.producerId, producerId));
 
     return this.groupOrdersWithItems(ordersWithItems);
   }
 
-  async updateStatus(id: string, status: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED"): Promise<void> {
+  async updateStatus(
+    id: string,
+    status:
+      | "PENDING"
+      | "COMPLETED"
+      | "REJECTED"
+      | "PARTIALLY_COMPLETED"
+      | "PAUSED"
+      | "CANCELLED"
+  ): Promise<void> {
     const updateData: any = {
       status,
       updatedAt: new Date(),
@@ -153,9 +235,13 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       .select({
         order: orders,
         item: orderItems,
+        consumer: users,
+        address: addresses,
       })
       .from(orders)
-      .leftJoin(orderItems, eq(orders.id, orderItems.orderId));
+      .leftJoin(orderItems, eq(orders.id, orderItems.orderId))
+      .innerJoin(users, eq(orders.consumerId, users.id))
+      .innerJoin(addresses, eq(orders.deliveryAddressId, addresses.id));
 
     return this.groupOrdersWithItems(ordersWithItems);
   }
@@ -166,12 +252,32 @@ export class DrizzleOrdersRepository implements OrdersRepository {
     for (const row of ordersWithItems) {
       const order = row.order;
       const item = row.item;
+      const consumer = row.consumer;
+      const address = row.address;
 
       if (!ordersMap.has(order.id)) {
         ordersMap.set(order.id, {
           id: order.id,
           consumerId: order.consumerId,
+          consumer: {
+            id: consumer.id,
+            firstName: consumer.firstName,
+            lastName: consumer.lastName,
+            email: consumer.email,
+            phone: consumer.phone,
+            cpf: consumer.cpf,
+          },
           deliveryAddressId: order.deliveryAddressId,
+          deliveryAddress: {
+            id: address.id,
+            street: address.street,
+            number: address.number,
+            complement: address.complement,
+            city: address.city,
+            state: address.state,
+            country: address.country,
+            zipCode: address.zipCode,
+          },
           status: order.status,
           totalAmount: order.totalAmount,
           createdAt: order.createdAt,
@@ -209,7 +315,10 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       updateData.rejectionReason = data.rejectionReason;
     }
 
-    await db.update(orderItems).set(updateData).where(eq(orderItems.id, data.itemId));
+    await db
+      .update(orderItems)
+      .set(updateData)
+      .where(eq(orderItems.id, data.itemId));
   }
 
   async findItemById(itemId: string): Promise<OrderItemWithProduct | null> {
@@ -255,7 +364,9 @@ export class DrizzleOrdersRepository implements OrdersRepository {
     };
   }
 
-  async findPendingItemsByProducerId(producerId: string): Promise<OrderItemWithProduct[]> {
+  async findPendingItemsByProducerId(
+    producerId: string
+  ): Promise<OrderItemWithProduct[]> {
     const result = await db
       .select({
         item: orderItems,
@@ -265,10 +376,12 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       .from(orderItems)
       .innerJoin(products, eq(orderItems.productId, products.id))
       .innerJoin(orders, eq(orderItems.orderId, orders.id))
-      .where(and(
-        eq(orderItems.producerId, producerId),
-        eq(orderItems.status, "PENDING")
-      ));
+      .where(
+        and(
+          eq(orderItems.producerId, producerId),
+          eq(orderItems.status, "PENDING")
+        )
+      );
 
     return result.map((row) => ({
       id: row.item.id,
@@ -296,7 +409,9 @@ export class DrizzleOrdersRepository implements OrdersRepository {
     }));
   }
 
-  async recalculateOrderStatus(orderId: string): Promise<"PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED"> {
+  async recalculateOrderStatus(
+    orderId: string
+  ): Promise<"PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED"> {
     const items = await db
       .select()
       .from(orderItems)
@@ -306,9 +421,9 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       return "PENDING";
     }
 
-    const approvedItems = items.filter(item => item.status === "APPROVED");
-    const rejectedItems = items.filter(item => item.status === "REJECTED");
-    const pendingItems = items.filter(item => item.status === "PENDING");
+    const approvedItems = items.filter((item) => item.status === "APPROVED");
+    const rejectedItems = items.filter((item) => item.status === "REJECTED");
+    const pendingItems = items.filter((item) => item.status === "PENDING");
 
     let newStatus: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED";
 

@@ -17,7 +17,7 @@ export const userRole = pgEnum("user_roles", ["consumer", "producer", "admin"]);
 // Enum para categorias de produtos
 export const productCategory = pgEnum("product_categories", [
   "frutas",
-  "legumes", 
+  "legumes",
   "verduras",
   "ervas",
   "graos",
@@ -39,7 +39,7 @@ export const productCategory = pgEnum("product_categories", [
   "flores_comestiveis",
   "vegano",
   "kits",
-  "outros"
+  "outros",
 ]);
 
 // Tabela unificada de Usuários
@@ -51,15 +51,17 @@ export const users = pgTable(
     passwordHash: text("password_hash").notNull(),
     role: userRole().notNull(),
     isActive: boolean("is_active").default(true),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     firstName: text("first_name").notNull(),
     lastName: text("last_name").notNull(),
     phone: text(),
-    
+
     // Campos específicos para consumidores
     cpf: text(), // obrigatório apenas para consumers
     birthDate: date("birth_date"),
-    
+
     // Campos específicos para produtores
     cnpj: text(), // obrigatório apenas para producers
     shopName: text("shop_name"),
@@ -96,7 +98,9 @@ export const wallets = pgTable(
       .notNull()
       .references(() => users.id),
     balance: numeric({ precision: 10, scale: 2 }).default("0"),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => ({
     userIdx: uniqueIndex("wallet_user_idx").on(table.userId),
@@ -114,7 +118,9 @@ export const products = pgTable("products", {
     .notNull()
     .references(() => users.id),
   quantity: integer().notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 // Tabela de Imagens dos Produtos
@@ -127,20 +133,35 @@ export const productImages = pgTable("product_images", {
 });
 
 // Enum para status de pedidos
-export const orderStatus = pgEnum("order_status", ["PENDING", "COMPLETED", "REJECTED", "PARTIALLY_COMPLETED"]);
+export const orderStatus = pgEnum("order_status", [
+  "PENDING",
+  "COMPLETED",
+  "REJECTED",
+  "PARTIALLY_COMPLETED",
+  "PAUSED",
+  "CANCELLED",
+]);
 
 // Enum para status de itens do pedido
-export const orderItemStatus = pgEnum("order_item_status", ["PENDING", "APPROVED", "REJECTED"]);
+export const orderItemStatus = pgEnum("order_item_status", [
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+]);
 
 // Enum para status de assinaturas
-export const subscriptionStatus = pgEnum("subscription_status", ["ACTIVE", "PAUSED", "CANCELLED"]);
+export const subscriptionStatus = pgEnum("subscription_status", [
+  "ACTIVE",
+  "PAUSED",
+  "CANCELLED",
+]);
 
 // Enum para frequência de assinaturas
 export const subscriptionFrequency = pgEnum("subscription_frequency", [
-  "WEEKLY", 
-  "BIWEEKLY", 
-  "MONTHLY", 
-  "QUARTERLY"
+  "WEEKLY",
+  "BIWEEKLY",
+  "MONTHLY",
+  "QUARTERLY",
 ]);
 
 // Tabela de Pedidos
@@ -154,8 +175,12 @@ export const orders = pgTable("orders", {
     .references(() => addresses.id),
   status: orderStatus().notNull().default("PENDING"),
   totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   completedAt: timestamp("completed_at", { withTimezone: true }),
 });
 
@@ -176,7 +201,9 @@ export const orderItems = pgTable("order_items", {
   totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
   status: orderItemStatus().notNull().default("PENDING"),
   rejectionReason: text("rejection_reason"),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 // Tabela de Assinaturas
@@ -190,9 +217,15 @@ export const subscriptions = pgTable("subscriptions", {
     .references(() => orders.id),
   status: subscriptionStatus().notNull().default("ACTIVE"),
   frequency: subscriptionFrequency().notNull(),
-  nextDeliveryDate: timestamp("next_delivery_date", { withTimezone: true }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  nextDeliveryDate: timestamp("next_delivery_date", {
+    withTimezone: true,
+  }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   pausedAt: timestamp("paused_at", { withTimezone: true }),
   cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
 });

@@ -19,7 +19,13 @@ interface CreateOrderUseCaseResponse {
     id: string;
     consumerId: string;
     deliveryAddressId: string;
-    status: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED";
+    status:
+      | "PENDING"
+      | "COMPLETED"
+      | "REJECTED"
+      | "PARTIALLY_COMPLETED"
+      | "PAUSED"
+      | "CANCELLED";
     totalAmount: string;
     createdAt: Date;
     updatedAt: Date;
