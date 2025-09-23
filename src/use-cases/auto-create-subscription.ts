@@ -1,15 +1,12 @@
 import { SubscriptionsRepository } from "../repositories/subscriptions-repository";
 import { OrdersRepository } from "../repositories/orders-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
-import { UnauthorizedError } from "./errors/unauthorized-error";
 
-interface CreateSubscriptionUseCaseRequest {
-  consumerId: string;
+interface AutoCreateSubscriptionUseCaseRequest {
   orderId: string;
-  frequency: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY";
 }
 
-interface CreateSubscriptionUseCaseResponse {
+interface AutoCreateSubscriptionUseCaseResponse {
   subscription: {
     id: string;
     consumerId: string;
@@ -21,53 +18,43 @@ interface CreateSubscriptionUseCaseResponse {
     updatedAt: Date;
     pausedAt: Date | null;
     cancelledAt: Date | null;
-  };
+  } | null;
 }
 
-export class CreateSubscriptionUseCase {
+export class AutoCreateSubscriptionUseCase {
   constructor(
     private subscriptionsRepository: SubscriptionsRepository,
     private ordersRepository: OrdersRepository
   ) {}
 
   async execute({
-    consumerId,
     orderId,
-    frequency,
-  }: CreateSubscriptionUseCaseRequest): Promise<CreateSubscriptionUseCaseResponse> {
+  }: AutoCreateSubscriptionUseCaseRequest): Promise<AutoCreateSubscriptionUseCaseResponse> {
     // Verificar se o pedido existe
     const order = await this.ordersRepository.findById(orderId);
     if (!order) {
       throw new ResourceNotFoundError("Pedido não encontrado");
     }
 
-    // Verificar se o pedido pertence ao consumidor
-    if (order.consumerId !== consumerId) {
-      throw new UnauthorizedError(
-        "Você não tem permissão para criar assinatura para este pedido"
-      );
-    }
-
-    // Verificar se o pedido foi completado
+    // Só criar assinatura se o pedido estiver completado
     if (order.status !== "COMPLETED") {
-      throw new Error(
-        "Só é possível criar assinatura para pedidos completados"
-      );
+      return { subscription: null };
     }
 
     // Verificar se já existe uma assinatura para este pedido
     const existingSubscription =
       await this.subscriptionsRepository.findByOrderId(orderId);
     if (existingSubscription) {
-      throw new Error("Já existe uma assinatura para este pedido");
+      return { subscription: existingSubscription };
     }
 
-    // Calcular a próxima data de entrega
+    // Usar frequência padrão WEEKLY para criação automática
+    const frequency = "WEEKLY";
     const nextDeliveryDate = this.calculateNextDeliveryDate(frequency);
 
-    // Criar a assinatura
+    // Criar a assinatura automaticamente
     const subscription = await this.subscriptionsRepository.create({
-      consumerId,
+      consumerId: order.consumerId,
       orderId,
       frequency,
       nextDeliveryDate,

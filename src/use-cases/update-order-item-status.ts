@@ -4,6 +4,7 @@ import {
 } from "../repositories/orders-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 import { NotAllowedError } from "./errors/not-allowed-error";
+import { AutoCreateSubscriptionUseCase } from "./auto-create-subscription";
 
 interface UpdateOrderItemStatusUseCaseRequest {
   itemId: string;
@@ -17,7 +18,10 @@ interface UpdateOrderItemStatusUseCaseResponse {
 }
 
 export class UpdateOrderItemStatusUseCase {
-  constructor(private ordersRepository: OrdersRepository) {}
+  constructor(
+    private ordersRepository: OrdersRepository,
+    private autoCreateSubscriptionUseCase: AutoCreateSubscriptionUseCase
+  ) {}
 
   async execute({
     itemId,
@@ -53,7 +57,19 @@ export class UpdateOrderItemStatusUseCase {
     });
 
     // Recalcular o status do pedido
-    await this.ordersRepository.recalculateOrderStatus(orderItem.orderId);
+    const newOrderStatus = await this.ordersRepository.recalculateOrderStatus(orderItem.orderId);
+
+    // Se o pedido foi completado, criar assinatura automaticamente
+    if (newOrderStatus === "COMPLETED") {
+      try {
+        await this.autoCreateSubscriptionUseCase.execute({
+          orderId: orderItem.orderId,
+        });
+      } catch (error) {
+        // Log do erro mas não falha a operação principal
+        console.error("Erro ao criar assinatura automaticamente:", error);
+      }
+    }
 
     return {
       success: true,
