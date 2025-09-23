@@ -6,56 +6,63 @@ import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-fo
 import { UnauthorizedError } from "../../../use-cases/errors/unauthorized-error";
 import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
 
-export const getOrderParamsSchema = z.object({
-  orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
-});
-
-export const getOrderResponseSchema = z.object({
-  200: z.object({
-    order: z.object({
-      id: z.string().uuid(),
-      consumerId: z.string().uuid(),
-      deliveryAddressId: z.string().uuid(),
-      totalAmount: z.string(),
-      status: z.enum(["PENDING", "COMPLETED", "REJECTED"]),
-      createdAt: z.date(),
-      items: z.array(z.object({
+// Schema para documentação Swagger
+export const getOrderByIdSchema = {
+  tags: ["Orders"],
+  summary: "Obter pedido por ID",
+  description:
+    "Obtém os detalhes de um pedido específico pelo seu ID. O usuário só pode acessar seus próprios pedidos.",
+  security: [{ bearerAuth: [] }],
+  params: z.object({
+    orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
+  }),
+  response: {
+    200: z.object({
+      order: z.object({
         id: z.string().uuid(),
-        productId: z.string().uuid(),
-        producerId: z.string().uuid(),
-        quantity: z.number(),
-        unitPrice: z.string(),
-        totalPrice: z.string(),
-      })),
-    }),
-  }).describe("Detalhes do pedido retornados com sucesso"),
-  400: z.object({
-    message: z.string(),
-    errors: z.array(z.object({
-      code: z.string(),
-      expected: z.string().optional(),
-      received: z.string().optional(),
-      path: z.array(z.union([z.string(), z.number()])),
+        consumerId: z.string().uuid(),
+        deliveryAddressId: z.string().uuid(),
+        totalAmount: z.string(),
+        status: z.enum(["PENDING", "COMPLETED", "REJECTED"]),
+        createdAt: z.date(),
+        items: z.array(z.object({
+          id: z.string().uuid(),
+          productId: z.string().uuid(),
+          producerId: z.string().uuid(),
+          quantity: z.number(),
+          unitPrice: z.string(),
+          totalPrice: z.string(),
+        })),
+      }),
+    }).describe("Detalhes do pedido retornados com sucesso"),
+    400: z.object({
       message: z.string(),
-    })).optional(),
-  }).describe("Dados inválidos - ID do pedido inválido"),
-  401: z.object({
-    message: z.string(),
-  }).describe("Token de autenticação inválido ou não fornecido"),
-  403: z.object({
-    message: z.string(),
-  }).describe("Acesso negado - usuário não tem permissão para acessar este pedido"),
-  404: z.object({
-    message: z.string(),
-  }).describe("Pedido não encontrado"),
-  500: z.object({
-    message: z.string(),
-  }).describe("Erro interno do servidor"),
-});
+      errors: z.array(z.object({
+        code: z.string(),
+        expected: z.string().optional(),
+        received: z.string().optional(),
+        path: z.array(z.union([z.string(), z.number()])),
+        message: z.string(),
+      })).optional(),
+    }).describe("ID inválido ou erro de validação"),
+    401: z.object({
+      message: z.string(),
+    }).describe("Token de autenticação inválido ou não fornecido"),
+    403: z.object({
+      message: z.string(),
+    }).describe("Acesso negado - usuário não autorizado a acessar este pedido"),
+    404: z.object({
+      message: z.string(),
+    }).describe("Pedido não encontrado"),
+    500: z.object({
+      message: z.string(),
+    }).describe("Erro interno do servidor"),
+  },
+};
 
 export async function getOrderById(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const params = getOrderParamsSchema.parse(request.params);
+    const params = getOrderByIdSchema.params.parse(request.params);
     const { orderId } = params;
     const { sub: userId, role: userRole } = getAuthenticatedUserFromRequest(request);
 

@@ -9,60 +9,67 @@ import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-fo
 import { InvalidRoleError } from "../../../use-cases/errors/invalid-role-error";
 import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
 
-export const createOrderBodySchema = z.object({
-  deliveryAddressId: z.string().uuid("ID do endereço deve ser um UUID válido"),
-  items: z
-    .array(
-      z.object({
-        productId: z.string().uuid("ID do produto deve ser um UUID válido"),
-        quantity: z.number().int().positive("Quantidade deve ser um número positivo"),
-      })
-    )
-    .min(1, "Deve haver pelo menos um item no pedido"),
-});
-
-export const createOrderResponseSchema = z.object({
-  201: z.object({
-    message: z.string(),
-    order: z.object({
-      id: z.string().uuid(),
-      consumerId: z.string().uuid(),
-      deliveryAddressId: z.string().uuid(),
-      totalAmount: z.string(),
-      status: z.enum(["PENDING", "COMPLETED", "REJECTED"]),
-      createdAt: z.date(),
-      items: z.array(z.object({
-        id: z.string().uuid(),
-        productId: z.string().uuid(),
-        quantity: z.number(),
-        unitPrice: z.string(),
-      })),
-    }),
-  }).describe("Pedido criado com sucesso"),
-  400: z.object({
-    message: z.string(),
-    errors: z.array(z.object({
-      code: z.string(),
-      expected: z.string().optional(),
-      received: z.string().optional(),
-      path: z.array(z.union([z.string(), z.number()])),
+// Schema para documentação Swagger
+export const createOrderSchema = {
+  tags: ["Orders"],
+  summary: "Criar novo pedido",
+  description:
+    "Cria um novo pedido vinculado ao usuário autenticado. Apenas consumidores podem criar pedidos. Todos os produtos devem existir e ter quantidade disponível.",
+  security: [{ bearerAuth: [] }],
+  body: z.object({
+    deliveryAddressId: z.string().uuid("ID do endereço deve ser um UUID válido"),
+    items: z
+      .array(
+        z.object({
+          productId: z.string().uuid("ID do produto deve ser um UUID válido"),
+          quantity: z.number().int().positive("Quantidade deve ser um número positivo"),
+        })
+      )
+      .min(1, "Deve haver pelo menos um item no pedido"),
+  }),
+  response: {
+    201: z.object({
       message: z.string(),
-    })).optional(),
-  }).describe("Dados inválidos ou erro de validação"),
-  403: z.object({
-    message: z.string(),
-  }).describe("Acesso negado - apenas consumidores podem criar pedidos"),
-  404: z.object({
-    message: z.string(),
-  }).describe("Recurso não encontrado (endereço ou produto)"),
-  500: z.object({
-    message: z.string(),
-  }).describe("Erro interno do servidor"),
-});
+      order: z.object({
+        id: z.string().uuid(),
+        consumerId: z.string().uuid(),
+        deliveryAddressId: z.string().uuid(),
+        totalAmount: z.string(),
+        status: z.enum(["PENDING", "COMPLETED", "REJECTED"]),
+        createdAt: z.date(),
+        items: z.array(z.object({
+          id: z.string().uuid(),
+          productId: z.string().uuid(),
+          quantity: z.number(),
+          unitPrice: z.string(),
+        })),
+      }),
+    }).describe("Pedido criado com sucesso"),
+    400: z.object({
+      message: z.string(),
+      errors: z.array(z.object({
+        code: z.string(),
+        expected: z.string().optional(),
+        received: z.string().optional(),
+        path: z.array(z.union([z.string(), z.number()])),
+        message: z.string(),
+      })).optional(),
+    }).describe("Dados inválidos ou erro de validação"),
+    403: z.object({
+      message: z.string(),
+    }).describe("Acesso negado - apenas consumidores podem criar pedidos"),
+    404: z.object({
+      message: z.string(),
+    }).describe("Recurso não encontrado (endereço ou produto)"),
+    500: z.object({
+      message: z.string(),
+    }).describe("Erro interno do servidor"),
+  },
+};
 
 export async function createOrder(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const body = createOrderBodySchema.parse(request.body);
+    const body = createOrderSchema.body.parse(request.body);
     const { deliveryAddressId, items } = body;
     const { sub: consumerId } = getAuthenticatedUserFromRequest(request);
 

@@ -6,48 +6,54 @@ import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-fo
 import { UnauthorizedError } from "../../../use-cases/errors/unauthorized-error";
 import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
 
-export const manageSubscriptionParamsSchema = z.object({
-  subscriptionId: z.string().uuid("ID da assinatura deve ser um UUID válido"),
-});
-
-export const manageSubscriptionBodySchema = z.object({
-  action: z.enum(["pause", "resume", "cancel"], {
-    message: "Ação deve ser pause, resume ou cancel",
+// Schema para documentação Swagger
+export const manageSubscriptionSchema = {
+  tags: ["Subscriptions"],
+  summary: "Gerenciar assinatura",
+  description:
+    "Permite pausar, retomar ou cancelar uma assinatura. Apenas consumidores podem gerenciar suas próprias assinaturas.",
+  security: [{ bearerAuth: [] }],
+  params: z.object({
+    subscriptionId: z.string().uuid("ID da assinatura deve ser um UUID válido"),
   }),
-});
-
-export const manageSubscriptionResponseSchema = z.object({
-  200: z.object({
-    message: z.string(),
-  }).describe("Assinatura gerenciada com sucesso"),
-  400: z.object({
-    message: z.string(),
-    errors: z.array(z.object({
-      code: z.string(),
-      expected: z.string().optional(),
-      received: z.string().optional(),
-      path: z.array(z.union([z.string(), z.number()])),
+  body: z.object({
+    action: z.enum(["pause", "resume", "cancel"], {
+      message: "Ação deve ser pause, resume ou cancel",
+    }),
+  }),
+  response: {
+    200: z.object({
       message: z.string(),
-    })).optional(),
-  }).describe("Dados inválidos ou erro de validação"),
-  401: z.object({
-    message: z.string(),
-  }).describe("Token de autenticação inválido ou não fornecido"),
-  403: z.object({
-    message: z.string(),
-  }).describe("Acesso negado - usuário não autorizado"),
-  404: z.object({
-    message: z.string(),
-  }).describe("Assinatura não encontrada"),
-  500: z.object({
-    message: z.string(),
-  }).describe("Erro interno do servidor"),
-});
+    }).describe("Assinatura gerenciada com sucesso"),
+    400: z.object({
+      message: z.string(),
+      errors: z.array(z.object({
+        code: z.string(),
+        expected: z.string().optional(),
+        received: z.string().optional(),
+        path: z.array(z.union([z.string(), z.number()])),
+        message: z.string(),
+      })).optional(),
+    }).describe("Dados inválidos ou erro de validação"),
+    401: z.object({
+      message: z.string(),
+    }).describe("Token de autenticação inválido ou não fornecido"),
+    403: z.object({
+      message: z.string(),
+    }).describe("Acesso negado - usuário não autorizado"),
+    404: z.object({
+      message: z.string(),
+    }).describe("Assinatura não encontrada"),
+    500: z.object({
+      message: z.string(),
+    }).describe("Erro interno do servidor"),
+  },
+};
 
 export async function manageSubscription(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const { subscriptionId } = request.params as z.infer<typeof manageSubscriptionParamsSchema>;
-    const { action } = request.body as z.infer<typeof manageSubscriptionBodySchema>;
+    const { subscriptionId } = request.params as z.infer<typeof manageSubscriptionSchema.params>;
+    const { action } = request.body as z.infer<typeof manageSubscriptionSchema.body>;
     const { sub: consumerId } = getAuthenticatedUserFromRequest(request);
 
     // Instanciar repositório
@@ -67,7 +73,7 @@ export async function manageSubscription(request: FastifyRequest, reply: Fastify
       pause: "pausada",
       resume: "retomada",
       cancel: "cancelada",
-    };
+    } as const;
 
     return reply.status(200).send({
       message: `Assinatura ${actionMessages[action]} com sucesso`,

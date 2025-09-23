@@ -1,36 +1,21 @@
-import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { verifyJWT } from "../../middlewares/get-authenticated-user-from-request";
-import { createSubscription, createSubscriptionBodySchema, createSubscriptionResponseSchema } from "./create-subscription";
-import { listSubscriptions, listSubscriptionsResponseSchema } from "./list-subscriptions";
-import { manageSubscription, manageSubscriptionParamsSchema, manageSubscriptionBodySchema, manageSubscriptionResponseSchema } from "./manage-subscription";
+import type { FastifyInstance } from "fastify";
+import { createSubscription, createSubscriptionSchema } from "./create-subscription";
+import { listSubscriptions, listSubscriptionsSchema } from "./list-subscriptions";
+import { manageSubscription, manageSubscriptionSchema } from "./manage-subscription";
 
-// Schema para criar assinatura
-export const createSubscriptionSchema = {
-  body: createSubscriptionBodySchema,
-  response: createSubscriptionResponseSchema,
-};
+export async function subscriptionsRoutes(app: FastifyInstance) {
+  app.post("/subscriptions", {
+    schema: createSubscriptionSchema,
+    handler: createSubscription,
+  });
 
-// Schema para listar assinaturas
-export const listSubscriptionsSchema = {
-  response: listSubscriptionsResponseSchema,
-};
+  app.get("/subscriptions", {
+    schema: listSubscriptionsSchema,
+    handler: listSubscriptions,
+  });
 
-// Schema para gerenciar assinatura
-export const manageSubscriptionSchema = {
-  params: manageSubscriptionParamsSchema,
-  body: manageSubscriptionBodySchema,
-  response: manageSubscriptionResponseSchema,
-};
-
-export const subscriptionsRoutes: FastifyPluginAsyncZod = async (app) => {
-  app.addHook("onRequest", verifyJWT);
-
-  // GET /subscriptions → Lista todas as assinaturas do usuário autenticado
-  app.get("/", { schema: listSubscriptionsSchema }, listSubscriptions);
-
-  // POST /subscriptions → Cria uma nova assinatura vinculada ao usuário autenticado
-  app.post("/", { schema: createSubscriptionSchema }, createSubscription);
-
-  // PATCH /subscriptions/{subscriptionId} → Gerencia uma assinatura (pausar, retomar, cancelar)
-  app.patch("/:subscriptionId", { schema: manageSubscriptionSchema }, manageSubscription);
-};
+  app.patch("/subscriptions/:subscriptionId", {
+    schema: manageSubscriptionSchema,
+    handler: manageSubscription,
+  });
+}

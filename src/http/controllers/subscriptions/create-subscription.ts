@@ -7,49 +7,56 @@ import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-fo
 import { UnauthorizedError } from "../../../use-cases/errors/unauthorized-error";
 import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
 
-export const createSubscriptionBodySchema = z.object({
-  orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
-  frequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY"], {
-    message: "Frequência deve ser WEEKLY, BIWEEKLY, MONTHLY ou QUARTERLY",
-  }),
-});
-
-export const createSubscriptionResponseSchema = z.object({
-  201: z.object({
-    message: z.string(),
-    subscription: z.object({
-      id: z.string().uuid(),
-      consumerId: z.string().uuid(),
-      orderId: z.string().uuid(),
-      status: z.enum(["ACTIVE", "PAUSED", "CANCELLED"]),
-      frequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY"]),
-      nextDeliveryDate: z.date(),
-      createdAt: z.date(),
-      updatedAt: z.date(),
-      pausedAt: z.date().nullable(),
-      cancelledAt: z.date().nullable(),
+// Schema para documentação Swagger
+export const createSubscriptionSchema = {
+  tags: ["Subscriptions"],
+  summary: "Criar nova assinatura",
+  description:
+    "Cria uma nova assinatura baseada em um pedido existente. Apenas consumidores podem criar assinaturas e somente de seus próprios pedidos.",
+  security: [{ bearerAuth: [] }],
+  body: z.object({
+    orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
+    frequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY"], {
+      message: "Frequência deve ser WEEKLY, BIWEEKLY, MONTHLY ou QUARTERLY",
     }),
-  }).describe("Assinatura criada com sucesso"),
-  400: z.object({
-    message: z.string(),
-    errors: z.array(z.object({
-      code: z.string(),
-      expected: z.string().optional(),
-      received: z.string().optional(),
-      path: z.array(z.union([z.string(), z.number()])),
+  }),
+  response: {
+    201: z.object({
       message: z.string(),
-    })).optional(),
-  }).describe("Dados inválidos ou erro de validação"),
-  403: z.object({
-    message: z.string(),
-  }).describe("Acesso negado - usuário não autorizado"),
-  404: z.object({
-    message: z.string(),
-  }).describe("Pedido não encontrado"),
-  500: z.object({
-    message: z.string(),
-  }).describe("Erro interno do servidor"),
-});
+      subscription: z.object({
+        id: z.string().uuid(),
+        consumerId: z.string().uuid(),
+        orderId: z.string().uuid(),
+        status: z.enum(["ACTIVE", "PAUSED", "CANCELLED"]),
+        frequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY"]),
+        nextDeliveryDate: z.date(),
+        createdAt: z.date(),
+        updatedAt: z.date(),
+        pausedAt: z.date().nullable(),
+        cancelledAt: z.date().nullable(),
+      }),
+    }).describe("Assinatura criada com sucesso"),
+    400: z.object({
+      message: z.string(),
+      errors: z.array(z.object({
+        code: z.string(),
+        expected: z.string().optional(),
+        received: z.string().optional(),
+        path: z.array(z.union([z.string(), z.number()])),
+        message: z.string(),
+      })).optional(),
+    }).describe("Dados inválidos ou erro de validação"),
+    403: z.object({
+      message: z.string(),
+    }).describe("Acesso negado - usuário não autorizado"),
+    404: z.object({
+      message: z.string(),
+    }).describe("Pedido não encontrado"),
+    500: z.object({
+      message: z.string(),
+    }).describe("Erro interno do servidor"),
+  },
+};
 
 export async function createSubscription(
   request: FastifyRequest,
@@ -57,7 +64,7 @@ export async function createSubscription(
 ) {
   try {
     const { orderId, frequency } = request.body as z.infer<
-      typeof createSubscriptionBodySchema
+      typeof createSubscriptionSchema.body
     >;
     const { sub: consumerId } = getAuthenticatedUserFromRequest(request);
 

@@ -4,50 +4,54 @@ import { UpdateOrderStatusUseCase } from "../../../use-cases/update-order-status
 import { DrizzleOrdersRepository } from "../../../repositories/drizzle-orders-repository";
 import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
 
-export const updateOrderStatusParamsSchema = z.object({
-  orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
-});
-
-export const updateOrderStatusBodySchema = z.object({
-  status: z.enum(["PENDING", "COMPLETED", "REJECTED"], {
-    message: "Status deve ser PENDING, COMPLETED ou REJECTED",
+// Schema para documentação Swagger
+export const updateOrderStatusSchema = {
+  tags: ["Orders"],
+  summary: "Atualizar status do pedido",
+  description:
+    "Atualiza o status de um pedido específico. Apenas produtores podem atualizar o status dos pedidos que contêm seus produtos.",
+  security: [{ bearerAuth: [] }],
+  params: z.object({
+    orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
   }),
-});
-
-export const updateOrderStatusResponseSchema = z.object({
-  200: z.object({
-    message: z.string(),
-  }).describe("Status do pedido atualizado com sucesso"),
-  400: z.object({
-    message: z.string(),
-    errors: z.array(z.object({
-      code: z.string(),
-      expected: z.string().optional(),
-      received: z.string().optional(),
-      path: z.array(z.union([z.string(), z.number()])),
+  body: z.object({
+    status: z.enum(["PENDING", "COMPLETED", "REJECTED"], {
+      message: "Status deve ser PENDING, COMPLETED ou REJECTED",
+    }),
+  }),
+  response: {
+    200: z.object({
       message: z.string(),
-    })).optional(),
-  }).describe("Dados inválidos - ID do pedido ou status inválido"),
-  401: z.object({
-    message: z.string(),
-  }).describe("Token de autenticação inválido ou não fornecido"),
-  403: z.object({
-    message: z.string(),
-  }).describe("Acesso negado - apenas produtores podem atualizar status de pedidos"),
-  404: z.object({
-    message: z.string(),
-  }).describe("Pedido não encontrado"),
-  500: z.object({
-    message: z.string(),
-  }).describe("Erro interno do servidor"),
-});
+    }).describe("Status do pedido atualizado com sucesso"),
+    400: z.object({
+      message: z.string(),
+      errors: z.array(z.object({
+        code: z.string(),
+        expected: z.string().optional(),
+        received: z.string().optional(),
+        path: z.array(z.union([z.string(), z.number()])),
+        message: z.string(),
+      })).optional(),
+    }).describe("Dados inválidos - ID do pedido ou status inválido"),
+    401: z.object({
+      message: z.string(),
+    }).describe("Token de autenticação inválido ou não fornecido"),
+    403: z.object({
+      message: z.string(),
+    }).describe("Acesso negado - apenas produtores podem atualizar status de pedidos"),
+    404: z.object({
+      message: z.string(),
+    }).describe("Pedido não encontrado"),
+    500: z.object({
+      message: z.string(),
+    }).describe("Erro interno do servidor"),
+  },
+};
 
 export async function updateOrderStatus(request: FastifyRequest, reply: FastifyReply) {
   try {
-    const params = updateOrderStatusParamsSchema.parse(request.params);
-    const body = updateOrderStatusBodySchema.parse(request.body);
-    const { orderId } = params;
-    const { status } = body;
+    const { orderId } = request.params as z.infer<typeof updateOrderStatusSchema.params>;
+    const { status } = request.body as z.infer<typeof updateOrderStatusSchema.body>;
 
     // Instanciar repositório
     const ordersRepository = new DrizzleOrdersRepository();
