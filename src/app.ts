@@ -8,6 +8,7 @@ import {
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastifyStatic from "@fastify/static";
+import fastifyCors from "@fastify/cors";
 import { appRoutes } from "./http/routes";
 import { env } from "./env";
 import { join } from "path";
@@ -27,6 +28,12 @@ export function buildApp() {
           }
         : false,
   }).withTypeProvider<ZodTypeProvider>();
+
+  // CORS setup
+  app.register(fastifyCors, {
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    credentials: true,
+  });
 
   // Swagger setup
   app.register(fastifySwagger, {
