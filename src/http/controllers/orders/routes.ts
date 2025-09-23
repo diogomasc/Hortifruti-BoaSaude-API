@@ -4,10 +4,6 @@ import { createOrder, createOrderSchema } from "./create-order";
 import { listOrders, listOrdersSchema } from "./list-orders";
 import { getOrderById, getOrderByIdSchema } from "./get-order-by-id";
 import {
-  updateOrderStatus,
-  updateOrderStatusSchema,
-} from "./update-order-status";
-import {
   updateOrderItemStatus,
   updateOrderItemStatusSchema,
 } from "./update-order-item-status";
@@ -28,13 +24,6 @@ export const ordersRoutes: FastifyPluginAsyncZod = async (app) => {
 
   // GET /orders/{orderId} → Obtém detalhes de um pedido específico
   app.get("/:orderId", { schema: getOrderByIdSchema }, getOrderById);
-
-  // PATCH /orders/{orderId}/status → Atualiza o status de um pedido
-  app.patch(
-    "/:orderId/status",
-    { schema: updateOrderStatusSchema },
-    updateOrderStatus
-  );
 
   // PATCH /orders/{orderId}/items/{itemId}/status → Atualiza o status de um item específico
   app.patch(
