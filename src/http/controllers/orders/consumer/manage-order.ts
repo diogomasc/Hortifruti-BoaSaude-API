@@ -12,16 +12,18 @@ export const manageOrderSchema = {
   tags: ["Orders - Consumer"],
   summary: "Gerenciar pedido",
   description:
-    "Permite pausar, retomar ou cancelar um pedido. Apenas consumidores podem gerenciar seus próprios pedidos.",
+    "Permite pausar, retomar, cancelar um pedido ou atualizar sua recorrência. Apenas consumidores podem gerenciar seus próprios pedidos.",
   security: [{ bearerAuth: [] }],
   params: z.object({
     orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
   }),
   body: z
     .object({
-      action: z.enum(["pause", "resume", "cancel"], {
-        message: "Ação deve ser pause, resume ou cancel",
-      }),
+      action: z
+        .enum(["pause", "resume", "cancel"], {
+          message: "Ação deve ser pause, resume ou cancel",
+        })
+        .optional(),
       // Campos opcionais para atualizar recorrência
       isRecurring: z.boolean().optional(),
       frequency: z
@@ -39,6 +41,7 @@ export const manageOrderSchema = {
         if (data.frequency === "CUSTOM" && !data.customDays) {
           return false;
         }
+
         return true;
       },
       {
@@ -116,14 +119,47 @@ export async function manageOrder(
       customDays,
     });
 
-    const actionMessages = {
-      pause: "pausado",
-      resume: "retomado",
-      cancel: "cancelado",
-    } as const;
+    // Construir mensagem detalhada baseada nas alterações
+    const messages = [];
+
+    // Adicionar mensagem da ação se executada
+    if (action) {
+      const actionMessages = {
+        pause: "pausado",
+        resume: "retomado",
+        cancel: "cancelado",
+      };
+      messages.push(`${actionMessages[action]}`);
+    }
+
+    // Adicionar mensagem sobre recorrência
+    if (isRecurring === false) {
+      messages.push("recorrência desativada");
+    } else if (frequency !== undefined || customDays !== undefined) {
+      if (frequency === "CUSTOM" && customDays) {
+        messages.push(
+          `frequência atualizada para personalizada (${customDays} dias)`
+        );
+      } else if (frequency && frequency !== "CUSTOM") {
+        const frequencyLabels = {
+          WEEKLY: "semanal",
+          BIWEEKLY: "quinzenal",
+          MONTHLY: "mensal",
+          QUARTERLY: "trimestral",
+        };
+        messages.push(
+          `frequência atualizada para ${frequencyLabels[frequency]}`
+        );
+      }
+    }
+
+    const message =
+      messages.length > 0
+        ? `Pedido ${messages.join(" e ")} com sucesso`
+        : "Pedido atualizado com sucesso";
 
     return reply.status(200).send({
-      message: `Pedido ${actionMessages[action]} com sucesso`,
+      message,
     });
   } catch (error) {
     if (error instanceof ResourceNotFoundError) {

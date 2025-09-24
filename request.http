@@ -283,7 +283,38 @@ Content-Type: application/json
   "action": "pause"
 }
 
-# Ações possíveis: "pause", "resume", "cancel"
+# Ações disponíveis: "pause", "resume", "cancel" (opcional)
+# Para alterar apenas a recorrência, forneça "frequency" e/ou "customDays" sem especificar ação
+# Para desativar recorrência, use "isRecurring": false
+
+### Alterar apenas frequência (sem ação)
+PATCH {{baseUrl}}/orders/{{orderId}}/manage
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "frequency": "CUSTOM",
+  "customDays": 7
+}
+
+### Desativar recorrência
+PATCH {{baseUrl}}/orders/{{orderId}}/manage
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "isRecurring": false
+}
+
+### Pausar pedido e alterar frequência
+PATCH {{baseUrl}}/orders/{{orderId}}/manage
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "action": "pause",
+  "frequency": "WEEKLY"
+}
 
 ###
 
@@ -293,9 +324,8 @@ Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
 
 {
-  "action": "resume",
-  "isRecurring": true,
-  "frequency": "MONTHLY"
+  "frequency": "CUSTOM",
+  "customDays": 10
 }
 
 # Você pode atualizar a recorrência junto com outras ações
@@ -309,13 +339,54 @@ Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
 
 {
-  "action": "resume",
   "isRecurring": true,
   "frequency": "CUSTOM",
   "customDays": 15
 }
 
 # Para frequency "CUSTOM", o campo customDays é obrigatório
+
+###
+
+### 10.3 NOVA FUNCIONALIDADE: Atualizar Recorrência Junto com Ação
+PATCH {{baseUrl}}/orders/{{orderId}}/manage
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "action": "resume"
+}
+
+# Agora você pode alterar a frequência junto com qualquer ação (pause, resume, cancel)
+# Não precisa mais da ação 'update_recurrence'
+
+###
+
+### 10.4 Pausar e Atualizar Para Recorrência Personalizada
+PATCH {{baseUrl}}/orders/{{orderId}}/manage
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "frequency": "CUSTOM",
+  "customDays": 7
+}
+
+# Pausa o pedido e altera para frequência personalizada de 7 dias
+
+###
+
+### 10.5 Cancelar e Desabilitar Recorrência
+PATCH {{baseUrl}}/orders/{{orderId}}/manage
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "action": "cancel",
+  "isRecurring": false
+}
+
+# Cancela o pedido e desabilita a recorrência
 
 ###
 
@@ -382,6 +453,7 @@ Authorization: Bearer {{producerToken}}
 #    - Frequências: WEEKLY, BIWEEKLY, MONTHLY, QUARTERLY, CUSTOM
 #    - Para CUSTOM, especifique customDays (número de dias)
 #    - Gerencie via PATCH /orders/{orderId}/manage
+#    - NOVA: Forneça frequency e/ou customDays junto com qualquer ação para atualizar recorrência
 # 5. IMPORTANTE: Funcionalidade de assinaturas foi DEPRECIADA
 #    - Use pedidos recorrentes em vez de assinaturas separadas
 #    - Rotas /subscriptions ainda existem mas são deprecated

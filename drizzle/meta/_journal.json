@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1758346028914,
-      "tag": "0000_clumsy_imperial_guard",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1758430659222,
-      "tag": "0001_shiny_captain_universe",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1758514990964,
-      "tag": "0002_opposite_the_hunter",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1758600434812,
-      "tag": "0003_colorful_firebird",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1758753459469,
-      "tag": "0004_unusual_grey_gargoyle",
+      "when": 1758756970082,
+      "tag": "0000_nosy_caretaker",
       "breakpoints": true
     }
   ]

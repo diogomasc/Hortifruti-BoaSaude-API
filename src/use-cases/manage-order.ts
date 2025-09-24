@@ -5,7 +5,7 @@ import { UnauthorizedError } from "./errors/unauthorized-error";
 interface ManageOrderUseCaseRequest {
   orderId: string;
   consumerId: string;
-  action: "pause" | "resume" | "cancel";
+  action?: "pause" | "resume" | "cancel";
   // Campos opcionais para atualizar recorrência
   isRecurring?: boolean;
   frequency?: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
@@ -23,6 +23,16 @@ export class ManageOrderUseCase {
     frequency,
     customDays,
   }: ManageOrderUseCaseRequest): Promise<void> {
+    // Validar que pelo menos um campo seja fornecido
+    if (!action && isRecurring === undefined && frequency === undefined && customDays === undefined) {
+      throw new Error("Pelo menos um campo deve ser fornecido (action, isRecurring, frequency ou customDays)");
+    }
+
+    // Validar frequency CUSTOM
+    if (frequency === "CUSTOM" && (customDays === undefined || customDays <= 0)) {
+      throw new Error("Para frequência personalizada, customDays deve ser um número positivo");
+    }
+
     // Verificar se o pedido existe
     const order = await this.ordersRepository.findById(orderId);
     if (!order) {
@@ -36,65 +46,89 @@ export class ManageOrderUseCase {
       );
     }
 
-    // Executar a ação baseada no status atual
-    switch (action) {
-      case "pause":
-        if (
-          order.status !== "COMPLETED" &&
-          order.status !== "PARTIALLY_COMPLETED"
-        ) {
-          throw new Error(
-            "Só é possível pausar pedidos aprovados ou parcialmente aprovados"
+    // Executar ação específica se fornecida
+    if (action) {
+      switch (action) {
+        case "pause":
+          if (
+            order.status !== "COMPLETED" &&
+            order.status !== "PARTIALLY_COMPLETED"
+          ) {
+            throw new Error(
+              "Só é possível pausar pedidos aprovados ou parcialmente aprovados"
+            );
+          }
+          await this.ordersRepository.updateStatus(orderId, "PAUSED");
+          break;
+
+        case "resume":
+          if (order.status !== "PAUSED") {
+            throw new Error("Só é possível retomar pedidos pausados");
+          }
+          // Retorna ao status anterior baseado nos itens
+          const hasRejectedItems = order.items.some(
+            (item) => item.status === "REJECTED"
           );
-        }
-        await this.ordersRepository.updateStatus(orderId, "PAUSED");
-        break;
-
-      case "resume":
-        if (order.status !== "PAUSED") {
-          throw new Error("Só é possível retomar pedidos pausados");
-        }
-        // Retorna ao status anterior baseado nos itens
-        const hasRejectedItems = order.items.some(
-          (item) => item.status === "REJECTED"
-        );
-        const hasApprovedItems = order.items.some(
-          (item) => item.status === "APPROVED"
-        );
-
-        if (hasApprovedItems && hasRejectedItems) {
-          await this.ordersRepository.updateStatus(
-            orderId,
-            "PARTIALLY_COMPLETED"
+          const hasApprovedItems = order.items.some(
+            (item) => item.status === "APPROVED"
           );
-        } else if (hasApprovedItems) {
-          await this.ordersRepository.updateStatus(orderId, "COMPLETED");
-        } else {
-          await this.ordersRepository.updateStatus(orderId, "PENDING");
-        }
-        break;
 
-      case "cancel":
-        if (order.status === "CANCELLED") {
-          throw new Error("Este pedido já foi cancelado");
-        }
-        if (order.status === "REJECTED") {
-          throw new Error("Não é possível cancelar um pedido já rejeitado");
-        }
-        await this.ordersRepository.updateStatus(orderId, "CANCELLED");
-        break;
+          if (hasApprovedItems && hasRejectedItems) {
+            await this.ordersRepository.updateStatus(
+              orderId,
+              "PARTIALLY_COMPLETED"
+            );
+          } else if (hasApprovedItems) {
+            await this.ordersRepository.updateStatus(orderId, "COMPLETED");
+          } else {
+            await this.ordersRepository.updateStatus(orderId, "PENDING");
+          }
+          break;
 
-      default:
-        throw new Error(`Ação inválida: ${action}`);
+        case "cancel":
+          if (order.status === "CANCELLED") {
+            throw new Error("Este pedido já foi cancelado");
+          }
+          if (order.status === "REJECTED") {
+            throw new Error("Não é possível cancelar um pedido já rejeitado");
+          }
+          await this.ordersRepository.updateStatus(orderId, "CANCELLED");
+          break;
+
+        default:
+          throw new Error(`Ação inválida: ${action}`);
+      }
     }
 
     // Atualizar campos de recorrência se fornecidos
-    if (isRecurring !== undefined || frequency !== undefined || customDays !== undefined) {
+    if (
+      isRecurring !== undefined ||
+      frequency !== undefined ||
+      customDays !== undefined
+    ) {
+      const updateData: any = {};
+
+      if (isRecurring !== undefined) {
+        updateData.isRecurring = isRecurring;
+        
+        // Se isRecurring for false, definir valores padrão
+        if (!isRecurring) {
+          updateData.frequency = null;
+          updateData.customDays = null;
+        }
+      }
+
+      if (frequency !== undefined) {
+        updateData.frequency = frequency;
+      }
+
+      if (customDays !== undefined) {
+        updateData.customDays = customDays;
+      }
+
       await this.ordersRepository.updateRecurrence({
         orderId,
-        isRecurring,
-        frequency,
-        customDays,
+        ...updateData,
       });
     }
   }
