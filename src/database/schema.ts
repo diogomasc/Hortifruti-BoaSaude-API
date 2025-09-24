@@ -149,19 +149,12 @@ export const orderItemStatus = pgEnum("order_item_status", [
   "REJECTED",
 ]);
 
-// Enum para status de assinaturas
-export const subscriptionStatus = pgEnum("subscription_status", [
-  "ACTIVE",
-  "PAUSED",
-  "CANCELLED",
-]);
-
-// Enum para frequência de assinaturas
+// Enum para frequência de recorrência (usado em pedidos recorrentes)
 export const subscriptionFrequency = pgEnum("subscription_frequency", [
   "WEEKLY",
-  "BIWEEKLY",
   "MONTHLY",
   "QUARTERLY",
+  "CUSTOM",
 ]);
 
 // Tabela de Pedidos
@@ -175,6 +168,13 @@ export const orders = pgTable("orders", {
     .references(() => addresses.id),
   status: orderStatus().notNull().default("PENDING"),
   totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  // Campos de recorrência
+  isRecurring: boolean("is_recurring").default(false),
+  frequency: subscriptionFrequency(),
+  customDays: integer("custom_days"), // Para recorrência personalizada em dias
+  nextDeliveryDate: timestamp("next_delivery_date", { withTimezone: true }),
+  pausedAt: timestamp("paused_at", { withTimezone: true }),
+  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -206,26 +206,5 @@ export const orderItems = pgTable("order_items", {
     .defaultNow(),
 });
 
-// Tabela de Assinaturas
-export const subscriptions = pgTable("subscriptions", {
-  id: uuid().primaryKey().defaultRandom(),
-  consumerId: uuid("consumer_id")
-    .notNull()
-    .references(() => users.id),
-  orderId: uuid("order_id")
-    .notNull()
-    .references(() => orders.id),
-  status: subscriptionStatus().notNull().default("ACTIVE"),
-  frequency: subscriptionFrequency().notNull(),
-  nextDeliveryDate: timestamp("next_delivery_date", {
-    withTimezone: true,
-  }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  pausedAt: timestamp("paused_at", { withTimezone: true }),
-  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
-});
+// Nota: A funcionalidade de assinaturas foi migrada para pedidos recorrentes
+// Os campos de recorrência estão agora diretamente na tabela 'orders'

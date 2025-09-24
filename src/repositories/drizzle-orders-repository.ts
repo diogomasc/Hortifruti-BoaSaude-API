@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, or, ilike, desc, asc, SQL } from "drizzle-orm";
 import { db } from "../database/client";
 import {
   orders,
@@ -12,9 +12,11 @@ import {
   CreateOrderRequest,
   OrderWithItems,
   UpdateOrderItemStatusRequest,
+  UpdateOrderRecurrenceRequest,
   OrderItemWithProduct,
   ConsumerData,
   AddressData,
+  FindItemsByProducerIdRequest,
 } from "./orders-repository";
 
 export class DrizzleOrdersRepository implements OrdersRepository {
@@ -26,6 +28,30 @@ export class DrizzleOrdersRepository implements OrdersRepository {
         0
       );
 
+      // Calcular próxima data de entrega se for recorrente
+      let nextDeliveryDate: Date | null = null;
+      if (data.isRecurring && data.frequency) {
+        const now = new Date();
+        switch (data.frequency) {
+          case "WEEKLY":
+            nextDeliveryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+            break;
+          case "MONTHLY":
+            nextDeliveryDate = new Date(now);
+            nextDeliveryDate.setMonth(now.getMonth() + 1);
+            break;
+          case "QUARTERLY":
+            nextDeliveryDate = new Date(now);
+            nextDeliveryDate.setMonth(now.getMonth() + 3);
+            break;
+          case "CUSTOM":
+            if (data.customDays) {
+              nextDeliveryDate = new Date(now.getTime() + data.customDays * 24 * 60 * 60 * 1000);
+            }
+            break;
+        }
+      }
+
       // Criar o pedido
       const [order] = await tx
         .insert(orders)
@@ -33,6 +59,10 @@ export class DrizzleOrdersRepository implements OrdersRepository {
           consumerId: data.consumerId,
           deliveryAddressId: data.deliveryAddressId,
           totalAmount: totalAmount.toString(),
+          isRecurring: data.isRecurring || false,
+          frequency: data.frequency ?? null,
+          customDays: data.customDays || null,
+          nextDeliveryDate,
         })
         .returning();
 
@@ -93,6 +123,13 @@ export class DrizzleOrdersRepository implements OrdersRepository {
         createdAt: orderData.order.createdAt,
         updatedAt: orderData.order.updatedAt,
         completedAt: orderData.order.completedAt,
+        // Campos de recorrência
+        isRecurring: orderData.order.isRecurring ?? false,
+        frequency: orderData.order.frequency,
+        customDays: orderData.order.customDays,
+        nextDeliveryDate: orderData.order.nextDeliveryDate,
+        pausedAt: orderData.order.pausedAt,
+        cancelledAt: orderData.order.cancelledAt,
         items: createdItems.map((item) => ({
           id: item.id,
           productId: item.productId,
@@ -167,6 +204,12 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       },
       status: order.status,
       totalAmount: order.totalAmount,
+      isRecurring: order.isRecurring ?? false,
+      frequency: order.frequency,
+      customDays: order.customDays,
+      nextDeliveryDate: order.nextDeliveryDate,
+      pausedAt: order.pausedAt,
+      cancelledAt: order.cancelledAt,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
       completedAt: order.completedAt,
@@ -283,6 +326,13 @@ export class DrizzleOrdersRepository implements OrdersRepository {
           createdAt: order.createdAt,
           updatedAt: order.updatedAt,
           completedAt: order.completedAt,
+          // Campos de recorrência
+          isRecurring: order.isRecurring,
+          frequency: order.frequency,
+          customDays: order.customDays,
+          nextDeliveryDate: order.nextDeliveryDate,
+          pausedAt: order.pausedAt,
+          cancelledAt: order.cancelledAt,
           items: [],
         });
       }
@@ -311,8 +361,11 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       updatedAt: new Date(),
     };
 
-    if (data.rejectionReason) {
+    if (data.status === "REJECTED" && data.rejectionReason) {
       updateData.rejectionReason = data.rejectionReason;
+    } else if (data.status === "APPROVED") {
+      // Clear rejection reason when approving an item
+      updateData.rejectionReason = null;
     }
 
     await db
@@ -407,6 +460,124 @@ export class DrizzleOrdersRepository implements OrdersRepository {
         createdAt: row.order.createdAt,
       },
     }));
+  }
+
+  async findItemsByProducerId({
+    producerId,
+    status,
+    search,
+    limit = 12,
+    offset = 0,
+  }: FindItemsByProducerIdRequest): Promise<OrderItemWithProduct[]> {
+    // Construir condições de filtro
+    const conditions = [eq(orderItems.producerId, producerId)];
+
+    // Filtro por status
+    if (status) {
+      conditions.push(eq(orderItems.status, status));
+    }
+
+    // Filtro de busca (por título do produto ou descrição)
+    if (search) {
+      conditions.push(
+        or(
+          ilike(products.title, `%${search}%`),
+          ilike(products.description, `%${search}%`)
+        )!
+      );
+    }
+
+    const result = await db
+      .select({
+        item: orderItems,
+        product: products,
+        order: orders,
+      })
+      .from(orderItems)
+      .innerJoin(products, eq(orderItems.productId, products.id))
+      .innerJoin(orders, eq(orderItems.orderId, orders.id))
+      .where(and(...conditions))
+      .orderBy(desc(orderItems.updatedAt))
+      .limit(limit)
+      .offset(offset);
+
+    return result.map((row) => ({
+      id: row.item.id,
+      orderId: row.item.orderId,
+      productId: row.item.productId,
+      producerId: row.item.producerId,
+      quantity: row.item.quantity,
+      unitPrice: row.item.unitPrice,
+      totalPrice: row.item.totalPrice,
+      status: row.item.status,
+      rejectionReason: row.item.rejectionReason,
+      updatedAt: row.item.updatedAt,
+      product: {
+        id: row.product.id,
+        title: row.product.title,
+        description: row.product.description,
+        price: row.product.price,
+        category: row.product.category,
+      },
+      order: {
+        id: row.order.id,
+        consumerId: row.order.consumerId,
+        createdAt: row.order.createdAt,
+      },
+    }));
+  }
+
+  async updateRecurrence(data: UpdateOrderRecurrenceRequest): Promise<void> {
+    const updateData: any = {};
+
+    if (data.isRecurring !== undefined) {
+      updateData.isRecurring = data.isRecurring;
+    }
+    if (data.frequency !== undefined) {
+      updateData.frequency = data.frequency;
+    }
+    if (data.customDays !== undefined) {
+      updateData.customDays = data.customDays;
+    }
+
+    // Calcular próxima data de entrega se necessário
+    if (data.isRecurring && data.frequency) {
+      const now = new Date();
+      let nextDeliveryDate: Date | null = null;
+      
+      switch (data.frequency) {
+        case "WEEKLY":
+          nextDeliveryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+          break;
+        case "MONTHLY":
+          nextDeliveryDate = new Date(now);
+          nextDeliveryDate.setMonth(now.getMonth() + 1);
+          break;
+        case "QUARTERLY":
+          nextDeliveryDate = new Date(now);
+          nextDeliveryDate.setMonth(now.getMonth() + 3);
+          break;
+        case "CUSTOM":
+          if (data.customDays) {
+            nextDeliveryDate = new Date(now.getTime() + data.customDays * 24 * 60 * 60 * 1000);
+          }
+          break;
+      }
+      
+      if (nextDeliveryDate) {
+        updateData.nextDeliveryDate = nextDeliveryDate;
+      }
+    } else if (data.isRecurring === false) {
+      // Se não é mais recorrente, limpar campos relacionados
+      updateData.frequency = null;
+      updateData.customDays = null;
+      updateData.nextDeliveryDate = null;
+    }
+
+    await db
+      .update(orders)
+      .set(updateData)
+      .where(eq(orders.id, data.orderId));
   }
 
   async recalculateOrderStatus(

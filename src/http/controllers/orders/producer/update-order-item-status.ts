@@ -1,13 +1,13 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
-import { makeUpdateOrderItemStatusUseCase } from "../../../use-cases/factories/make-update-order-item-status-use-case";
-import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
-import { NotAllowedError } from "../../../use-cases/errors/not-allowed-error";
-import { InvalidStatusTransitionError } from "../../../use-cases/errors/invalid-status-transition-error";
+import { makeUpdateOrderItemStatusUseCase } from "../../../../use-cases/factories/make-update-order-item-status-use-case";
+import { ResourceNotFoundError } from "../../../../use-cases/errors/resource-not-found-error";
+import { NotAllowedError } from "../../../../use-cases/errors/not-allowed-error";
+import { InvalidStatusTransitionError } from "../../../../use-cases/errors/invalid-status-transition-error";
 
 // Schema para documentação Swagger
 export const updateOrderItemStatusSchema = {
-  tags: ["Orders"],
+  tags: ["Orders - Producer"],
   summary: "Atualizar status de item do pedido",
   description:
     "Atualiza o status de um item específico do pedido. Apenas o produtor dono do item pode aprovar ou rejeitar.",

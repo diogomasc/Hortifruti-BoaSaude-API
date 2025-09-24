@@ -6,6 +6,10 @@ interface ManageOrderUseCaseRequest {
   orderId: string;
   consumerId: string;
   action: "pause" | "resume" | "cancel";
+  // Campos opcionais para atualizar recorrência
+  isRecurring?: boolean;
+  frequency?: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+  customDays?: number;
 }
 
 export class ManageOrderUseCase {
@@ -15,6 +19,9 @@ export class ManageOrderUseCase {
     orderId,
     consumerId,
     action,
+    isRecurring,
+    frequency,
+    customDays,
   }: ManageOrderUseCaseRequest): Promise<void> {
     // Verificar se o pedido existe
     const order = await this.ordersRepository.findById(orderId);
@@ -78,7 +85,17 @@ export class ManageOrderUseCase {
         break;
 
       default:
-        throw new Error("Ação inválida");
+        throw new Error(`Ação inválida: ${action}`);
+    }
+
+    // Atualizar campos de recorrência se fornecidos
+    if (isRecurring !== undefined || frequency !== undefined || customDays !== undefined) {
+      await this.ordersRepository.updateRecurrence({
+        orderId,
+        isRecurring,
+        frequency,
+        customDays,
+      });
     }
   }
 }

@@ -1,130 +1,388 @@
 ### Variáveis
 @baseUrl = http://localhost:3333
-@token = SEU_TOKEN_JWT_AQUI
+@consumerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YmVmNGE0ZC1iMzgzLTQ4MTEtYTY1My03NmMxMzkzNjczNmUiLCJyb2xlIjoiY29uc3VtZXIiLCJpYXQiOjE3NTg3NTA5NjMsImV4cCI6MTc1OTM1NTc2M30.pmB_sT8-TT4XTY5J2qYVNWxjhpjwM_fm_TGWu5qs9Xw
+@producerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzOGVjNDIwZC02ZmI0LTQyM2ItOWVjMy1kMDBmMmNkNzMxN2IiLCJyb2xlIjoicHJvZHVjZXIiLCJpYXQiOjE3NTg3NTA5OTksImV4cCI6MTc1OTM1NTc5OX0.8wYfHUtgeOSjYwgKe0pu-lB8ykiNTreG-BxYRGdNRs4
+@addressId = 84991f5e-b5e9-4393-bdd5-c4382b452f49
+@product1Id = f8268374-d547-4a68-a4f9-a3a813a349d9
+@product2Id = 720f5f06-f065-417c-a3a5-04dd076b9fbc
+@orderId = 8e55b8e3-2985-48ba-9a87-f1c69ae4b603
+@orderItemId = 7a0beee4-9356-405c-8775-837c33c892be
 
-### 1. Listar produtos (público - sem autenticação)
+### ========================================
+### FLUXO COMPLETO: PEDIDOS E PEDIDOS RECORRENTES
+### ========================================
+
+### 1. PREPARAÇÃO - Criar Usuários
+
+### 1.1 Criar Consumidor
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "email": "dmasc@example.com",
+  "password": "123456",
+  "firstName": "Diogo",
+  "lastName": "Mascarenhas",
+  "phone": "58551648535",
+  "role": "consumer",
+  "cpf": "64231221067",
+  "birthDate": "2000-01-01"
+}
+
+###
+
+### 1.2 Criar Produtor
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "email": "acalento@example.com",
+  "password": "123456",
+  "firstName": "Ednalva",
+  "lastName": "Mascarenhas",
+  "phone": "58551648535",
+  "role": "producer",
+  "cnpj": "71058599455362",
+  "shopName": "Acalento Store",
+  "shopDescription": "Produtos frescos e orgânicos"
+}
+
+###
+
+### 2. AUTENTICAÇÃO - Fazer Login
+
+### 2.1 Login do Consumidor
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "dmasc@example.com",
+  "password": "123456"
+}
+
+# Copie o token retornado e cole na variável @consumerToken
+
+###
+
+### 2.2 Login do Produtor
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "acalento@example.com",
+  "password": "123456"
+}
+
+# Copie o token retornado e cole na variável @producerToken
+
+###
+
+### 3. CONFIGURAÇÃO - Criar Endereço e Produtos
+
+### 3.1 Criar Endereço de Entrega (como Consumidor)
+POST {{baseUrl}}/users/me/addresses/
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "street": "Rua das Flores, 123",
+  "number": "123",
+  "complement": "Apto 45",
+  "city": "São Paulo",
+  "state": "SP",
+  "country": "Brasil",
+  "zipCode": "01234567"
+}
+
+# Copie o id retornado e cole na variável @addressId
+
+###
+
+### 3.2 Criar Produto 1 (como Produtor)
+POST {{baseUrl}}/products
+Authorization: Bearer {{producerToken}}
+Content-Type: application/json
+
+{
+  "title": "Tomate Orgânico - Acelento",
+  "description": "Tomates frescos e orgânicos",
+  "price": "8.50",
+  "category": "frutas",
+  "quantity": 100
+}
+
+# Copie o id retornado e cole na variável @product1Id
+
+###
+
+### 3.3 Criar Produto 2 (como Produtor)
+POST {{baseUrl}}/products
+Authorization: Bearer {{producerToken}}
+Content-Type: application/json
+
+{
+  "title": "Alface Crespa - Acelento",
+  "description": "Alface fresca e crocante",
+  "price": "3.20",
+  "category": "verduras",
+  "quantity": 50
+}
+
+# Copie o id retornado e cole na variável @product2Id
+
+###
+
+### ========================================
+### FLUXO PRINCIPAL: PEDIDOS ÚNICOS E RECORRENTES
+### ========================================
+
+### 4. PASSO 1: Criar Pedido Único (como Consumidor)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "deliveryAddressId": "{{addressId}}",
+  "items": [
+    {
+      "productId": "{{product1Id}}",
+      "quantity": 2
+    },
+    {
+      "productId": "{{product2Id}}",
+      "quantity": 3
+    }
+  ]
+}
+
+###
+
+### 4.1 PASSO 1: Criar Pedido Recorrente Semanal (como Consumidor)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "deliveryAddressId": "{{addressId}}",
+  "items": [
+    {
+      "productId": "{{product1Id}}",
+      "quantity": 2
+    },
+    {
+      "productId": "{{product2Id}}",
+      "quantity": 3
+    }
+  ],
+  "isRecurring": true,
+  "frequency": "WEEKLY"
+}
+
+###
+
+### 4.2 PASSO 1: Criar Pedido Recorrente Personalizado (como Consumidor)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "deliveryAddressId": "{{addressId}}",
+  "items": [
+    {
+      "productId": "{{product1Id}}",
+      "quantity": 1
+    }
+  ],
+  "isRecurring": true,
+  "frequency": "CUSTOM",
+  "customDays": 10
+}
+
+# Copie o orderId retornado e cole na variável @orderId
+# Copie um dos orderItemIds retornados e cole na variável @orderItemId
+
+###
+
+### 5. PASSO 2: Listar Itens Pendentes (como Produtor)
+GET {{baseUrl}}/orders/items/pending
+Authorization: Bearer {{producerToken}}
+Content-Type: application/json
+
+# Aqui você verá os itens do pedido criado aguardando aprovação
+# Anote os IDs dos itens que deseja aprovar
+
+###
+
+### 6. PASSO 3: Aprovar Item do Pedido (como Produtor)
+PATCH {{baseUrl}}/orders/{{orderId}}/items/{{orderItemId}}/status
+Authorization: Bearer {{producerToken}}
+Content-Type: application/json
+
+{
+  "status": "APPROVED"
+}
+
+# Status possíveis: "approved", "rejected"
+# Para rejeitar, use: {"status": "rejected", "rejectionReason": "Produto em falta"}
+
+###
+
+### 6.1 Aprovar Segundo Item (se houver)
+# Repita o processo acima para outros itens do pedido
+# PATCH {{baseUrl}}/orders/{{orderId}}/items/{{orderItemId2}}/status
+# Authorization: Bearer {{producerToken}}
+# Content-Type: application/json
+# 
+# {
+#   "status": "approved"
+# }
+
+###
+
+### 7. PASSO 4: Verificar Pedido Recorrente Criado (como Consumidor)
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+# Para pedidos recorrentes, você verá os campos:
+# - isRecurring: true
+# - frequency: "WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", ou "CUSTOM"
+# - customDays: número de dias (apenas para frequency "CUSTOM")
+# - nextDeliveryDate: data da próxima entrega
+# - pausedAt: null (se não estiver pausado)
+# - cancelledAt: null (se não estiver cancelado)
+
+###
+
+### ========================================
+### VERIFICAÇÕES ADICIONAIS
+### ========================================
+
+### 8. Verificar Status do Pedido
+GET {{baseUrl}}/orders/{{orderId}}
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+# O pedido deve estar com status "completed" quando todos os itens forem aprovados
+
+###
+
+### 9. Listar Todos os Pedidos (como Consumidor)
+GET {{baseUrl}}/orders
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+###
+
+### 10. Gerenciar Pedido Recorrente (Pausar/Retomar/Cancelar)
+PATCH {{baseUrl}}/orders/{{orderId}}/manage
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "action": "pause"
+}
+
+# Ações possíveis: "pause", "resume", "cancel"
+
+###
+
+### 10.1 Atualizar Recorrência de Pedido
+PATCH {{baseUrl}}/orders/{{orderId}}/manage
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "action": "resume",
+  "isRecurring": true,
+  "frequency": "MONTHLY"
+}
+
+# Você pode atualizar a recorrência junto com outras ações
+# Frequências disponíveis: "WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"
+
+###
+
+### 10.2 Definir Recorrência Personalizada
+PATCH {{baseUrl}}/orders/{{orderId}}/manage
+Authorization: Bearer {{consumerToken}}
+Content-Type: application/json
+
+{
+  "action": "resume",
+  "isRecurring": true,
+  "frequency": "CUSTOM",
+  "customDays": 15
+}
+
+# Para frequency "CUSTOM", o campo customDays é obrigatório
+
+###
+
+### ========================================
+### FLUXO DE PRODUTOS (COMPLEMENTAR)
+### ========================================
+
+### 11. Listar produtos (público - sem autenticação)
 GET {{baseUrl}}/products
 Content-Type: application/json
 
 ###
 
-### 2. Obter produto por ID (público - sem autenticação)
-GET {{baseUrl}}/products/[productId1]
+### 12. Obter produto por ID (público - sem autenticação)
+GET {{baseUrl}}/products/{{product1Id}}
 Content-Type: application/json
 
 ###
 
-### 3. Criar produto (requer autenticação + role producer)
-POST {{baseUrl}}/products
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-  "title": "Nome do Produto",
-  "description": "Descrição do produto",
-  "price": "2.50",
-  "category": "frutas",
-  "quantity": 10
-}
-
-###
-
-### 4. Listar produtos do produtor (requer autenticação + role producer)
+### 13. Listar produtos do produtor (requer autenticação + role producer)
 GET {{baseUrl}}/products/me
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{producerToken}}
 
 ###
 
-### 5. Atualizar produto (requer autenticação + role producer)
-PUT {{baseUrl}}/products/[productId1]
+### 14. Atualizar produto (requer autenticação + role producer)
+PUT {{baseUrl}}/products/{{product1Id}}
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{producerToken}}
 
 {
-  "title": "Produto Atualizado",
-  "description": "Descrição atualizada do produto",
-  "price": "3.50",
-  "category": "frutas",
-  "quantity": 15
+  "title": "Tomate Orgânico Premium",
+  "description": "Tomates frescos e orgânicos de alta qualidade",
+  "price": "9.50",
+  "category": "temperos",
+  "quantity": 80
 }
 
 ###
 
-### 6. Deletar produto (requer autenticação + role producer)
-DELETE {{baseUrl}}/products/[productId1]
-Authorization: Bearer {{token}}
+### 15. Deletar produto (requer autenticação + role producer)
+DELETE {{baseUrl}}/products/{{product2Id}}
+Authorization: Bearer {{producerToken}}
 
 ###
 
-### 7a. Adicionar imagem ao primeiro produto
-POST {{baseUrl}}/products/[productId1]/images
-Authorization: Bearer {{token}}
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+### ========================================
+### INSTRUÇÕES DE USO
+### ========================================
 
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"; filename="imagem-1.png"
-Content-Type: image/png
-
-< ./img/maca-1.png
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
-
-###
-
-### 7b. Adicionar segunda imagem ao primeiro produto
-POST {{baseUrl}}/products/[productId1]/images
-Authorization: Bearer {{token}}
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"; filename="imagem-2.jpg"
-Content-Type: image/jpeg
-
-< ./img/maca-2.jpg
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
-
-###
-
-### 7c. Adicionar imagem ao segundo produto
-POST {{baseUrl}}/products/[productId2]/images
-Authorization: Bearer {{token}}
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"; filename="imagem-3.png"
-Content-Type: image/png
-
-< ./img/maca-1.png
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
-
-###
-
-### 7d. Adicionar segunda imagem ao segundo produto
-POST {{baseUrl}}/products/[productId2]/images
-Authorization: Bearer {{token}}
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"; filename="imagem-4.jpg"
-Content-Type: image/jpeg
-
-< ./img/maca-3.jpg
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
-
-###
-
-### 8a. Listar imagens do primeiro produto (requer autenticação + role producer)
-GET {{baseUrl}}/products/[productId1]/images
-Authorization: Bearer {{token}}
-
-###
-
-### 8b. Listar imagens do segundo produto (requer autenticação + role producer)
-GET {{baseUrl}}/products/[productId2]/images
-Authorization: Bearer {{token}}
-
-###
-
-### 9. Deletar imagem do produto (requer autenticação + role producer)
-DELETE {{baseUrl}}/products/[productId1]/images/[imageId]
-Authorization: Bearer {{token}}
+# 1. Execute as requisições na ordem apresentada
+# 2. Sempre copie os IDs retornados e atualize as variáveis no topo
+# 3. Para testar o fluxo completo:
+#    - Crie usuários (consumidor e produtor)
+#    - Faça login e obtenha os tokens
+#    - Crie endereço e produtos
+#    - Crie um pedido (único ou recorrente) como consumidor
+#    - Liste itens pendentes como produtor
+#    - Aprove todos os itens como produtor
+#    - Para pedidos recorrentes, gerencie a recorrência (pausar/retomar/cancelar)
+# 4. Pedidos recorrentes:
+#    - Use isRecurring: true para criar pedidos recorrentes
+#    - Frequências: WEEKLY, BIWEEKLY, MONTHLY, QUARTERLY, CUSTOM
+#    - Para CUSTOM, especifique customDays (número de dias)
+#    - Gerencie via PATCH /orders/{orderId}/manage
+# 5. IMPORTANTE: Funcionalidade de assinaturas foi DEPRECIADA
+#    - Use pedidos recorrentes em vez de assinaturas separadas
+#    - Rotas /subscriptions ainda existem mas são deprecated
+# 6. Use a documentação em http://localhost:3333/docs para mais detalhes

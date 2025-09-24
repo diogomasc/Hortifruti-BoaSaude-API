@@ -12,6 +12,10 @@ interface CreateOrderUseCaseRequest {
     productId: string;
     quantity: number;
   }[];
+  // Campos de recorrência
+  isRecurring?: boolean;
+  frequency?: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+  customDays?: number;
 }
 
 interface CreateOrderUseCaseResponse {
@@ -30,6 +34,13 @@ interface CreateOrderUseCaseResponse {
     createdAt: Date;
     updatedAt: Date;
     completedAt: Date | null;
+    // Campos de recorrência
+    isRecurring: boolean;
+    frequency: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
+    customDays: number | null;
+    nextDeliveryDate: Date | null;
+    pausedAt: Date | null;
+    cancelledAt: Date | null;
     items: {
       id: string;
       productId: string;
@@ -53,6 +64,9 @@ export class CreateOrderUseCase {
     consumerId,
     deliveryAddressId,
     items,
+    isRecurring = false,
+    frequency,
+    customDays,
   }: CreateOrderUseCaseRequest): Promise<CreateOrderUseCaseResponse> {
     // Verificar se o usuário existe e é um consumidor
     const user = await this.usersRepository.findById(consumerId);
@@ -100,11 +114,38 @@ export class CreateOrderUseCase {
       });
     }
 
+    // Calcular próxima data de entrega se for recorrente
+    let nextDeliveryDate: Date | null = null;
+    if (isRecurring && frequency) {
+      const now = new Date();
+      switch (frequency) {
+        case "WEEKLY":
+          nextDeliveryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+          break;
+        case "MONTHLY":
+          nextDeliveryDate = new Date(now);
+          nextDeliveryDate.setMonth(now.getMonth() + 1);
+          break;
+        case "QUARTERLY":
+          nextDeliveryDate = new Date(now);
+          nextDeliveryDate.setMonth(now.getMonth() + 3);
+          break;
+        case "CUSTOM":
+          if (customDays) {
+            nextDeliveryDate = new Date(now.getTime() + customDays * 24 * 60 * 60 * 1000);
+          }
+          break;
+      }
+    }
+
     // Criar o pedido
     const order = await this.ordersRepository.create({
       consumerId,
       deliveryAddressId,
       items: orderItems,
+      isRecurring,
+      frequency,
+      customDays,
     });
 
     return {

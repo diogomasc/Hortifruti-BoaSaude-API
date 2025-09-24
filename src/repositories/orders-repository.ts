@@ -9,6 +9,10 @@ export interface CreateOrderRequest {
     quantity: number;
     unitPrice: number;
   }[];
+  // Campos de recorrência
+  isRecurring?: boolean;
+  frequency?: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+  customDays?: number; // Para recorrência personalizada em dias
 }
 
 export interface ConsumerData {
@@ -48,6 +52,13 @@ export interface OrderWithItems {
   createdAt: Date;
   updatedAt: Date;
   completedAt: Date | null;
+  // Campos de recorrência
+  isRecurring: boolean;
+  frequency: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
+  customDays: number | null;
+  nextDeliveryDate: Date | null;
+  pausedAt: Date | null;
+  cancelledAt: Date | null;
   items: {
     id: string;
     productId: string;
@@ -92,11 +103,27 @@ export interface OrderItemWithProduct {
   };
 }
 
+export interface FindItemsByProducerIdRequest {
+  producerId: string;
+  status?: "PENDING" | "APPROVED" | "REJECTED";
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface UpdateOrderRecurrenceRequest {
+  orderId: string;
+  isRecurring?: boolean;
+  frequency?: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
+  customDays?: number | null;
+}
+
 export interface OrdersRepository {
   create(data: CreateOrderRequest): Promise<OrderWithItems>;
   findById(id: string): Promise<OrderWithItems | null>;
   findByConsumerId(consumerId: string): Promise<OrderWithItems[]>;
   findByProducerId(producerId: string): Promise<OrderWithItems[]>;
+  findAll(): Promise<OrderWithItems[]>;
   updateStatus(
     id: string,
     status:
@@ -107,11 +134,14 @@ export interface OrdersRepository {
       | "PAUSED"
       | "CANCELLED"
   ): Promise<void>;
-  findAll(): Promise<OrderWithItems[]>;
   updateItemStatus(data: UpdateOrderItemStatusRequest): Promise<void>;
+  updateRecurrence(data: UpdateOrderRecurrenceRequest): Promise<void>;
   findItemById(itemId: string): Promise<OrderItemWithProduct | null>;
   findPendingItemsByProducerId(
     producerId: string
+  ): Promise<OrderItemWithProduct[]>;
+  findItemsByProducerId(
+    data: FindItemsByProducerIdRequest
   ): Promise<OrderItemWithProduct[]>;
   recalculateOrderStatus(
     orderId: string

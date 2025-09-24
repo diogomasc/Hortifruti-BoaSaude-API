@@ -5,7 +5,7 @@ import { profileController } from "./controllers/profile";
 import { usersRoutes } from "./controllers/users/routes";
 import { productsRoutes } from "./controllers/products/routes";
 import { ordersRoutes } from "./controllers/orders/routes";
-import { subscriptionsRoutes } from "./controllers/subscriptions/routes";
+
 
 export async function appRoutes(app: FastifyInstance) {
   app.register(registerController);
@@ -21,6 +21,5 @@ export async function appRoutes(app: FastifyInstance) {
   // Rotas de pedidos
   app.register(ordersRoutes, { prefix: "/orders" });
 
-  // Rotas de assinaturas
-  app.register(subscriptionsRoutes, { prefix: "/subscriptions" });
+
 }
