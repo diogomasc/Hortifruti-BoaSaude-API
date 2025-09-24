@@ -11,7 +11,7 @@ export const getOrderByIdSchema = {
   tags: ["Orders - Consumer"],
   summary: "Obter pedido por ID",
   description:
-    "Obtém os detalhes de um pedido específico pelo seu ID. O usuário só pode acessar seus próprios pedidos.",
+    "Obtém os detalhes completos de um pedido específico pelo seu ID, incluindo informações de recorrência e detalhes dos itens. O usuário só pode acessar seus próprios pedidos.",
   security: [{ bearerAuth: [] }],
   params: z.object({
     orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
@@ -24,8 +24,17 @@ export const getOrderByIdSchema = {
           consumerId: z.string().uuid(),
           deliveryAddressId: z.string().uuid(),
           totalAmount: z.string(),
-          status: z.enum(["PENDING", "COMPLETED", "REJECTED"]),
-          createdAt: z.date(),
+          status: z.enum(["PENDING", "COMPLETED", "REJECTED", "PARTIALLY_COMPLETED", "PAUSED", "CANCELLED"]),
+          createdAt: z.string(),
+          updatedAt: z.string(),
+          completedAt: z.string().nullable(),
+          // Campos de recorrência
+          isRecurring: z.boolean(),
+          frequency: z.enum(["WEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"]).nullable(),
+          customDays: z.number().nullable(),
+          nextDeliveryDate: z.string().nullable(),
+          pausedAt: z.string().nullable(),
+          cancelledAt: z.string().nullable(),
           items: z.array(
             z.object({
               id: z.string().uuid(),
@@ -34,11 +43,21 @@ export const getOrderByIdSchema = {
               quantity: z.number(),
               unitPrice: z.string(),
               totalPrice: z.string(),
+              status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
+              rejectionReason: z.string().nullable(),
+              updatedAt: z.string(),
+              product: z.object({
+                id: z.string().uuid(),
+                title: z.string(),
+                description: z.string(),
+                price: z.string(),
+                category: z.string(),
+              }).optional(),
             })
           ),
         }),
       })
-      .describe("Detalhes do pedido retornados com sucesso"),
+      .describe("Detalhes completos do pedido retornados com sucesso"),
     400: z
       .object({
         message: z.string(),
@@ -101,8 +120,23 @@ export async function getOrderById(
       userRole,
     });
 
+    // Converter datas para strings
+    const formattedOrder = {
+      ...order,
+      createdAt: order.createdAt.toISOString(),
+      updatedAt: order.updatedAt.toISOString(),
+      completedAt: order.completedAt?.toISOString() || null,
+      nextDeliveryDate: order.nextDeliveryDate?.toISOString() || null,
+      pausedAt: order.pausedAt?.toISOString() || null,
+      cancelledAt: order.cancelledAt?.toISOString() || null,
+      items: order.items.map((item) => ({
+        ...item,
+        updatedAt: item.updatedAt.toISOString(),
+      })),
+    };
+
     return reply.status(200).send({
-      order,
+      order: formattedOrder,
     });
   } catch (error) {
     if (error instanceof ResourceNotFoundError) {

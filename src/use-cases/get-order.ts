@@ -24,6 +24,13 @@ interface GetOrderUseCaseResponse {
     createdAt: Date;
     updatedAt: Date;
     completedAt: Date | null;
+    // Campos de recorrência
+    isRecurring: boolean;
+    frequency: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
+    customDays: number | null;
+    nextDeliveryDate: Date | null;
+    pausedAt: Date | null;
+    cancelledAt: Date | null;
     items: {
       id: string;
       productId: string;
@@ -31,6 +38,16 @@ interface GetOrderUseCaseResponse {
       quantity: number;
       unitPrice: string;
       totalPrice: string;
+      status: "PENDING" | "APPROVED" | "REJECTED";
+      rejectionReason: string | null;
+      updatedAt: Date;
+      product?: {
+        id: string;
+        title: string;
+        description: string;
+        price: string;
+        category: string;
+      };
     }[];
   };
 }

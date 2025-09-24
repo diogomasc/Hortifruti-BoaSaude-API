@@ -3,10 +3,20 @@ import { OrdersRepository, OrderWithItems } from "../repositories/orders-reposit
 interface ListOrdersUseCaseRequest {
   userId: string;
   userRole: "consumer" | "producer" | "admin";
+  status?: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED" | "PAUSED" | "CANCELLED";
+  search?: string;
+  limit?: number;
+  offset?: number;
 }
 
 interface ListOrdersUseCaseResponse {
   orders: OrderWithItems[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasNext: boolean;
+  };
 }
 
 export class ListOrdersUseCase {
@@ -15,6 +25,10 @@ export class ListOrdersUseCase {
   async execute({
     userId,
     userRole,
+    status,
+    search,
+    limit = 12,
+    offset = 0,
   }: ListOrdersUseCaseRequest): Promise<ListOrdersUseCaseResponse> {
     let orders: OrderWithItems[];
 
@@ -31,8 +45,31 @@ export class ListOrdersUseCase {
       orders = [];
     }
 
+    // Aplicar filtros
+    if (status) {
+      orders = orders.filter(order => order.status === status);
+    }
+
+    if (search) {
+      const searchLower = search.toLowerCase();
+      orders = orders.filter(order => 
+        order.id.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Calcular paginação
+    const total = orders.length;
+    const paginatedOrders = orders.slice(offset, offset + limit);
+    const hasNext = offset + limit < total;
+
     return {
-      orders,
+      orders: paginatedOrders,
+      pagination: {
+        total,
+        limit,
+        offset,
+        hasNext,
+      },
     };
   }
 }
