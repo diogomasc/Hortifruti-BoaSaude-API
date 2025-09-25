@@ -7,7 +7,7 @@ import { InvalidStatusTransitionError } from "../../../../use-cases/errors/inval
 
 // Schema para documentação Swagger
 export const updateOrderItemStatusSchema = {
-  tags: ["Orders - Producer"],
+  tags: ["Orders - Only Producer"],
   summary: "Atualizar status de item do pedido",
   description:
     "Atualiza o status de um item específico do pedido. Apenas o produtor dono do item pode aprovar ou rejeitar.",

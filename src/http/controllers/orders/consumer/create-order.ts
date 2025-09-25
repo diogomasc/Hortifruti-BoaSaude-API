@@ -26,7 +26,7 @@ function normalizeRecurrenceData(data: {
 
 // Schema para documentação Swagger
 export const createOrderSchema = {
-  tags: ["Orders - Consumer"],
+  tags: ["Orders - Only Consumer"],
   summary: "Criar novo pedido",
   description:
     "Cria um novo pedido vinculado ao usuário autenticado. Apenas consumidores podem criar pedidos. Todos os produtos devem existir e ter quantidade disponível.",

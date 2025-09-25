@@ -4,7 +4,7 @@ import { makeListPendingOrderItemsUseCase } from "../../../../use-cases/factorie
 
 // Schema para documentação Swagger
 export const listPendingOrderItemsSchema = {
-  tags: ["Orders - Producer"],
+  tags: ["Orders - Only Producer"],
   summary: "Listar itens pendentes do produtor",
   description:
     "Lista todos os itens de pedidos que estão pendentes de aprovação/rejeição pelo produtor autenticado, agrupados por pedido com paginação.",

@@ -34,7 +34,7 @@ const updateOrderRecurrenceSchema = z
 
 // Schema para documentação Swagger
 export const manageOrderSchema = {
-  tags: ["Orders - Consumer"],
+  tags: ["Orders - Only Consumer"],
   summary: "Gerenciar pedido",
   description:
     "Permite pausar, retomar, cancelar um pedido ou atualizar sua recorrência. Apenas consumidores podem gerenciar seus próprios pedidos.",
@@ -151,7 +151,9 @@ export async function manageOrder(
           QUARTERLY: "trimestral",
         };
         messages.push(
-          `frequência atualizada para ${frequencyLabels[frequency as keyof typeof frequencyLabels]}`
+          `frequência atualizada para ${
+            frequencyLabels[frequency as keyof typeof frequencyLabels]
+          }`
         );
       }
     }

@@ -1,14 +1,14 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
-import { GetOrderUseCase } from "../../../../use-cases/get-order";
-import { DrizzleOrdersRepository } from "../../../../repositories/drizzle-orders-repository";
-import { ResourceNotFoundError } from "../../../../use-cases/errors/resource-not-found-error";
-import { NotAllowedError } from "../../../../use-cases/errors/not-allowed-error";
-import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
+import { GetOrderUseCase } from "../../../use-cases/get-order";
+import { DrizzleOrdersRepository } from "../../../repositories/drizzle-orders-repository";
+import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
+import { NotAllowedError } from "../../../use-cases/errors/not-allowed-error";
+import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
 
 // Schema para documentação Swagger
 export const getOrderByIdSchema = {
-  tags: ["Orders - Consumer"],
+  tags: ["Orders"],
   summary: "Obter pedido por ID",
   description:
     "Obtém os detalhes completos de um pedido específico pelo seu ID, incluindo informações de recorrência e detalhes dos itens. O usuário só pode acessar seus próprios pedidos.",
@@ -24,13 +24,22 @@ export const getOrderByIdSchema = {
           consumerId: z.string().uuid(),
           deliveryAddressId: z.string().uuid(),
           totalAmount: z.string(),
-          status: z.enum(["PENDING", "COMPLETED", "REJECTED", "PARTIALLY_COMPLETED", "PAUSED", "CANCELLED"]),
+          status: z.enum([
+            "PENDING",
+            "COMPLETED",
+            "REJECTED",
+            "PARTIALLY_COMPLETED",
+            "PAUSED",
+            "CANCELLED",
+          ]),
           createdAt: z.string(),
           updatedAt: z.string(),
           completedAt: z.string().nullable(),
           // Campos de recorrência
           isRecurring: z.boolean(),
-          frequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"]).nullable(),
+          frequency: z
+            .enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"])
+            .nullable(),
           customDays: z.number().nullable(),
           nextDeliveryDate: z.string().nullable(),
           pausedAt: z.string().nullable(),
@@ -46,13 +55,15 @@ export const getOrderByIdSchema = {
               status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
               rejectionReason: z.string().nullable(),
               updatedAt: z.string(),
-              product: z.object({
-                id: z.string().uuid(),
-                title: z.string(),
-                description: z.string(),
-                price: z.string(),
-                category: z.string(),
-              }).optional(),
+              product: z
+                .object({
+                  id: z.string().uuid(),
+                  title: z.string(),
+                  description: z.string(),
+                  price: z.string(),
+                  category: z.string(),
+                })
+                .optional(),
             })
           ),
         }),

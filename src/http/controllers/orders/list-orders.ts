@@ -1,18 +1,27 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
-import { ListOrdersUseCase } from "../../../../use-cases/list-orders";
-import { DrizzleOrdersRepository } from "../../../../repositories/drizzle-orders-repository";
-import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
+import { ListOrdersUseCase } from "../../../use-cases/list-orders";
+import { DrizzleOrdersRepository } from "../../../repositories/drizzle-orders-repository";
+import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
 
 // Schema para documentação Swagger
 export const listOrdersSchema = {
-  tags: ["Orders - Consumer"],
+  tags: ["Orders"],
   summary: "Listar pedidos do usuário",
   description:
     "Lista todos os pedidos do usuário autenticado com paginação e filtros. Retorna informações completas dos pedidos incluindo itens, status e informações de recorrência.",
   security: [{ bearerAuth: [] }],
   querystring: z.object({
-    status: z.enum(["PENDING", "COMPLETED", "REJECTED", "PARTIALLY_COMPLETED", "PAUSED", "CANCELLED"]).optional(),
+    status: z
+      .enum([
+        "PENDING",
+        "COMPLETED",
+        "REJECTED",
+        "PARTIALLY_COMPLETED",
+        "PAUSED",
+        "CANCELLED",
+      ])
+      .optional(),
     search: z.string().optional(),
     limit: z.coerce.number().min(1).max(50).default(12),
     offset: z.coerce.number().min(0).default(0),
@@ -26,13 +35,22 @@ export const listOrdersSchema = {
             consumerId: z.string().uuid(),
             deliveryAddressId: z.string().uuid(),
             totalAmount: z.string(),
-            status: z.enum(["PENDING", "COMPLETED", "REJECTED", "PARTIALLY_COMPLETED", "PAUSED", "CANCELLED"]),
+            status: z.enum([
+              "PENDING",
+              "COMPLETED",
+              "REJECTED",
+              "PARTIALLY_COMPLETED",
+              "PAUSED",
+              "CANCELLED",
+            ]),
             createdAt: z.string(),
             updatedAt: z.string(),
             completedAt: z.string().nullable(),
             // Campos de recorrência
             isRecurring: z.boolean(),
-            frequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"]).nullable(),
+            frequency: z
+              .enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"])
+              .nullable(),
             customDays: z.number().nullable(),
             nextDeliveryDate: z.string().nullable(),
             pausedAt: z.string().nullable(),
@@ -48,13 +66,15 @@ export const listOrdersSchema = {
                 status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
                 rejectionReason: z.string().nullable(),
                 updatedAt: z.string(),
-                product: z.object({
-                  id: z.string().uuid(),
-                  title: z.string(),
-                  description: z.string(),
-                  price: z.string(),
-                  category: z.string(),
-                }).optional(),
+                product: z
+                  .object({
+                    id: z.string().uuid(),
+                    title: z.string(),
+                    description: z.string(),
+                    price: z.string(),
+                    category: z.string(),
+                  })
+                  .optional(),
               })
             ),
           })
@@ -87,7 +107,13 @@ export async function listOrders(request: FastifyRequest, reply: FastifyReply) {
 
     // Extrair parâmetros de query
     const { status, search, limit, offset } = request.query as {
-      status?: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED" | "PAUSED" | "CANCELLED";
+      status?:
+        | "PENDING"
+        | "COMPLETED"
+        | "REJECTED"
+        | "PARTIALLY_COMPLETED"
+        | "PAUSED"
+        | "CANCELLED";
       search?: string;
       limit: number;
       offset: number;
