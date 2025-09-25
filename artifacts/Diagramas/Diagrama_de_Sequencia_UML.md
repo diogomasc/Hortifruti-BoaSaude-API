@@ -47,14 +47,15 @@ sequenceDiagram
     S->>DB: Validar endereço de entrega
     DB-->>S: Endereço válido
     
-    S->>DB: Validar produtos e quantidades
-    DB-->>S: Produtos disponíveis
+    S->>DB: Validar produtos e quantidades disponíveis
+    Note right of S: Verifica estoque sem decrementar
+    DB-->>S: Produtos disponíveis em estoque
     
     S->>DB: Criar pedido com status PENDING
     DB-->>S: Pedido criado (ID: order-123)
     
-    S->>DB: Criar itens do pedido
-    Note right of S: Item 1: Produto do Produtor 1<br/>Item 2: Produto do Produtor 2
+    S->>DB: Criar itens do pedido (sem decrementar estoque)
+    Note right of S: Item 1: Produto do Produtor 1<br/>Item 2: Produto do Produtor 2<br/>Status: PENDING (estoque não alterado)
     DB-->>S: Itens criados
     
     S->>DB: Calcular próxima entrega (7 dias)
@@ -80,7 +81,11 @@ sequenceDiagram
     P1->>S: PUT /orders/order-123/items/item-1/status/
     Note right of P1: Status: APPROVED
     S->>DB: Atualizar status do item
-    DB-->>S: Item aprovado
+    S->>DB: Creditar carteira do produtor
+    Note right of S: Valor creditado baseado no unitPrice * quantity
+    S->>DB: Decrementar estoque do produto
+    Note right of S: Quantidade decrementada apenas na aprovação
+    DB-->>S: Item aprovado, carteira creditada, estoque atualizado
     S-->>P1: Confirmação de aprovação
     
     %% Produtor 2 - Rejeição (em paralelo)
@@ -92,7 +97,8 @@ sequenceDiagram
     P2->>S: PUT /orders/order-123/items/item-2/status/
     Note right of P2: Status: REJECTED<br/>Reason: "Produto fora de estoque"
     S->>DB: Atualizar status do item
-    DB-->>S: Item rejeitado
+    Note right of S: Sem alteração no estoque ou carteira
+    DB-->>S: Item rejeitado (estoque e carteira inalterados)
     S-->>P2: Confirmação de rejeição
 
     %% Fase 6: Consolidação do Status
@@ -126,8 +132,11 @@ sequenceDiagram
     Note over S,DB: Fase 9: Renovação Automática (7 dias depois)
     S->>DB: Verificar assinaturas para renovação
     DB-->>S: Assinatura order-123 ativa
+    S->>DB: Validar estoque atual dos produtos
+    Note right of S: Verifica disponibilidade antes de criar novo pedido
+    DB-->>S: Produtos ainda disponíveis
     S->>DB: Criar novo pedido baseado na assinatura
-    Note right of S: Novo pedido: order-456<br/>Mesmos produtos e configurações
+    Note right of S: Novo pedido: order-456<br/>Mesmos produtos e configurações<br/>Status: PENDING (sem decremento de estoque)
     DB-->>S: Novo pedido criado
     S->>N: Notificar produtores sobre novo ciclo
     N->>P1: Nova rodada de aprovação
@@ -168,8 +177,9 @@ sequenceDiagram
 
 #### **Fase 3: Configuração do Pedido (1-3 minutos)**
 - **Duração**: Dependente da complexidade do pedido
-- **Características**: Validações múltiplas e cálculos
+- **Características**: Validações múltiplas de estoque sem decremento imediato
 - **Transações**: Operações atômicas no banco de dados
+- **Segurança**: Validação de disponibilidade sem reserva de estoque
 
 #### **Fase 4: Notificação Descentralizada (Imediata)**
 - **Duração**: Segundos
@@ -178,8 +188,9 @@ sequenceDiagram
 
 #### **Fase 5: Processamento Paralelo (Variável)**
 - **Duração**: Minutos a horas (dependente dos produtores)
-- **Características**: Processamento independente e paralelo
+- **Características**: Processamento independente e paralelo com gestão de estoque
 - **Flexibilidade**: Cada produtor decide em seu tempo
+- **Integridade**: Estoque e carteira atualizados apenas na aprovação
 
 #### **Fase 6: Consolidação (Instantânea)**
 - **Duração**: Segundos
@@ -198,8 +209,9 @@ sequenceDiagram
 
 #### **Fase 9: Ciclo Automático (Recorrente)**
 - **Duração**: Baseada na frequência configurada
-- **Características**: Automação completa do processo
+- **Características**: Automação completa do processo com validação de estoque
 - **Manutenção**: Histórico preservado
+- **Inteligência**: Verifica disponibilidade antes de criar novos pedidos
 
 #### **Fase 10: Gestão Ativa (Sob Demanda)**
 - **Duração**: Instantânea
@@ -246,18 +258,23 @@ sequenceDiagram
 1. **Aprovação Manual**: Dependente da disponibilidade dos produtores
 2. **Múltiplos Produtores**: Tempo de consolidação aumenta com o número de produtores
 3. **Picos de Renovação**: Múltiplas assinaturas renovando simultaneamente
+4. **Concorrência de Estoque**: Múltiplos pedidos competindo pelo mesmo produto
 
 #### **Otimizações Implementadas**
 1. **Cache de Produtos**: Reduz latência na navegação
 2. **Processamento Paralelo**: Produtores trabalham independentemente
 3. **Notificações Assíncronas**: Não bloqueia o fluxo principal
 4. **Consolidação Automática**: Recálculo instantâneo de status
+5. **Gestão Inteligente de Estoque**: Decremento apenas na aprovação evita reservas desnecessárias
+6. **Controle de Re-aprovação**: Sistema rastreia status anterior para evitar operações duplicadas
 
 #### **Monitoramento Recomendado**
 1. **Tempo de Resposta**: APIs críticas < 2s
 2. **Taxa de Aprovação**: % de itens aprovados vs rejeitados
 3. **Tempo de Processamento**: Média de tempo dos produtores
 4. **Renovações Automáticas**: Sucesso das renovações programadas
+5. **Precisão do Estoque**: Consistência entre estoque real e sistema
+6. **Integridade Financeira**: Consistência entre aprovações e créditos na carteira
 
 ---
 
