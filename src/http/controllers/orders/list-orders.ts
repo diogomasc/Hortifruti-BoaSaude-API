@@ -1,7 +1,7 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { ListOrdersUseCase } from "../../../use-cases/list-orders";
 import { DrizzleOrdersRepository } from "../../../repositories/drizzle-orders-repository";
-import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
+import { getAuthenticatedUserFromRequest, verifyJWT } from "../../middlewares/get-authenticated-user-from-request";
 import {
   listOrdersQuerySchema,
   listOrdersResponseSchema,
@@ -9,6 +9,7 @@ import {
 import { OrderStatus } from "../../../constants";
 
 export const listOrdersRoute: FastifyPluginAsyncZod = async function (server) {
+  server.addHook("onRequest", verifyJWT);
   server.get(
     "/",
     {

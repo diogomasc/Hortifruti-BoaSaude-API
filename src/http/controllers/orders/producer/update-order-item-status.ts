@@ -11,7 +11,7 @@ import { ORDER_ITEM_STATUS } from "../../../../constants";
 export const updateOrderItemStatusRoute: FastifyPluginAsyncZod =
   async function (app) {
     app.put(
-      "/:orderId/items/:itemId/status/",
+      "/:orderId/items/:itemId/status",
       {
         schema: {
           tags: ["Orders - Only Producer"],

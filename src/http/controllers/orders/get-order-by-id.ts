@@ -4,14 +4,15 @@ import { GetOrderUseCase } from "../../../use-cases/get-order";
 import { DrizzleOrdersRepository } from "../../../repositories/drizzle-orders-repository";
 import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
 import { NotAllowedError } from "../../../use-cases/errors/not-allowed-error";
-import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
+import { getAuthenticatedUserFromRequest, verifyJWT } from "../../middlewares/get-authenticated-user-from-request";
 import { uuidParamsSchema, errorResponseSchema } from "../../schemas/common";
 
 export const getOrderByIdRoute: FastifyPluginAsyncZod = async function (
   server
 ) {
+  server.addHook("onRequest", verifyJWT);
   server.get(
-    "/:orderId/",
+    "/:orderId",
     {
       schema: {
         tags: ["Orders"],
