@@ -1,0 +1,4 @@
+ALTER TABLE "public"."products" ALTER COLUMN "category" SET DATA TYPE text;--> statement-breakpoint
+DROP TYPE "public"."product_categories";--> statement-breakpoint
+CREATE TYPE "public"."product_categories" AS ENUM('Frutas', 'Verduras', 'Legumes', 'Folhosos', 'Raízes', 'Tubérculos', 'Vegetais', 'Sementes e Grãos', 'Oleaginosas', 'Cereais', 'Ervas e Temperos', 'Cogumelos e Fungos', 'Brotos', 'Frutas Secas e Desidratadas', 'Exóticos / Tropicais', 'Orgânicos', 'Outros');--> statement-breakpoint
+ALTER TABLE "public"."products" ALTER COLUMN "category" SET DATA TYPE "public"."product_categories" USING "category"::"public"."product_categories";

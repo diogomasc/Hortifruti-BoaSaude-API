@@ -13,6 +13,10 @@ import { appRoutes } from "./http/routes";
 import { env } from "./env";
 import { join } from "path";
 import { globalErrorHandler } from "./http/middlewares/global-error-handler";
+import { ORDER_STATUS_ARRAY, ORDER_ITEM_STATUS_ARRAY, ORDER_ACTIONS_ARRAY } from "./constants/order-status";
+import { USER_ROLES_ARRAY } from "./constants/user-roles";
+import { PRODUCT_CATEGORIES_ARRAY } from "./constants/product-categories";
+import { FREQUENCY_ARRAY } from "./constants/frequency";
 
 export function buildApp() {
   const app = Fastify({
@@ -53,6 +57,39 @@ export function buildApp() {
             bearerFormat: "JWT",
           },
         },
+        schemas: {
+          // Enums para melhor documentação
+          OrderStatus: {
+            type: "string",
+            enum: ORDER_STATUS_ARRAY,
+            description: "Status possíveis para um pedido. PENDING: Aguardando aprovação dos produtores. COMPLETED: Todos os itens foram aprovados e o pedido está completo. REJECTED: Pedido foi rejeitado. PARTIALLY_COMPLETED: Alguns itens foram aprovados, outros rejeitados. PAUSED: Pedido pausado pelo consumidor. CANCELLED: Pedido cancelado."
+          },
+          OrderItemStatus: {
+            type: "string", 
+            enum: ORDER_ITEM_STATUS_ARRAY,
+            description: "Status possíveis para um item do pedido. PENDING: Aguardando aprovação do produtor. APPROVED: Item aprovado pelo produtor. REJECTED: Item rejeitado pelo produtor."
+          },
+          Frequency: {
+            type: "string",
+            enum: FREQUENCY_ARRAY,
+            description: "Frequências disponíveis para pedidos recorrentes. WEEKLY: Semanal. BIWEEKLY: Quinzenal. MONTHLY: Mensal. QUARTERLY: Trimestral. CUSTOM: Personalizada."
+          },
+          OrderAction: {
+            type: "string",
+            enum: ORDER_ACTIONS_ARRAY,
+            description: "Ações disponíveis para gerenciar um pedido. pause: Pausar pedido (apenas consumidor). resume: Retomar pedido pausado (apenas consumidor). cancel: Cancelar pedido (apenas consumidor)."
+          },
+          UserRole: {
+            type: "string",
+            enum: USER_ROLES_ARRAY,
+            description: "Papéis de usuário no sistema. consumer: Consumidor que faz pedidos. producer: Produtor que fornece produtos. admin: Administrador do sistema."
+          },
+          ProductCategory: {
+            type: "string",
+            enum: PRODUCT_CATEGORIES_ARRAY,
+            description: "Categorias de produtos disponíveis no sistema, organizadas por tipo de alimento."
+          }
+        }
       },
     },
     transform: jsonSchemaTransform,

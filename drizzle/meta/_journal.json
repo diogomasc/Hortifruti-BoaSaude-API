@@ -8,6 +8,13 @@
       "when": 1758778806332,
       "tag": "0000_left_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1758828500309,
+      "tag": "0001_wooden_korg",
+      "breakpoints": true
     }
   ]
 }
