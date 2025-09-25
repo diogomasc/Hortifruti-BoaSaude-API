@@ -10,7 +10,7 @@ import {
 
 export const deleteAddressRoute: FastifyPluginAsyncZod = async (server) => {
   server.delete(
-    "/:id",
+    "/:id/",
     {
       schema: {
         tags: ["Addresses"],

@@ -9,7 +9,7 @@ import {
 
 export const updateProductRoute: FastifyPluginAsyncZod = async (server) => {
   server.put(
-    "/products/:id",
+    "/products/:id/",
     {
       schema: {
         tags: ["Products"],

@@ -16,7 +16,7 @@ export const consumerOrdersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook("onRequest", verifyJWT);
 
   // POST /orders → Cria um novo pedido vinculado ao usuário autenticado
-  app.register(createOrderRoute, { prefix: "/" });
+  app.register(createOrderRoute);
 
   // PATCH /orders/{orderId}/manage → Gerencia pedido (pausar, retomar, cancelar)
   app.register(manageOrderRoute);

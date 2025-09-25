@@ -6,7 +6,7 @@ import { getUserProfileResponseSchema } from "../../schemas/users";
 
 export const getUserProfileRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
-    "/me",
+    "/me/",
     {
       schema: {
         tags: ["Users"],

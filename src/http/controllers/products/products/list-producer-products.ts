@@ -13,7 +13,7 @@ export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
   server
 ) => {
   server.get(
-    "/products/me",
+    "/products/me/",
     {
       schema: {
         tags: ["Products"],

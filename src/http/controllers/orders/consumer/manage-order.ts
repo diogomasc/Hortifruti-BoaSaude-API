@@ -11,7 +11,7 @@ import { ORDER_ACTIONS, FREQUENCY } from "../../../../constants";
 
 export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
   app.patch(
-    "/:orderId/manage",
+    "/:orderId/manage/",
     {
       schema: {
         tags: ["Orders - Only Consumer"],
@@ -37,9 +37,16 @@ export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
       await manageOrderUseCase.execute({
         orderId,
         consumerId,
-        action: action as typeof ORDER_ACTIONS.PAUSE | typeof ORDER_ACTIONS.RESUME | typeof ORDER_ACTIONS.CANCEL,
+        action: action as
+          | typeof ORDER_ACTIONS.PAUSE
+          | typeof ORDER_ACTIONS.RESUME
+          | typeof ORDER_ACTIONS.CANCEL,
         isRecurring,
-        frequency: frequency as typeof FREQUENCY.WEEKLY | typeof FREQUENCY.BIWEEKLY | typeof FREQUENCY.MONTHLY | typeof FREQUENCY.QUARTERLY,
+        frequency: frequency as
+          | typeof FREQUENCY.WEEKLY
+          | typeof FREQUENCY.BIWEEKLY
+          | typeof FREQUENCY.MONTHLY
+          | typeof FREQUENCY.QUARTERLY,
         customDays,
       });
 

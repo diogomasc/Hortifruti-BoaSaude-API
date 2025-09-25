@@ -7,7 +7,7 @@ import { errorResponseSchema } from "../../schemas/common";
 
 export const deleteUserRoute: FastifyPluginAsyncZod = async function (server) {
   server.delete(
-    "/me",
+    "/me/",
     {
       schema: {
         tags: ["Users"],

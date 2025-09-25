@@ -7,7 +7,7 @@ import { getProductByIdResponseSchema } from "../../../schemas/products";
 
 export const getProductByIdRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
-    "/products/:id",
+    "/products/:id/",
     {
       schema: {
         tags: ["Products Public"],

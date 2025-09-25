@@ -18,7 +18,7 @@ export const addProductImageRoute: FastifyPluginAsyncZod = async (server) => {
   });
 
   server.post(
-    "/products/:id/images",
+    "/products/:id/images/",
     {
       schema: {
         tags: ["Product Images"],

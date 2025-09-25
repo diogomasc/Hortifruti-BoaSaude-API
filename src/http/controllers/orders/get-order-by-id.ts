@@ -11,7 +11,7 @@ export const getOrderByIdRoute: FastifyPluginAsyncZod = async function (
   server
 ) {
   server.get(
-    "/:orderId",
+    "/:orderId/",
     {
       schema: {
         tags: ["Orders"],

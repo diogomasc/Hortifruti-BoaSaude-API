@@ -8,7 +8,7 @@ import {
 
 export const createProductRoute: FastifyPluginAsyncZod = async (server) => {
   server.post(
-    "/products",
+    "/products/",
     {
       schema: {
         tags: ["Products"],

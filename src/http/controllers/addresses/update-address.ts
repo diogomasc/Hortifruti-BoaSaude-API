@@ -11,7 +11,7 @@ import {
 
 export const updateAddressRoute: FastifyPluginAsyncZod = async (server) => {
   server.put(
-    "/:id",
+    "/:id/",
     {
       schema: {
         tags: ["Addresses"],

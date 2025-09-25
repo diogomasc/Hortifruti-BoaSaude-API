@@ -6,7 +6,7 @@ import { deleteProductResponseSchema } from "../../../schemas/products";
 
 export const deleteProductRoute: FastifyPluginAsyncZod = async (server) => {
   server.delete(
-    "/products/:id",
+    "/products/:id/",
     {
       schema: {
         tags: ["Products"],

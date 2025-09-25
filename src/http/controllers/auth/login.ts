@@ -10,7 +10,7 @@ const loginBodySchema = z.object({
 
 export const loginRoute: FastifyPluginAsyncZod = async (server) => {
   server.post(
-    "/login",
+    "/login/",
     {
       schema: {
         tags: ["Authentication"],

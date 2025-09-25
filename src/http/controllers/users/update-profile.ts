@@ -10,7 +10,7 @@ import {
 
 export const updateUserProfileRoute: FastifyPluginAsyncZod = async (server) => {
   server.put(
-    "/me",
+    "/me/",
     {
       schema: {
         tags: ["Users"],

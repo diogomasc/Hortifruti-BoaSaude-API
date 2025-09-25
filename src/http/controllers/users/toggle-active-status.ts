@@ -8,7 +8,7 @@ import { errorResponseSchema } from "../../schemas/common";
 export const toggleUserActiveStatusRoute: FastifyPluginAsyncZod =
   async function (server) {
     server.patch(
-      "/me/active",
+      "/me/active/",
       {
         schema: {
           tags: ["Users"],

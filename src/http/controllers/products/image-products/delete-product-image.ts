@@ -11,7 +11,7 @@ export const deleteProductImageRoute: FastifyPluginAsyncZod = async (
   server
 ) => {
   server.delete(
-    "/products/:id/images/:imageId",
+    "/products/:id/images/:imageId/",
     {
       schema: {
         tags: ["Product Images"],

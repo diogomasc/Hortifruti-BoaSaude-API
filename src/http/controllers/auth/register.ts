@@ -75,7 +75,7 @@ const registerBodySchema = z
 
 export const registerRoute: FastifyPluginAsyncZod = async (server) => {
   server.post(
-    "/register",
+    "/register/",
     {
       schema: {
         tags: ["Authentication"],

@@ -10,7 +10,7 @@ import { ProductCategory } from "../../../../constants/product-categories";
 
 export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
-    "/products",
+    "/products/",
     {
       schema: {
         tags: ["Products Public"],

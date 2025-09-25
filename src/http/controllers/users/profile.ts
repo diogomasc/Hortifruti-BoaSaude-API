@@ -8,7 +8,7 @@ import { errorResponseSchema } from "../../schemas/common";
 
 export const profileRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
-    "/profile",
+    "/profile/",
     {
       preHandler: [verifyJWT],
       schema: {

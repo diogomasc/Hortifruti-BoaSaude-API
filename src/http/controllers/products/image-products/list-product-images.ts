@@ -9,7 +9,7 @@ import {
 
 export const listProductImagesRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
-    "/products/:id/images",
+    "/products/:id/images/",
     {
       schema: {
         tags: ["Product Images"],
