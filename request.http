@@ -1,142 +1,236 @@
-### Variáveis
+### ========================================
+### VARIÁVEIS DE DEMONSTRAÇÃO
+### ========================================
+
 @baseUrl = http://localhost:3333
-@consumerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YmVmNGE0ZC1iMzgzLTQ4MTEtYTY1My03NmMxMzkzNjczNmUiLCJyb2xlIjoiY29uc3VtZXIiLCJpYXQiOjE3NTg3NTA5NjMsImV4cCI6MTc1OTM1NTc2M30.pmB_sT8-TT4XTY5J2qYVNWxjhpjwM_fm_TGWu5qs9Xw
-@producerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzOGVjNDIwZC02ZmI0LTQyM2ItOWVjMy1kMDBmMmNkNzMxN2IiLCJyb2xlIjoicHJvZHVjZXIiLCJpYXQiOjE3NTg3NTA5OTksImV4cCI6MTc1OTM1NTc5OX0.8wYfHUtgeOSjYwgKe0pu-lB8ykiNTreG-BxYRGdNRs4
-@addressId = 84991f5e-b5e9-4393-bdd5-c4382b452f49
-@product1Id = f8268374-d547-4a68-a4f9-a3a813a349d9
-@product2Id = 720f5f06-f065-417c-a3a5-04dd076b9fbc
-@orderId = 8e55b8e3-2985-48ba-9a87-f1c69ae4b603
-@orderItemId = 7a0beee4-9356-405c-8775-837c33c892be
+
+# Tokens de autenticação (serão atualizados após login)
+@consumerToken = 
+@producer1Token = 
+@producer2Token = 
+
+# IDs que serão preenchidos durante a demonstração
+@addressId = 
+@product1Id = 
+@product2Id = 
+@product3Id = 
+@product4Id = 
+@orderId = 
+@orderItemId = 
 
 ### ========================================
-### FLUXO COMPLETO: PEDIDOS E PEDIDOS RECORRENTES
+### DEMONSTRAÇÃO COMPLETA DA API HORTIFRUTI BOA SAÚDE
+### Cenário: 1 Consumidor + 2 Produtores + Produtos Variados
 ### ========================================
 
-### 1. PREPARAÇÃO - Criar Usuários
+### ========================================
+### ETAPA 1: CRIAÇÃO DE USUÁRIOS
+### ========================================
 
 ### 1.1 Criar Consumidor
 POST {{baseUrl}}/register
 Content-Type: application/json
 
 {
-  "email": "dmasc@example.com",
-  "password": "123456",
-  "firstName": "Diogo",
-  "lastName": "Mascarenhas",
-  "phone": "58551648535",
+  "email": "maria.silva@email.com",
+  "password": "senha123",
+  "firstName": "Maria",
+  "lastName": "Silva",
+  "phone": "11987654321",
   "role": "consumer",
-  "cpf": "64231221067",
-  "birthDate": "2000-01-01"
+  "cpf": "12345678901",
+  "birthDate": "1985-03-15"
 }
 
 ###
 
-### 1.2 Criar Produtor
+### 1.2 Criar Produtor 1 - Fazenda Verde
 POST {{baseUrl}}/register
 Content-Type: application/json
 
 {
-  "email": "acalento@example.com",
-  "password": "123456",
-  "firstName": "Ednalva",
-  "lastName": "Mascarenhas",
-  "phone": "58551648535",
+  "email": "contato@fazendaverde.com",
+  "password": "senha123",
+  "firstName": "João",
+  "lastName": "Santos",
+  "phone": "11987654322",
   "role": "producer",
-  "cnpj": "71058599455362",
-  "shopName": "Acalento Store",
-  "shopDescription": "Produtos frescos e orgânicos"
+  "cnpj": "12345678000195",
+  "shopName": "Fazenda Verde",
+  "shopDescription": "Especializada em verduras e legumes orgânicos frescos"
 }
 
 ###
 
-### 2. AUTENTICAÇÃO - Fazer Login
+### 1.3 Criar Produtor 2 - Pomar do Vale
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "email": "vendas@pomardovale.com",
+  "password": "senha123",
+  "firstName": "Ana",
+  "lastName": "Costa",
+  "phone": "11987654323",
+  "role": "producer",
+  "cnpj": "98765432000187",
+  "shopName": "Pomar do Vale",
+  "shopDescription": "Frutas frescas e temperos naturais direto do campo"
+}
+
+###
+
+### ========================================
+### ETAPA 2: AUTENTICAÇÃO
+### ========================================
 
 ### 2.1 Login do Consumidor
 POST {{baseUrl}}/login
 Content-Type: application/json
 
 {
-  "email": "dmasc@example.com",
-  "password": "123456"
+  "email": "maria.silva@email.com",
+  "password": "senha123"
 }
 
-# Copie o token retornado e cole na variável @consumerToken
+# 📋 COPIE o token retornado e cole na variável @consumerToken
 
 ###
 
-### 2.2 Login do Produtor
+### 2.2 Login do Produtor 1 (Fazenda Verde)
 POST {{baseUrl}}/login
 Content-Type: application/json
 
 {
-  "email": "acalento@example.com",
-  "password": "123456"
+  "email": "contato@fazendaverde.com",
+  "password": "senha123"
 }
 
-# Copie o token retornado e cole na variável @producerToken
+# 📋 COPIE o token retornado e cole na variável @producer1Token
 
 ###
 
-### 3. CONFIGURAÇÃO - Criar Endereço e Produtos
+### 2.3 Login do Produtor 2 (Pomar do Vale)
+POST {{baseUrl}}/login
+Content-Type: application/json
 
-### 3.1 Criar Endereço de Entrega (como Consumidor)
-POST {{baseUrl}}/users/me/addresses/
+{
+  "email": "vendas@pomardovale.com",
+  "password": "senha123"
+}
+
+# 📋 COPIE o token retornado e cole na variável @producer2Token
+
+###
+
+### ========================================
+### ETAPA 3: CONFIGURAÇÃO INICIAL
+### ========================================
+
+### 3.1 Criar Endereço de Entrega (Consumidor)
+POST {{baseUrl}}/users/me/addresses
 Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
 
 {
-  "street": "Rua das Flores, 123",
-  "number": "123",
-  "complement": "Apto 45",
+  "street": "Rua das Palmeiras, 456",
+  "number": "456",
+  "complement": "Casa 2",
   "city": "São Paulo",
   "state": "SP",
   "country": "Brasil",
   "zipCode": "01234567"
 }
 
-# Copie o id retornado e cole na variável @addressId
+# 📋 COPIE o id retornado e cole na variável @addressId
 
 ###
 
-### 3.2 Criar Produto 1 (como Produtor)
+### ========================================
+### ETAPA 4: CADASTRO DE PRODUTOS
+### ========================================
+
+### 4.1 Produto 1 - Fazenda Verde: Alface Orgânica
 POST {{baseUrl}}/products
-Authorization: Bearer {{producerToken}}
+Authorization: Bearer {{producer1Token}}
 Content-Type: application/json
 
 {
-  "title": "Tomate Orgânico - Acelento",
-  "description": "Tomates frescos e orgânicos",
-  "price": "8.50",
+  "title": "Alface Orgânica Crespa",
+  "description": "Alface fresca cultivada sem agrotóxicos, ideal para saladas",
+  "price": "4.50",
+  "category": "verduras",
+  "quantity": 80
+}
+
+# 📋 COPIE o id retornado e cole na variável @product1Id
+
+###
+
+### 4.2 Produto 2 - Fazenda Verde: Cenoura Baby
+POST {{baseUrl}}/products
+Authorization: Bearer {{producer1Token}}
+Content-Type: application/json
+
+{
+  "title": "Cenoura Baby Orgânica",
+  "description": "Cenouras pequenas e doces, perfeitas para lanches saudáveis",
+  "price": "6.80",
+  "category": "legumes",
+  "quantity": 60
+}
+
+# 📋 COPIE o id retornado e cole na variável @product2Id
+
+###
+
+### 4.3 Produto 3 - Pomar do Vale: Maçã Gala
+POST {{baseUrl}}/products
+Authorization: Bearer {{producer2Token}}
+Content-Type: application/json
+
+{
+  "title": "Maçã Gala Premium",
+  "description": "Maçãs doces e crocantes, colhidas no ponto ideal de maturação",
+  "price": "8.90",
   "category": "frutas",
   "quantity": 100
 }
 
-# Copie o id retornado e cole na variável @product1Id
+# 📋 COPIE o id retornado e cole na variável @product3Id
 
 ###
 
-### 3.3 Criar Produto 2 (como Produtor)
+### 4.4 Produto 4 - Pomar do Vale: Manjericão Fresco
 POST {{baseUrl}}/products
-Authorization: Bearer {{producerToken}}
+Authorization: Bearer {{producer2Token}}
 Content-Type: application/json
 
 {
-  "title": "Alface Crespa - Acelento",
-  "description": "Alface fresca e crocante",
+  "title": "Manjericão Fresco",
+  "description": "Manjericão aromático cultivado em estufa, ideal para temperos",
   "price": "3.20",
-  "category": "verduras",
-  "quantity": 50
+  "category": "temperos",
+  "quantity": 40
 }
 
-# Copie o id retornado e cole na variável @product2Id
+# 📋 COPIE o id retornado e cole na variável @product4Id
 
 ###
 
 ### ========================================
-### FLUXO PRINCIPAL: PEDIDOS ÚNICOS E RECORRENTES
+### ETAPA 5: DEMONSTRAÇÃO DE PEDIDOS
 ### ========================================
 
-### 4. PASSO 1: Criar Pedido Único (como Consumidor)
+### 5.1 Listar Produtos Disponíveis (Público)
+GET {{baseUrl}}/products
+Content-Type: application/json
+
+# 👀 Visualize todos os produtos cadastrados pelos produtores
+
+###
+
+### 5.2 Criar Pedido Único Misto (Consumidor)
 POST {{baseUrl}}/orders
 Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
@@ -149,38 +243,22 @@ Content-Type: application/json
       "quantity": 2
     },
     {
-      "productId": "{{product2Id}}",
+      "productId": "{{product3Id}}",
       "quantity": 3
+    },
+    {
+      "productId": "{{product4Id}}",
+      "quantity": 1
     }
   ]
 }
 
-###
-
-### 4.1 PASSO 1: Criar Pedido Recorrente Semanal (como Consumidor)
-POST {{baseUrl}}/orders
-Authorization: Bearer {{consumerToken}}
-Content-Type: application/json
-
-{
-  "deliveryAddressId": "{{addressId}}",
-  "items": [
-    {
-      "productId": "{{product1Id}}",
-      "quantity": 2
-    },
-    {
-      "productId": "{{product2Id}}",
-      "quantity": 3
-    }
-  ],
-  "isRecurring": true,
-  "frequency": "WEEKLY"
-}
+# 📋 COPIE o orderId retornado e cole na variável @orderId
+# 📋 COPIE um dos orderItemIds retornados e cole na variável @orderItemId
 
 ###
 
-### 4.2 PASSO 1: Criar Pedido Recorrente Personalizado (como Consumidor)
+### 5.3 Criar Pedido Recorrente Semanal (Consumidor)
 POST {{baseUrl}}/orders
 Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
@@ -191,90 +269,84 @@ Content-Type: application/json
     {
       "productId": "{{product1Id}}",
       "quantity": 1
+    },
+    {
+      "productId": "{{product2Id}}",
+      "quantity": 2
     }
   ],
   "isRecurring": true,
-  "frequency": "CUSTOM",
-  "customDays": 10
+  "frequency": "WEEKLY"
 }
 
-# Copie o orderId retornado e cole na variável @orderId
-# Copie um dos orderItemIds retornados e cole na variável @orderItemId
-
 ###
 
-### 5. PASSO 2: Listar Itens Pendentes (como Produtor)
+### ========================================
+### ETAPA 6: GESTÃO DE PEDIDOS PELOS PRODUTORES
+### ========================================
+
+### 6.1 Listar Itens Pendentes - Produtor 1 (Fazenda Verde)
 GET {{baseUrl}}/orders/items/pending
-Authorization: Bearer {{producerToken}}
+Authorization: Bearer {{producer1Token}}
 Content-Type: application/json
 
-# Aqui você verá os itens do pedido criado aguardando aprovação
-# Anote os IDs dos itens que deseja aprovar
+# 👀 Visualize os itens de verduras/legumes aguardando aprovação
 
 ###
 
-### 6. PASSO 3: Aprovar Item do Pedido (como Produtor)
+### 6.2 Listar Itens Pendentes - Produtor 2 (Pomar do Vale)
+GET {{baseUrl}}/orders/items/pending
+Authorization: Bearer {{producer2Token}}
+Content-Type: application/json
+
+# 👀 Visualize os itens de frutas/temperos aguardando aprovação
+
+###
+
+### 6.3 Aprovar Item do Pedido - Produtor 1
 PATCH {{baseUrl}}/orders/{{orderId}}/items/{{orderItemId}}/status
-Authorization: Bearer {{producerToken}}
+Authorization: Bearer {{producer1Token}}
 Content-Type: application/json
 
 {
   "status": "APPROVED"
 }
 
-# Status possíveis: "approved", "rejected"
-# Para rejeitar, use: {"status": "rejected", "rejectionReason": "Produto em falta"}
-
 ###
 
-### 6.1 Aprovar Segundo Item (se houver)
-# Repita o processo acima para outros itens do pedido
-# PATCH {{baseUrl}}/orders/{{orderId}}/items/{{orderItemId2}}/status
-# Authorization: Bearer {{producerToken}}
+### 6.4 Exemplo de Rejeição - Produtor 2
+# PATCH {{baseUrl}}/orders/{{orderId}}/items/{{orderItemId}}/status
+# Authorization: Bearer {{producer2Token}}
 # Content-Type: application/json
 # 
 # {
-#   "status": "approved"
+#   "status": "REJECTED",
+#   "rejectionReason": "Produto temporariamente em falta"
 # }
 
 ###
 
-### 7. PASSO 4: Verificar Pedido Recorrente Criado (como Consumidor)
+### ========================================
+### ETAPA 7: VERIFICAÇÕES E GESTÃO
+### ========================================
+
+### 7.1 Verificar Status do Pedido (Consumidor)
 GET {{baseUrl}}/orders/{{orderId}}
 Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
 
-# Para pedidos recorrentes, você verá os campos:
-# - isRecurring: true
-# - frequency: "WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", ou "CUSTOM"
-# - customDays: número de dias (apenas para frequency "CUSTOM")
-# - nextDeliveryDate: data da próxima entrega
-# - pausedAt: null (se não estiver pausado)
-# - cancelledAt: null (se não estiver cancelado)
+# 👀 Veja o status atualizado após aprovações/rejeições
 
 ###
 
-### ========================================
-### VERIFICAÇÕES ADICIONAIS
-### ========================================
-
-### 8. Verificar Status do Pedido
-GET {{baseUrl}}/orders/{{orderId}}
-Authorization: Bearer {{consumerToken}}
-Content-Type: application/json
-
-# O pedido deve estar com status "completed" quando todos os itens forem aprovados
-
-###
-
-### 9. Listar Todos os Pedidos (como Consumidor)
+### 7.2 Listar Todos os Pedidos (Consumidor)
 GET {{baseUrl}}/orders
 Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
 
 ###
 
-### 10. Gerenciar Pedido Recorrente (Pausar/Retomar/Cancelar)
+### 7.3 Gerenciar Pedido Recorrente - Pausar
 PATCH {{baseUrl}}/orders/{{orderId}}/manage
 Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
@@ -283,42 +355,9 @@ Content-Type: application/json
   "action": "pause"
 }
 
-# Ações disponíveis: "pause", "resume", "cancel" (opcional)
-# Para alterar apenas a recorrência, forneça "frequency" e/ou "customDays" sem especificar ação
-# Para desativar recorrência, use "isRecurring": false
-
-### Alterar apenas frequência (sem ação)
-PATCH {{baseUrl}}/orders/{{orderId}}/manage
-Authorization: Bearer {{consumerToken}}
-Content-Type: application/json
-
-{
-  "frequency": "CUSTOM",
-  "customDays": 7
-}
-
-### Desativar recorrência
-PATCH {{baseUrl}}/orders/{{orderId}}/manage
-Authorization: Bearer {{consumerToken}}
-Content-Type: application/json
-
-{
-  "isRecurring": false
-}
-
-### Pausar pedido e alterar frequência
-PATCH {{baseUrl}}/orders/{{orderId}}/manage
-Authorization: Bearer {{consumerToken}}
-Content-Type: application/json
-
-{
-  "action": "pause",
-  "frequency": "WEEKLY"
-}
-
 ###
 
-### 10.1 Atualizar Recorrência de Pedido
+### 7.4 Gerenciar Pedido Recorrente - Alterar Frequência
 PATCH {{baseUrl}}/orders/{{orderId}}/manage
 Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
@@ -328,27 +367,9 @@ Content-Type: application/json
   "customDays": 10
 }
 
-# Você pode atualizar a recorrência junto com outras ações
-# Frequências disponíveis: "WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"
-
 ###
 
-### 10.2 Definir Recorrência Personalizada
-PATCH {{baseUrl}}/orders/{{orderId}}/manage
-Authorization: Bearer {{consumerToken}}
-Content-Type: application/json
-
-{
-  "isRecurring": false,
-  "frequency": "CUSTOM",
-  "customDays": 15
-}
-
-# Para frequency "CUSTOM", o campo customDays é obrigatório
-
-###
-
-### 10.3 NOVA FUNCIONALIDADE: Atualizar Recorrência Junto com Ação
+### 7.5 Gerenciar Pedido Recorrente - Retomar
 PATCH {{baseUrl}}/orders/{{orderId}}/manage
 Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
@@ -357,104 +378,81 @@ Content-Type: application/json
   "action": "resume"
 }
 
-# Agora você pode alterar a frequência junto com qualquer ação (pause, resume, cancel)
-# Não precisa mais da ação 'update_recurrence'
-
-###
-
-### 10.4 Pausar e Atualizar Para Recorrência Personalizada
-PATCH {{baseUrl}}/orders/{{orderId}}/manage
-Authorization: Bearer {{consumerToken}}
-Content-Type: application/json
-
-{
-  "frequency": "CUSTOM",
-  "customDays": 7
-}
-
-# Pausa o pedido e altera para frequência personalizada de 7 dias
-
-###
-
-### 10.5 Cancelar e Desabilitar Recorrência
-PATCH {{baseUrl}}/orders/{{orderId}}/manage
-Authorization: Bearer {{consumerToken}}
-Content-Type: application/json
-
-{
-  "action": "cancel",
-  "isRecurring": false
-}
-
-# Cancela o pedido e desabilita a recorrência
-
 ###
 
 ### ========================================
-### FLUXO DE PRODUTOS (COMPLEMENTAR)
+### ETAPA 8: GESTÃO DE PRODUTOS PELOS PRODUTORES
 ### ========================================
 
-### 11. Listar produtos (público - sem autenticação)
-GET {{baseUrl}}/products
-Content-Type: application/json
-
-###
-
-### 12. Obter produto por ID (público - sem autenticação)
-GET {{baseUrl}}/products/{{product1Id}}
-Content-Type: application/json
-
-###
-
-### 13. Listar produtos do produtor (requer autenticação + role producer)
+### 8.1 Listar Produtos - Fazenda Verde
 GET {{baseUrl}}/products/me
+Authorization: Bearer {{producer1Token}}
 Content-Type: application/json
-Authorization: Bearer {{producerToken}}
 
 ###
 
-### 14. Atualizar produto (requer autenticação + role producer)
-PUT {{baseUrl}}/products/{{product1Id}}
+### 8.2 Listar Produtos - Pomar do Vale
+GET {{baseUrl}}/products/me
+Authorization: Bearer {{producer2Token}}
 Content-Type: application/json
-Authorization: Bearer {{producerToken}}
+
+###
+
+### 8.3 Atualizar Produto - Fazenda Verde
+PUT {{baseUrl}}/products/{{product1Id}}
+Authorization: Bearer {{producer1Token}}
+Content-Type: application/json
 
 {
-  "title": "Tomate Orgânico Premium",
-  "description": "Tomates frescos e orgânicos de alta qualidade",
-  "price": "9.50",
-  "category": "temperos",
-  "quantity": 80
+  "title": "Alface Orgânica Crespa Premium",
+  "description": "Alface fresca cultivada sem agrotóxicos, certificada orgânica",
+  "price": "5.00",
+  "category": "verduras",
+  "quantity": 75
 }
 
 ###
 
-### 15. Deletar produto (requer autenticação + role producer)
-DELETE {{baseUrl}}/products/{{product2Id}}
-Authorization: Bearer {{producerToken}}
+### 8.4 Obter Produto Específico (Público)
+GET {{baseUrl}}/products/{{product3Id}}
+Content-Type: application/json
 
 ###
 
 ### ========================================
-### INSTRUÇÕES DE USO
+### INSTRUÇÕES DE DEMONSTRAÇÃO
 ### ========================================
 
-# 1. Execute as requisições na ordem apresentada
-# 2. Sempre copie os IDs retornados e atualize as variáveis no topo
-# 3. Para testar o fluxo completo:
-#    - Crie usuários (consumidor e produtor)
-#    - Faça login e obtenha os tokens
-#    - Crie endereço e produtos
-#    - Crie um pedido (único ou recorrente) como consumidor
-#    - Liste itens pendentes como produtor
-#    - Aprove todos os itens como produtor
-#    - Para pedidos recorrentes, gerencie a recorrência (pausar/retomar/cancelar)
-# 4. Pedidos recorrentes:
-#    - Use isRecurring: true para criar pedidos recorrentes
-#    - Frequências: WEEKLY, BIWEEKLY, MONTHLY, QUARTERLY, CUSTOM
-#    - Para CUSTOM, especifique customDays (número de dias)
-#    - Gerencie via PATCH /orders/{orderId}/manage
-#    - NOVA: Forneça frequency e/ou customDays junto com qualquer ação para atualizar recorrência
-# 5. IMPORTANTE: Funcionalidade de assinaturas foi DEPRECIADA
-#    - Use pedidos recorrentes em vez de assinaturas separadas
-#    - Rotas /subscriptions ainda existem mas são deprecated
-# 6. Use a documentação em http://localhost:3333/docs para mais detalhes
+# 🎯 FLUXO COMPLETO DE DEMONSTRAÇÃO:
+# 
+# 1️⃣ PREPARAÇÃO (Etapas 1-4):
+#    - Crie 1 consumidor e 2 produtores com dados genéricos
+#    - Faça login de todos os usuários e copie os tokens
+#    - Crie endereço de entrega para o consumidor
+#    - Cadastre 2 produtos por produtor (total: 4 produtos variados)
+# 
+# 2️⃣ DEMONSTRAÇÃO PRINCIPAL (Etapas 5-6):
+#    - Liste produtos disponíveis
+#    - Crie pedidos únicos e recorrentes misturando produtos dos 2 produtores
+#    - Cada produtor gerencia apenas seus próprios produtos
+#    - Demonstre aprovações e rejeições
+# 
+# 3️⃣ GESTÃO AVANÇADA (Etapas 7-8):
+#    - Verifique status dos pedidos
+#    - Gerencie pedidos recorrentes (pausar/retomar/alterar)
+#    - Atualize produtos e visualize catálogo
+# 
+# 📋 LEMBRE-SE:
+#    - Sempre copie os IDs retornados para as variáveis
+#    - Execute as requisições na ordem apresentada
+#    - Use os tokens corretos para cada tipo de usuário
+#    - Produtores só veem/gerenciam seus próprios produtos
+# 
+# 🌐 DOCUMENTAÇÃO COMPLETA:
+#    - Acesse http://localhost:3333/docs para Swagger UI
+#    - Veja diagramas técnicos no README.md do projeto
+# 
+# 🎨 CENÁRIO DEMONSTRADO:
+#    - Fazenda Verde: Especialista em verduras e legumes orgânicos
+#    - Pomar do Vale: Especialista em frutas frescas e temperos
+#    - Maria Silva: Consumidora que compra de ambos os produtores
