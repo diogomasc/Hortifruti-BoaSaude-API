@@ -2,6 +2,10 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import { makeListProductImagesUseCase } from "../../../../use-cases/factories/make-list-product-images-use-case";
+import {
+  productParamsSchema,
+  listProductImagesResponseSchema,
+} from "../../../schemas/products";
 
 export const listProductImagesRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
@@ -12,35 +16,8 @@ export const listProductImagesRoute: FastifyPluginAsyncZod = async (server) => {
         summary: "Listar imagens do produto",
         description:
           "Lista todas as imagens de um produto específico do produtor autenticado.",
-        params: z.object({
-          id: z.string().uuid().describe("ID do produto"),
-        }),
-        response: {
-          200: z.object({
-            images: z.array(
-              z.object({
-                id: z.string().uuid(),
-                productId: z.string().uuid(),
-                imageUrl: z.string(),
-              })
-            ),
-          }),
-          401: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Token não fornecido ou inválido"),
-          403: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Produto não pertence ao usuário"),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Produto não encontrado"),
-        },
+        params: productParamsSchema,
+        response: listProductImagesResponseSchema,
       },
     },
     async (request, reply) => {

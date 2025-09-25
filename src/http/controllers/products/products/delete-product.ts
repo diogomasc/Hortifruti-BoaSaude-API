@@ -2,6 +2,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import { makeDeleteProductUseCase } from "../../../../use-cases/factories/make-delete-product-use-case";
+import { deleteProductResponseSchema } from "../../../schemas/products";
 
 export const deleteProductRoute: FastifyPluginAsyncZod = async (server) => {
   server.delete(
@@ -15,24 +16,7 @@ export const deleteProductRoute: FastifyPluginAsyncZod = async (server) => {
         params: z.object({
           id: z.string().uuid().describe("ID do produto"),
         }),
-        response: {
-          204: z.null().describe("Produto deletado com sucesso"),
-          401: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Token não fornecido ou inválido"),
-          403: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Produto não pertence ao usuário"),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Produto não encontrado"),
-        },
+        response: deleteProductResponseSchema,
       },
     },
     async (request, reply) => {

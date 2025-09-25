@@ -2,6 +2,10 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import { makeDeleteProductImageUseCase } from "../../../../use-cases/factories/make-delete-product-image-use-case";
+import {
+  productImageParamsSchema,
+  deleteProductImageResponseSchema,
+} from "../../../schemas/products";
 
 export const deleteProductImageRoute: FastifyPluginAsyncZod = async (
   server
@@ -14,28 +18,8 @@ export const deleteProductImageRoute: FastifyPluginAsyncZod = async (
         summary: "Deletar imagem do produto",
         description:
           "Deleta uma imagem específica de um produto do produtor autenticado. Esta ação é irreversível.",
-        params: z.object({
-          id: z.string().uuid().describe("ID do produto"),
-          imageId: z.string().uuid().describe("ID da imagem"),
-        }),
-        response: {
-          204: z.null().describe("Imagem deletada com sucesso"),
-          401: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Token não fornecido ou inválido"),
-          403: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Imagem não pertence ao usuário"),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Imagem não encontrada"),
-        },
+        params: productImageParamsSchema,
+        response: deleteProductImageResponseSchema,
       },
     },
     async (request, reply) => {

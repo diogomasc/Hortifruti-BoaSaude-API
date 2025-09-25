@@ -3,6 +3,7 @@ import { z } from "zod";
 import { makeToggleUserActiveStatusUseCase } from "../../../use-cases/factories/make-toggle-user-active-status-use-case";
 import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
 import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
+import { errorResponseSchema } from "../../schemas/common";
 
 export const toggleUserActiveStatusRoute: FastifyPluginAsyncZod =
   async function (server) {
@@ -30,21 +31,9 @@ export const toggleUserActiveStatusRoute: FastifyPluginAsyncZod =
                 createdAt: z.date(),
               }),
             }),
-            400: z
-              .object({
-                message: z.string(),
-              })
-              .describe("Dados inválidos"),
-            401: z
-              .object({
-                message: z.string(),
-              })
-              .describe("Token não fornecido ou inválido"),
-            404: z
-              .object({
-                message: z.string(),
-              })
-              .describe("Usuário não encontrado"),
+            400: errorResponseSchema.describe("Dados inválidos"),
+            401: errorResponseSchema.describe("Token não fornecido ou inválido"),
+            404: errorResponseSchema.describe("Usuário não encontrado"),
           },
         },
       },

@@ -5,6 +5,7 @@ import { DrizzleOrdersRepository } from "../../../repositories/drizzle-orders-re
 import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
 import { NotAllowedError } from "../../../use-cases/errors/not-allowed-error";
 import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
+import { uuidParamsSchema, errorResponseSchema } from "../../schemas/common";
 
 export const getOrderByIdRoute: FastifyPluginAsyncZod = async function (
   server
@@ -18,9 +19,9 @@ export const getOrderByIdRoute: FastifyPluginAsyncZod = async function (
         description:
           "Obtém os detalhes completos de um pedido específico pelo seu ID, incluindo informações de recorrência e detalhes dos itens. O usuário só pode acessar seus próprios pedidos.",
         security: [{ bearerAuth: [] }],
-        params: z.object({
-          orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
-        }),
+        params: uuidParamsSchema.extend({
+          orderId: uuidParamsSchema.shape.id.describe("ID do pedido deve ser um UUID válido"),
+        }).omit({ id: true }),
         response: {
           200: z
             .object({
@@ -96,28 +97,12 @@ export const getOrderByIdRoute: FastifyPluginAsyncZod = async function (
                 .optional(),
             })
             .describe("ID inválido ou erro de validação"),
-          401: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Token de autenticação inválido ou não fornecido"),
-          403: z
-            .object({
-              message: z.string(),
-            })
-            .describe(
+          401: errorResponseSchema.describe("Token de autenticação inválido ou não fornecido"),
+          403: errorResponseSchema.describe(
               "Acesso negado - usuário não autorizado a acessar este pedido"
             ),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Pedido não encontrado"),
-          500: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Erro interno do servidor"),
+          404: errorResponseSchema.describe("Pedido não encontrado"),
+          500: errorResponseSchema.describe("Erro interno do servidor"),
         },
       },
     },

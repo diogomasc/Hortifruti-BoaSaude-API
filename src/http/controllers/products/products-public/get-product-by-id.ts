@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "../../../../database/client";
 import { products, productImages } from "../../../../database/schema";
 import { eq } from "drizzle-orm";
+import { getProductByIdResponseSchema } from "../../../schemas/products";
 
 export const getProductByIdRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
@@ -16,31 +17,7 @@ export const getProductByIdRoute: FastifyPluginAsyncZod = async (server) => {
         params: z.object({
           id: z.string().uuid("ID deve ser um UUID válido"),
         }),
-        response: {
-          200: z.object({
-            product: z.object({
-              id: z.string().uuid(),
-              title: z.string(),
-              description: z.string(),
-              price: z.string(),
-              category: z.string(),
-              producerId: z.string().uuid(),
-              quantity: z.number(),
-              createdAt: z.date(),
-              images: z.array(
-                z.object({
-                  id: z.string().uuid(),
-                  productId: z.string().uuid(),
-                  imageUrl: z.string(),
-                })
-              ),
-            }),
-          }),
-          400: z.object({ message: z.string() }).describe("ID inválido"),
-          404: z
-            .object({ message: z.string() })
-            .describe("Produto não encontrado"),
-        },
+        response: getProductByIdResponseSchema,
       },
     },
     async (request, reply) => {

@@ -4,6 +4,7 @@ import { ResourceNotFoundError } from "../../use-cases/errors/resource-not-found
 import { makeGetUserProfileUseCase } from "../../use-cases/factories/make-get-user-profile-use-case";
 import { getAuthenticatedUserFromRequest } from "../middlewares/get-authenticated-user-from-request";
 import { verifyJWT } from "../middlewares/get-authenticated-user-from-request";
+import { errorResponseSchema } from "../schemas/common";
 
 export const profileController: FastifyPluginAsyncZod = async (server) => {
   server.get(
@@ -29,16 +30,8 @@ export const profileController: FastifyPluginAsyncZod = async (server) => {
               createdAt: z.date().describe("Data de criação da conta"),
             }),
           }),
-          401: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Token não fornecido ou inválido"),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Usuário não encontrado"),
+          401: errorResponseSchema.describe("Token não fornecido ou inválido"),
+          404: errorResponseSchema.describe("Usuário não encontrado"),
         },
       },
     },

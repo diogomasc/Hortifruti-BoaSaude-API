@@ -1,36 +1,11 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { z } from "zod";
 import { ManageOrderUseCase } from "../../../../use-cases/manage-order";
 import { DrizzleOrdersRepository } from "../../../../repositories/drizzle-orders-repository";
 import { ResourceNotFoundError } from "../../../../use-cases/errors/resource-not-found-error";
 import { NotAllowedError } from "../../../../use-cases/errors/not-allowed-error";
 import { InvalidStatusTransitionError } from "../../../../use-cases/errors/invalid-status-transition-error";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
-// Schema para validação de recorrência em atualizações
-const updateOrderRecurrenceSchema = z
-  .object({
-    isRecurring: z.boolean().optional(),
-    frequency: z
-      .enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"])
-      .optional(),
-    customDays: z
-      .number()
-      .int()
-      .positive("Dias personalizados deve ser um número positivo")
-      .optional(),
-  })
-  .refine(
-    (data) => {
-      // Se frequency for CUSTOM, customDays é obrigatório
-      if (data.frequency === "CUSTOM" && !data.customDays) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "Para frequency CUSTOM, customDays é obrigatório.",
-    }
-  );
+import { orderParamsSchema, manageOrderBodySchema, manageOrderResponseSchema } from "../../../schemas/orders";
 
 export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
   app.patch(
@@ -42,61 +17,9 @@ export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
         description:
           "Permite pausar, retomar, cancelar um pedido ou atualizar sua recorrência. Apenas consumidores podem gerenciar seus próprios pedidos.",
         security: [{ bearerAuth: [] }],
-        params: z.object({
-          orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
-        }),
-        body: z
-          .object({
-            action: z
-              .enum(["pause", "resume", "cancel"], {
-                message: "Ação deve ser pause, resume ou cancel",
-              })
-              .optional(),
-          })
-          .merge(updateOrderRecurrenceSchema),
-        response: {
-          200: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Pedido gerenciado com sucesso"),
-          400: z
-            .object({
-              message: z.string(),
-              errors: z
-                .array(
-                  z.object({
-                    code: z.string(),
-                    expected: z.string().optional(),
-                    received: z.string().optional(),
-                    path: z.array(z.union([z.string(), z.number()])),
-                    message: z.string(),
-                  })
-                )
-                .optional(),
-            })
-            .describe("Dados inválidos ou erro de validação"),
-          401: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Token de autenticação inválido ou não fornecido"),
-          403: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Acesso negado - usuário não autorizado"),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Pedido não encontrado"),
-          500: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Erro interno do servidor"),
-        },
+        params: orderParamsSchema,
+        body: manageOrderBodySchema,
+        response: manageOrderResponseSchema,
       },
     },
     async (request, reply) => {

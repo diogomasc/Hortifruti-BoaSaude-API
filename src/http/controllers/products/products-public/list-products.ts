@@ -1,8 +1,11 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { z } from "zod";
 import { db } from "../../../../database/client";
 import { products, productImages } from "../../../../database/schema";
 import { ilike, asc, desc, type SQL, and, eq } from "drizzle-orm";
+import {
+  listProductsQuerySchema,
+  listProductsResponseSchema,
+} from "../../../schemas/products";
 
 export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
@@ -13,68 +16,8 @@ export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
         summary: "Listar produtos públicos",
         description:
           "Lista todos os produtos disponíveis com paginação e filtros de busca. Esta rota é pública e não requer autenticação.",
-        querystring: z.object({
-          search: z.string().optional(),
-          category: z
-            .enum([
-              "frutas",
-              "legumes",
-              "verduras",
-              "ervas",
-              "graos",
-              "tuberculos",
-              "hortalicas",
-              "organicos",
-              "ovos",
-              "mel",
-              "cogumelos",
-              "temperos",
-              "sementes",
-              "castanhas",
-              "integrais",
-              "conservas",
-              "compotas",
-              "polpa_fruta",
-              "polpa_vegetal",
-              "sazonal",
-              "flores_comestiveis",
-              "vegano",
-              "kits",
-              "outros",
-            ])
-            .optional(),
-          producerId: z.string().uuid().optional(),
-          limit: z.coerce.number().int().min(1).max(100).default(12),
-          offset: z.coerce.number().int().min(0).default(0),
-          sortByPrice: z.enum(["desc", "asc"]).optional().default("desc"),
-        }),
-        response: {
-          200: z.object({
-            products: z.array(
-              z.object({
-                id: z.string().uuid(),
-                title: z.string(),
-                description: z.string(),
-                price: z.string(),
-                category: z.string(),
-                producerId: z.string().uuid(),
-                quantity: z.number(),
-                createdAt: z.date(),
-                images: z.array(
-                  z.object({
-                    id: z.string().uuid(),
-                    productId: z.string().uuid(),
-                    imageUrl: z.string(),
-                  })
-                ),
-              })
-            ),
-            total: z.number(),
-          }),
-          400: z
-            .object({ message: z.string() })
-            .describe("Parâmetros inválidos"),
-        },
+        querystring: listProductsQuerySchema,
+        response: listProductsResponseSchema,
       },
     },
     async (request, reply) => {

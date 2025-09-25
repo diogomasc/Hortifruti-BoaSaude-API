@@ -3,6 +3,7 @@ import { z } from "zod";
 import { makeDeleteUserUseCase } from "../../../use-cases/factories/make-delete-user-use-case";
 import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
 import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
+import { errorResponseSchema } from "../../schemas/common";
 
 export const deleteUserRoute: FastifyPluginAsyncZod = async function (server) {
   server.delete(
@@ -16,16 +17,8 @@ export const deleteUserRoute: FastifyPluginAsyncZod = async function (server) {
         security: [{ bearerAuth: [] }],
         response: {
           204: z.void().describe("Usuário deletado com sucesso"),
-          401: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Token não fornecido ou inválido"),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Usuário não encontrado"),
+          401: errorResponseSchema.describe("Token não fornecido ou inválido"),
+          404: errorResponseSchema.describe("Usuário não encontrado"),
         },
       },
     },

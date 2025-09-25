@@ -4,6 +4,7 @@ import { RegisterUseCase } from "../../use-cases/register";
 import { DrizzleUsersRepository } from "../../repositories/drizzle-users-repository";
 import { DrizzleWalletsRepository } from "../../repositories/drizzle-wallets-repository";
 import { UserAlreadyExistsError } from "../../use-cases/errors/user-already-exists-error";
+import { errorResponseSchema } from "../schemas/common";
 
 const registerBodySchema = z
   .object({
@@ -95,11 +96,7 @@ export const registerController: FastifyPluginAsyncZod = async (server) => {
               }),
             })
             .describe("Usuário criado com sucesso"),
-          400: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Informações inválidas"),
+          400: errorResponseSchema.describe("Informações inválidas"),
         },
       },
     },

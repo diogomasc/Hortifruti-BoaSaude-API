@@ -1,9 +1,11 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { z } from "zod";
-import { makeUpdateOrderItemStatusUseCase } from "../../../../use-cases/factories/make-update-order-item-status-use-case";
+import { UpdateOrderItemStatusUseCase } from "../../../../use-cases/update-order-item-status";
+import { DrizzleOrdersRepository } from "../../../../repositories/drizzle-orders-repository";
 import { ResourceNotFoundError } from "../../../../use-cases/errors/resource-not-found-error";
 import { NotAllowedError } from "../../../../use-cases/errors/not-allowed-error";
 import { InvalidStatusTransitionError } from "../../../../use-cases/errors/invalid-status-transition-error";
+import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
+import { orderItemParamsSchema, updateOrderItemStatusBodySchema, updateOrderItemStatusResponseSchema } from "../../../schemas/orders";
 
 export const updateOrderItemStatusRoute: FastifyPluginAsyncZod = async function (
   app
@@ -17,74 +19,9 @@ export const updateOrderItemStatusRoute: FastifyPluginAsyncZod = async function 
         description:
           "Atualiza o status de um item específico do pedido. Apenas o produtor dono do item pode aprovar ou rejeitar.",
         security: [{ bearerAuth: [] }],
-        params: z.object({
-          orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
-          itemId: z.string().uuid("ID do item deve ser um UUID válido"),
-        }),
-        body: z
-          .object({
-            status: z.enum(["APPROVED", "REJECTED"], {
-              message: "Status deve ser APPROVED ou REJECTED",
-            }),
-            rejectionReason: z.string().optional(),
-          })
-          .refine(
-            (data) => {
-              if (data.status === "REJECTED" && !data.rejectionReason) {
-                return false;
-              }
-              return true;
-            },
-            {
-              message: "Motivo da rejeição é obrigatório quando o status é REJECTED",
-              path: ["rejectionReason"],
-            }
-          ),
-        response: {
-          200: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Status do item atualizado com sucesso"),
-          400: z
-            .object({
-              message: z.string(),
-              errors: z
-                .array(
-                  z.object({
-                    code: z.string(),
-                    expected: z.string().optional(),
-                    received: z.string().optional(),
-                    path: z.array(z.union([z.string(), z.number()])),
-                    message: z.string(),
-                  })
-                )
-                .optional(),
-            })
-            .describe("Dados inválidos ou transição de status inválida"),
-          401: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Token de autenticação inválido ou não fornecido"),
-          403: z
-            .object({
-              message: z.string(),
-            })
-            .describe(
-              "Acesso negado - apenas o produtor dono do item pode atualizar"
-            ),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Item do pedido não encontrado"),
-          500: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Erro interno do servidor"),
-        },
+        params: orderItemParamsSchema,
+        body: updateOrderItemStatusBodySchema,
+        response: updateOrderItemStatusResponseSchema,
       },
     },
     async (request, reply) => {
@@ -102,7 +39,8 @@ export const updateOrderItemStatusRoute: FastifyPluginAsyncZod = async function 
     }
 
     // Instanciar use case
-    const updateOrderItemStatusUseCase = makeUpdateOrderItemStatusUseCase();
+    const ordersRepository = new DrizzleOrdersRepository();
+        const updateOrderItemStatusUseCase = new UpdateOrderItemStatusUseCase(ordersRepository);
 
     // Executar use case
     await updateOrderItemStatusUseCase.execute({

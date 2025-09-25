@@ -7,6 +7,7 @@ import { pipeline } from "stream/promises";
 import { join } from "path";
 import { randomUUID } from "crypto";
 import { mkdir } from "fs/promises";
+import { addProductImageResponseSchema } from "../../../schemas/products";
 
 export const addProductImageRoute: FastifyPluginAsyncZod = async (server) => {
   // Registrar plugin para multipart
@@ -28,40 +29,7 @@ export const addProductImageRoute: FastifyPluginAsyncZod = async (server) => {
           id: z.string().uuid().describe("ID do produto"),
         }),
         consumes: ["multipart/form-data"],
-        response: {
-          201: z.object({
-            image: z.object({
-              id: z.string().uuid(),
-              productId: z.string().uuid(),
-              imageUrl: z.string(),
-            }),
-          }),
-          400: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Dados inválidos ou limite de imagens excedido"),
-          401: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Token não fornecido ou inválido"),
-          403: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Produto não pertence ao usuário"),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Produto não encontrado"),
-          413: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Arquivo muito grande (máximo 3MB)"),
-        },
+        response: addProductImageResponseSchema,
       },
     },
     async (request, reply) => {

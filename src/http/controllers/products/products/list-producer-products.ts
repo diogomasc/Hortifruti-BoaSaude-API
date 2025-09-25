@@ -1,9 +1,12 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { z } from "zod";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import { db } from "../../../../database/client";
 import { products, productImages } from "../../../../database/schema";
 import { ilike, asc, type SQL, and, eq } from "drizzle-orm";
+import {
+  listProducerProductsQuerySchema,
+  listProducerProductsResponseSchema,
+} from "../../../schemas/products";
 
 export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
   server
@@ -16,84 +19,8 @@ export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
         summary: "Listar produtos do produtor",
         description:
           "Lista todos os produtos do produtor autenticado com paginação e filtros. Requer autenticação e que o usuário seja um produtor.",
-        querystring: z.object({
-          search: z.string().optional(),
-          category: z
-            .enum([
-              "frutas",
-              "legumes",
-              "verduras",
-              "ervas",
-              "graos",
-              "tuberculos",
-              "hortalicas",
-              "organicos",
-              "ovos",
-              "mel",
-              "cogumelos",
-              "temperos",
-              "sementes",
-              "castanhas",
-              "integrais",
-              "conservas",
-              "compotas",
-              "polpa_fruta",
-              "polpa_vegetal",
-              "sazonal",
-              "flores_comestiveis",
-              "vegano",
-              "kits",
-              "outros",
-            ])
-            .optional(),
-          page: z.coerce.number().int().min(1).default(1),
-          limit: z.coerce.number().int().min(1).max(100).default(12),
-          offset: z.coerce.number().int().min(0).default(0),
-        }),
-        response: {
-          200: z.object({
-            products: z.array(
-              z.object({
-                id: z.string().uuid(),
-                title: z.string(),
-                description: z.string(),
-                price: z.string(),
-                category: z.string(),
-                producerId: z.string().uuid(),
-                quantity: z.number(),
-                createdAt: z.date(),
-                images: z.array(
-                  z.object({
-                    id: z.string().uuid(),
-                    productId: z.string().uuid(),
-                    imageUrl: z.string(),
-                  })
-                ),
-              })
-            ),
-            pagination: z.object({
-              total: z.number(),
-              limit: z.number(),
-              offset: z.number(),
-              hasNext: z.boolean(),
-            }),
-          }),
-          401: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Token não fornecido ou inválido"),
-          403: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Usuário não é um produtor"),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe("Usuário não encontrado"),
-        },
+        querystring: listProducerProductsQuerySchema,
+        response: listProducerProductsResponseSchema,
       },
     },
     async (request, reply) => {
