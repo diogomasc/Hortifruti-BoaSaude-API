@@ -2,7 +2,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { db } from "../../../../database/client";
 import { products, productImages } from "../../../../database/schema";
-import { ilike, asc, type SQL, and, eq } from "drizzle-orm";
+import { ilike, asc, desc, type SQL, and, eq } from "drizzle-orm";
 
 export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
@@ -44,9 +44,9 @@ export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
             ])
             .optional(),
           producerId: z.string().uuid().optional(),
-          page: z.coerce.number().int().min(1).default(1),
           limit: z.coerce.number().int().min(1).max(100).default(12),
-          offset: z.coerce.number().int().min(0).optional(),
+          offset: z.coerce.number().int().min(0).default(0),
+          sortByPrice: z.enum(["desc", "asc"]).optional().default("desc"),
         }),
         response: {
           200: z.object({
@@ -78,7 +78,7 @@ export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
       },
     },
     async (request, reply) => {
-      const { search, category, producerId, page, limit, offset } = request.query;
+      const { search, category, producerId, limit, offset, sortByPrice } = request.query;
 
       const conditions: SQL[] = [];
 
@@ -94,8 +94,8 @@ export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
         conditions.push(eq(products.producerId, producerId));
       }
 
-      // Calcular offset baseado na página ou usar o offset fornecido diretamente
-      const calculatedOffset = offset !== undefined ? offset : (page - 1) * limit;
+      // Usar o offset fornecido diretamente
+      const calculatedOffset = offset;
 
       const [result, total] = await Promise.all([
         db
@@ -116,7 +116,7 @@ export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
           })
           .from(products)
           .leftJoin(productImages, eq(productImages.productId, products.id))
-          .orderBy(asc(products.createdAt))
+          .orderBy(sortByPrice === "asc" ? asc(products.price) : desc(products.price))
           .offset(calculatedOffset)
           .limit(limit)
           .where(and(...conditions)),

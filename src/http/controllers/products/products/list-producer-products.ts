@@ -47,6 +47,8 @@ export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
             ])
             .optional(),
           page: z.coerce.number().int().min(1).default(1),
+          limit: z.coerce.number().int().min(1).max(100).default(12),
+          offset: z.coerce.number().int().min(0).default(0),
         }),
         response: {
           200: z.object({
@@ -69,7 +71,12 @@ export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
                 ),
               })
             ),
-            total: z.number(),
+            pagination: z.object({
+              total: z.number(),
+              limit: z.number(),
+              offset: z.number(),
+              hasNext: z.boolean(),
+            }),
           }),
           401: z
             .object({
@@ -90,8 +97,11 @@ export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
       },
     },
     async (request, reply) => {
-      const { search, category, page } = request.query;
+      const { search, category, page, limit, offset } = request.query;
       const user = getAuthenticatedUserFromRequest(request);
+
+      // Calcular offset baseado na página ou usar o offset fornecido diretamente
+      const calculatedOffset = offset !== undefined ? offset : (page - 1) * limit;
 
       const conditions: SQL[] = [eq(products.producerId, user.sub)];
 
@@ -123,8 +133,8 @@ export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
           .from(products)
           .leftJoin(productImages, eq(productImages.productId, products.id))
           .orderBy(asc(products.createdAt))
-          .offset((page - 1) * 12)
-          .limit(12)
+          .offset(calculatedOffset)
+          .limit(limit)
           .where(and(...conditions)),
         db.$count(products, and(...conditions)),
       ]);
@@ -156,9 +166,16 @@ export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
 
       const productsWithImages = Array.from(productsMap.values());
 
+      const hasNext = calculatedOffset + limit < total;
+
       return reply.status(200).send({
         products: productsWithImages,
-        total,
+        pagination: {
+          total,
+          limit,
+          offset: calculatedOffset,
+          hasNext,
+        },
       });
     }
   );

@@ -8,8 +8,13 @@ export const listAddressesSchema = {
   tags: ["Addresses"],
   summary: "Listar endereços do usuário",
   description:
-    "Lista todos os endereços vinculados ao usuário autenticado.",
+    "Lista todos os endereços vinculados ao usuário autenticado com paginação e busca.",
   security: [{ bearerAuth: [] }],
+  querystring: z.object({
+    search: z.string().optional().describe("Buscar por rua, cidade, estado ou complemento"),
+    limit: z.coerce.number().int().min(1).max(100).default(12).describe("Número máximo de endereços por página"),
+    offset: z.coerce.number().int().min(0).default(0).describe("Número de endereços para pular"),
+  }),
   response: {
     200: z.object({
       addresses: z.array(
@@ -25,6 +30,12 @@ export const listAddressesSchema = {
           zipCode: z.string().optional(),
         })
       ),
+      pagination: z.object({
+        total: z.number(),
+        limit: z.number(),
+        offset: z.number(),
+        hasNext: z.boolean(),
+      }),
     }),
     401: z
       .object({
@@ -37,15 +48,24 @@ export const listAddressesSchema = {
 export async function listAddresses(request: FastifyRequest, reply: FastifyReply) {
   try {
     const { sub: userId } = getAuthenticatedUserFromRequest(request);
+    const { search, limit, offset } = request.query as {
+      search?: string;
+      limit: number;
+      offset: number;
+    };
 
     const listUserAddressesUseCase = makeListUserAddressesUseCase();
 
-    const { addresses } = await listUserAddressesUseCase.execute({
+    const { addresses, pagination } = await listUserAddressesUseCase.execute({
       userId,
+      search,
+      limit,
+      offset,
     });
 
     return reply.status(200).send({
       addresses,
+      pagination,
     });
   } catch (err) {
     throw err;
