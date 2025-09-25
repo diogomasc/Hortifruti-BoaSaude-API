@@ -7,9 +7,11 @@ import type {
   CreateProductData,
   UpdateProductData,
   ProductsSearchParams,
+  CreateProductImageData
+} from "../types";
+import type {
   ProductsRepository,
-  ProductImagesRepository,
-  CreateProductImageData,
+  ProductImagesRepository
 } from "./products-repository";
 
 function mapDrizzleProductToProduct(

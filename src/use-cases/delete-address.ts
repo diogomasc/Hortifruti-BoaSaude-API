@@ -1,10 +1,9 @@
 import type { AddressesRepository } from "../repositories/addresses-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { DeleteAddressRequest } from "../types";
 
-interface DeleteAddressUseCaseRequest {
-  addressId: string;
-  userId: string;
-}
+// Type alias for backward compatibility
+type DeleteAddressUseCaseRequest = DeleteAddressRequest;
 
 export class DeleteAddressUseCase {
   constructor(private addressesRepository: AddressesRepository) {}

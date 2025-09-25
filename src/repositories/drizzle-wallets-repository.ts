@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm";
 import { db } from "../database/client";
 import { wallets } from "../database/schema";
-import type { Wallet, CreateWalletData, WalletsRepository } from "./wallets-repository";
+import type { Wallet, CreateWalletData } from "../types";
+import type { WalletsRepository } from "./wallets-repository";
 
 export class DrizzleWalletsRepository implements WalletsRepository {
   private mapDrizzleWalletToWallet(drizzleWallet: any): Wallet {

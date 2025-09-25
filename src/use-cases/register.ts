@@ -2,31 +2,11 @@ import { hash } from "argon2";
 import type { UsersRepository } from "../repositories/users-repository";
 import type { WalletsRepository } from "../repositories/wallets-repository";
 import { UserAlreadyExistsError } from "./errors/user-already-exists-error";
+import type { RegisterRequest, RegisterResponse } from "../types";
 
-interface RegisterUseCaseRequest {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  role: "consumer" | "producer" | "admin";
-  cpf?: string;
-  birthDate?: string;
-  cnpj?: string;
-  shopName?: string;
-  shopDescription?: string;
-}
-
-interface RegisterUseCaseResponse {
-  user: {
-    id: string;
-    email: string;
-    role: "consumer" | "producer" | "admin";
-    firstName: string;
-    lastName: string;
-    createdAt: Date;
-  };
-}
+// Use centralized types
+type RegisterUseCaseRequest = RegisterRequest;
+type RegisterUseCaseResponse = RegisterResponse;
 
 export class RegisterUseCase {
   constructor(
@@ -102,6 +82,13 @@ export class RegisterUseCase {
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
+        phone: user.phone,
+        cpf: user.cpf,
+        birthDate: user.birthDate,
+        cnpj: user.cnpj,
+        shopName: user.shopName,
+        shopDescription: user.shopDescription,
+        isActive: user.isActive,
         createdAt: user.createdAt,
       },
     };

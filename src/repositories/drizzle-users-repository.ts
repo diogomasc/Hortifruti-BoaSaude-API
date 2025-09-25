@@ -1,7 +1,8 @@
 import { eq } from "drizzle-orm";
 import { db } from "../database/client";
 import { users } from "../database/schema";
-import type { User, CreateUserData, UsersRepository } from "./users-repository";
+import type { User, CreateUserData } from "../types";
+import type { UsersRepository } from "./users-repository";
 
 export class DrizzleUsersRepository implements UsersRepository {
   private mapDrizzleUserToUser(drizzleUser: any): User {

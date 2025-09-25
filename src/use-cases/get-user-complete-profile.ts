@@ -2,44 +2,11 @@ import type { UsersRepository } from "../repositories/users-repository";
 import type { WalletsRepository } from "../repositories/wallets-repository";
 import type { AddressesRepository } from "../repositories/addresses-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { GetUserCompleteProfileRequest, GetUserCompleteProfileResponse } from "../types";
 
-interface GetUserCompleteProfileUseCaseRequest {
-  userId: string;
-}
-
-interface GetUserCompleteProfileUseCaseResponse {
-  user: {
-    id: string;
-    email: string;
-    role: "consumer" | "producer" | "admin";
-    firstName: string;
-    lastName: string;
-    phone?: string;
-    cpf?: string;
-    birthDate?: string;
-    cnpj?: string;
-    shopName?: string;
-    shopDescription?: string;
-    isActive: boolean;
-    createdAt: Date;
-    wallet?: {
-      id: string;
-      balance: string;
-      updatedAt: Date;
-    };
-    addresses: {
-      id: string;
-      userId: string;
-      street: string;
-      number: string;
-      complement?: string;
-      city: string;
-      state: string;
-      country: string;
-      zipCode: string;
-    }[];
-  };
-}
+// Type aliases for backward compatibility
+type GetUserCompleteProfileUseCaseRequest = GetUserCompleteProfileRequest;
+type GetUserCompleteProfileUseCaseResponse = GetUserCompleteProfileResponse;
 
 export class GetUserCompleteProfileUseCase {
   constructor(

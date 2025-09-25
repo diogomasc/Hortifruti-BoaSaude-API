@@ -1,16 +1,9 @@
-import { OrdersRepository, OrderItemWithProduct } from "../repositories/orders-repository";
+import { OrdersRepository } from "../repositories/orders-repository";
+import { ListPendingOrderItemsRequest, ListPendingOrderItemsResponse } from "../types";
 
-interface ListPendingOrderItemsUseCaseRequest {
-  producerId: string;
-  status?: "PENDING" | "APPROVED" | "REJECTED";
-  search?: string;
-  limit?: number;
-  offset?: number;
-}
-
-interface ListPendingOrderItemsUseCaseResponse {
-  items: OrderItemWithProduct[];
-}
+// Type aliases for backward compatibility
+type ListPendingOrderItemsUseCaseRequest = ListPendingOrderItemsRequest;
+type ListPendingOrderItemsUseCaseResponse = ListPendingOrderItemsResponse;
 
 export class ListPendingOrderItemsUseCase {
   constructor(private ordersRepository: OrdersRepository) {}

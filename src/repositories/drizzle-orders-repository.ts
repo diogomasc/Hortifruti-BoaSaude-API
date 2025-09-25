@@ -8,15 +8,22 @@ import {
   addresses,
 } from "../database/schema";
 import {
-  OrdersRepository,
-  CreateOrderRequest,
+  CreateOrderData,
   OrderWithItems,
-  UpdateOrderItemStatusRequest,
-  UpdateOrderRecurrenceRequest,
+  UpdateOrderItemStatusData,
+  UpdateOrderRecurrenceData,
   OrderItemWithProduct,
   ConsumerData,
   AddressData,
-  FindItemsByProducerIdRequest,
+  FindItemsByProducerIdParams,
+  OrderStatus
+} from "../types";
+import {
+  OrdersRepository,
+  CreateOrderRequest,
+  UpdateOrderItemStatusRequest,
+  UpdateOrderRecurrenceRequest,
+  FindItemsByProducerIdRequest
 } from "./orders-repository";
 
 export class DrizzleOrdersRepository implements OrdersRepository {

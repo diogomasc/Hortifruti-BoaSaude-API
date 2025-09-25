@@ -3,30 +3,11 @@ import { sign } from "jsonwebtoken";
 import type { UsersRepository } from "../repositories/users-repository";
 import { InvalidCredentialsError } from "./errors/invalid-credentials-error";
 import { env } from "../env";
+import type { AuthenticateRequest, AuthenticateResponse } from "../types";
 
-interface AuthenticateUseCaseRequest {
-  email: string;
-  password: string;
-}
-
-interface AuthenticateUseCaseResponse {
-  user: {
-    id: string;
-    email: string;
-    role: "consumer" | "producer" | "admin";
-    firstName: string;
-    lastName: string;
-    phone?: string;
-    cpf?: string;
-    birthDate?: string;
-    cnpj?: string;
-    shopName?: string;
-    shopDescription?: string;
-    isActive: boolean;
-    createdAt: Date;
-  };
-  token: string;
-}
+// Use centralized types
+type AuthenticateUseCaseRequest = AuthenticateRequest;
+type AuthenticateUseCaseResponse = AuthenticateResponse;
 
 export class AuthenticateUseCase {
   constructor(private usersRepository: UsersRepository) {}

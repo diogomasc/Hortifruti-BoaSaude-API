@@ -1,27 +1,10 @@
 import type { UsersRepository } from "../repositories/users-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { GetUserProfileRequest, GetUserProfileResponse } from "../types";
 
-interface GetUserProfileUseCaseRequest {
-  userId: string;
-}
-
-interface GetUserProfileUseCaseResponse {
-  user: {
-    id: string;
-    email: string;
-    role: "consumer" | "producer" | "admin";
-    firstName: string;
-    lastName: string;
-    phone?: string;
-    cpf?: string;
-    birthDate?: string;
-    cnpj?: string;
-    shopName?: string;
-    shopDescription?: string;
-    isActive: boolean;
-    createdAt: Date;
-  };
-}
+// Type aliases for backward compatibility
+type GetUserProfileUseCaseRequest = GetUserProfileRequest;
+type GetUserProfileUseCaseResponse = GetUserProfileResponse;
 
 export class GetUserProfileUseCase {
   constructor(private usersRepository: UsersRepository) {}

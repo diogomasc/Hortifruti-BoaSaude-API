@@ -1,22 +1,10 @@
 import type { UsersRepository } from "../repositories/users-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { ToggleUserActiveStatusRequest, ToggleUserActiveStatusResponse } from "../types";
 
-interface ToggleUserActiveStatusUseCaseRequest {
-  userId: string;
-  isActive: boolean;
-}
-
-interface ToggleUserActiveStatusUseCaseResponse {
-  user: {
-    id: string;
-    email: string;
-    role: "consumer" | "producer" | "admin";
-    firstName: string;
-    lastName: string;
-    isActive: boolean;
-    createdAt: Date;
-  };
-}
+// Type aliases for backward compatibility
+type ToggleUserActiveStatusUseCaseRequest = ToggleUserActiveStatusRequest;
+type ToggleUserActiveStatusUseCaseResponse = ToggleUserActiveStatusResponse;
 
 export class ToggleUserActiveStatusUseCase {
   constructor(private usersRepository: UsersRepository) {}

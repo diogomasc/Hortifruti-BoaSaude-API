@@ -1,56 +1,11 @@
 import { OrdersRepository } from "../repositories/orders-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 import { UnauthorizedError } from "./errors/unauthorized-error";
+import { GetOrderRequest, GetOrderResponse } from "../types";
 
-interface GetOrderUseCaseRequest {
-  orderId: string;
-  userId: string;
-  userRole: "consumer" | "producer" | "admin";
-}
-
-interface GetOrderUseCaseResponse {
-  order: {
-    id: string;
-    consumerId: string;
-    deliveryAddressId: string;
-    status:
-      | "PENDING"
-      | "COMPLETED"
-      | "REJECTED"
-      | "PARTIALLY_COMPLETED"
-      | "PAUSED"
-      | "CANCELLED";
-    totalAmount: string;
-    createdAt: Date;
-    updatedAt: Date;
-    completedAt: Date | null;
-    // Campos de recorrência
-    isRecurring: boolean;
-    frequency: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
-    customDays: number | null;
-    nextDeliveryDate: Date | null;
-    pausedAt: Date | null;
-    cancelledAt: Date | null;
-    items: {
-      id: string;
-      productId: string;
-      producerId: string;
-      quantity: number;
-      unitPrice: string;
-      totalPrice: string;
-      status: "PENDING" | "APPROVED" | "REJECTED";
-      rejectionReason: string | null;
-      updatedAt: Date;
-      product?: {
-        id: string;
-        title: string;
-        description: string;
-        price: string;
-        category: string;
-      };
-    }[];
-  };
-}
+// Type aliases for backward compatibility
+type GetOrderUseCaseRequest = GetOrderRequest;
+type GetOrderUseCaseResponse = GetOrderResponse;
 
 export class GetOrderUseCase {
   constructor(private ordersRepository: OrdersRepository) {}

@@ -1,19 +1,10 @@
 import type { ProductsRepository, ProductImagesRepository } from "../repositories/products-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { AddProductImageRequest, AddProductImageResponse } from "../types";
 
-interface AddProductImageUseCaseRequest {
-  productId: string;
-  producerId: string;
-  imageUrl: string;
-}
-
-interface AddProductImageUseCaseResponse {
-  image: {
-    id: string;
-    productId: string;
-    imageUrl: string;
-  };
-}
+// Type aliases for backward compatibility
+type AddProductImageUseCaseRequest = AddProductImageRequest;
+type AddProductImageUseCaseResponse = AddProductImageResponse;
 
 export class AddProductImageUseCase {
   constructor(

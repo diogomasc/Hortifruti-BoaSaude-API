@@ -39,15 +39,17 @@ export const updateUserProfileRoute: FastifyPluginAsyncZod = async (server) => {
 
         const { user } = await updateUserProfileUseCase.execute({
           userId,
-          email,
-          firstName,
-          lastName,
-          phone,
-          cpf,
-          birthDate,
-          cnpj,
-          shopName,
-          shopDescription,
+          data: {
+            email,
+            firstName,
+            lastName,
+            phone,
+            cpf,
+            birthDate,
+            cnpj,
+            shopName,
+            shopDescription,
+          },
         });
 
         return reply.status(200).send({

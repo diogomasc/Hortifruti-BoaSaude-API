@@ -1,10 +1,9 @@
 import type { ProductsRepository } from "../repositories/products-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { DeleteProductRequest } from "../types";
 
-interface DeleteProductUseCaseRequest {
-  productId: string;
-  producerId: string;
-}
+// Type alias for backward compatibility
+type DeleteProductUseCaseRequest = DeleteProductRequest;
 
 export class DeleteProductUseCase {
   constructor(private productsRepository: ProductsRepository) {}

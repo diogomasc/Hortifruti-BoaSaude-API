@@ -1,25 +1,4 @@
-export interface Address {
-  id: string;
-  userId: string;
-  street: string;
-  number: string;
-  complement?: string;
-  city: string;
-  state: string;
-  country: string;
-  zipCode: string;
-}
-
-export interface CreateAddressData {
-  userId: string;
-  street: string;
-  number: string;
-  complement?: string;
-  city: string;
-  state: string;
-  country: string;
-  zipCode: string;
-}
+import { Address, CreateAddressData } from '../types';
 
 export interface AddressesRepository {
   findById(id: string): Promise<Address | null>;

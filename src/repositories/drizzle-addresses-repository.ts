@@ -1,7 +1,8 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../database/client";
 import { addresses } from "../database/schema";
-import type { Address, CreateAddressData, AddressesRepository } from "./addresses-repository";
+import type { Address, CreateAddressData } from "../types";
+import type { AddressesRepository } from "./addresses-repository";
 
 export class DrizzleAddressesRepository implements AddressesRepository {
   private mapDrizzleAddressToAddress(drizzleAddress: any): Address {

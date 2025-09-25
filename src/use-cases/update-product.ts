@@ -1,33 +1,11 @@
 import type { ProductsRepository } from "../repositories/products-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { UpdateProductRequest, UpdateProductResponse } from "../types";
 
-interface UpdateProductUseCaseRequest {
-  productId: string;
-  producerId: string;
-  title?: string;
-  description?: string;
-  price?: string;
-  category?: string;
-  quantity?: number;
-}
+// Type aliases for backward compatibility
+type UpdateProductUseCaseRequest = UpdateProductRequest;
+type UpdateProductUseCaseResponse = UpdateProductResponse;
 
-interface UpdateProductUseCaseResponse {
-  product: {
-    id: string;
-    title: string;
-    description: string;
-    price: string;
-    category: string;
-    producerId: string;
-    quantity: number;
-    createdAt: Date;
-    images: Array<{
-      id: string;
-      productId: string;
-      imageUrl: string;
-    }>;
-  };
-}
 
 export class UpdateProductUseCase {
   constructor(private productsRepository: ProductsRepository) {}

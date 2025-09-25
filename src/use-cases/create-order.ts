@@ -4,53 +4,11 @@ import { ProductsRepository } from "../repositories/products-repository";
 import { UsersRepository } from "../repositories/users-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 import { InvalidRoleError } from "./errors/invalid-role-error";
+import { CreateOrderRequest, CreateOrderResponse } from "../types";
 
-interface CreateOrderUseCaseRequest {
-  consumerId: string;
-  deliveryAddressId: string;
-  items: {
-    productId: string;
-    quantity: number;
-  }[];
-  // Campos de recorrência
-  isRecurring?: boolean;
-  frequency?: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
-  customDays?: number;
-}
-
-interface CreateOrderUseCaseResponse {
-  order: {
-    id: string;
-    consumerId: string;
-    deliveryAddressId: string;
-    status:
-      | "PENDING"
-      | "COMPLETED"
-      | "REJECTED"
-      | "PARTIALLY_COMPLETED"
-      | "PAUSED"
-      | "CANCELLED";
-    totalAmount: string;
-    createdAt: Date;
-    updatedAt: Date;
-    completedAt: Date | null;
-    // Campos de recorrência
-    isRecurring: boolean;
-    frequency: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
-    customDays: number | null;
-    nextDeliveryDate: Date | null;
-    pausedAt: Date | null;
-    cancelledAt: Date | null;
-    items: {
-      id: string;
-      productId: string;
-      producerId: string;
-      quantity: number;
-      unitPrice: string;
-      totalPrice: string;
-    }[];
-  };
-}
+// Type aliases for backward compatibility
+type CreateOrderUseCaseRequest = CreateOrderRequest;
+type CreateOrderUseCaseResponse = CreateOrderResponse;
 
 export class CreateOrderUseCase {
   constructor(

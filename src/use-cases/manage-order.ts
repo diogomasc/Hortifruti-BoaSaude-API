@@ -1,16 +1,10 @@
 import { OrdersRepository } from "../repositories/orders-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 import { UnauthorizedError } from "./errors/unauthorized-error";
+import { ManageOrderRequest } from "../types";
 
-interface ManageOrderUseCaseRequest {
-  orderId: string;
-  consumerId: string;
-  action?: "pause" | "resume" | "cancel";
-  // Campos opcionais para atualizar recorrência
-  isRecurring?: boolean;
-  frequency?: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
-  customDays?: number;
-}
+// Type alias for backward compatibility
+type ManageOrderUseCaseRequest = ManageOrderRequest;
 
 export class ManageOrderUseCase {
   constructor(private ordersRepository: OrdersRepository) {}

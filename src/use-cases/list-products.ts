@@ -1,36 +1,10 @@
 import type { ProductsRepository } from "../repositories/products-repository";
+import { ListProductsRequest, ListProductsResponse } from "../types";
 
-interface ListProductsUseCaseRequest {
-  page?: number;
-  limit?: number;
-  search?: string;
-  category?: string;
-  producerId?: string;
-}
+// Type aliases for backward compatibility
+type ListProductsUseCaseRequest = ListProductsRequest;
+type ListProductsUseCaseResponse = ListProductsResponse;
 
-interface ListProductsUseCaseResponse {
-  products: Array<{
-    id: string;
-    title: string;
-    description: string;
-    price: string;
-    category: string;
-    producerId: string;
-    quantity: number;
-    createdAt: Date;
-    images: Array<{
-      id: string;
-      productId: string;
-      imageUrl: string;
-    }>;
-  }>;
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
 
 export class ListProductsUseCase {
   constructor(private productsRepository: ProductsRepository) {}

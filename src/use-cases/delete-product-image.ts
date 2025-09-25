@@ -1,10 +1,9 @@
 import type { ProductsRepository, ProductImagesRepository } from "../repositories/products-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { DeleteProductImageRequest } from "../types";
 
-interface DeleteProductImageUseCaseRequest {
-  imageId: string;
-  producerId: string;
-}
+// Type alias for backward compatibility
+type DeleteProductImageUseCaseRequest = DeleteProductImageRequest;
 
 export class DeleteProductImageUseCase {
   constructor(

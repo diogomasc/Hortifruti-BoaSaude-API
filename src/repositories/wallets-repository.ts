@@ -1,14 +1,4 @@
-export interface Wallet {
-  id: string;
-  userId: string;
-  balance: string;
-  updatedAt: Date;
-}
-
-export interface CreateWalletData {
-  userId: string;
-  balance?: string;
-}
+import { Wallet, CreateWalletData } from '../types';
 
 export interface WalletsRepository {
   findByUserId(userId: string): Promise<Wallet | null>;

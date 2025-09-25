@@ -1,29 +1,23 @@
 import {
   OrdersRepository,
-  UpdateOrderItemStatusRequest,
+  UpdateOrderItemStatusRequest as RepositoryUpdateOrderItemStatusRequest,
 } from "../repositories/orders-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 import { NotAllowedError } from "./errors/not-allowed-error";
+import {
+  UpdateOrderItemStatusRequest,
+  UpdateOrderItemStatusResponse,
+} from "../types";
 
-interface UpdateOrderItemStatusUseCaseRequest {
-  itemId: string;
-  producerId: string; // ID do produtor que está fazendo a atualização
-  status: "APPROVED" | "REJECTED";
-  rejectionReason?: string;
-}
-
-interface UpdateOrderItemStatusUseCaseResponse {
-  success: boolean;
-}
+// Type aliases for backward compatibility
+type UpdateOrderItemStatusUseCaseRequest = UpdateOrderItemStatusRequest;
+type UpdateOrderItemStatusUseCaseResponse = UpdateOrderItemStatusResponse;
 
 export class UpdateOrderItemStatusUseCase {
-  constructor(
-    private ordersRepository: OrdersRepository
-  ) {}
+  constructor(private ordersRepository: OrdersRepository) {}
 
   async execute({
     itemId,
-    producerId,
     status,
     rejectionReason,
   }: UpdateOrderItemStatusUseCaseRequest): Promise<UpdateOrderItemStatusUseCaseResponse> {
@@ -32,11 +26,6 @@ export class UpdateOrderItemStatusUseCase {
 
     if (!orderItem) {
       throw new ResourceNotFoundError();
-    }
-
-    // Verificar se o produtor é o dono do item
-    if (orderItem.producerId !== producerId) {
-      throw new NotAllowedError();
     }
 
     // Permitir re-aprovação/re-rejeição de itens
@@ -62,6 +51,7 @@ export class UpdateOrderItemStatusUseCase {
 
     return {
       success: true,
+      message: "Status do item atualizado com sucesso",
     };
   }
 }

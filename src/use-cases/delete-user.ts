@@ -2,10 +2,10 @@ import type { UsersRepository } from "../repositories/users-repository";
 import type { WalletsRepository } from "../repositories/wallets-repository";
 import type { AddressesRepository } from "../repositories/addresses-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { DeleteUserRequest } from "../types";
 
-interface DeleteUserUseCaseRequest {
-  userId: string;
-}
+// Type alias for backward compatibility
+type DeleteUserUseCaseRequest = DeleteUserRequest;
 
 export class DeleteUserUseCase {
   constructor(

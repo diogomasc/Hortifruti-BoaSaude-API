@@ -1,31 +1,10 @@
 import type { AddressesRepository } from "../repositories/addresses-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { UpdateAddressRequest, UpdateAddressResponse } from "../types";
 
-interface UpdateAddressUseCaseRequest {
-  addressId: string;
-  userId: string;
-  street?: string;
-  number?: string;
-  complement?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  zipCode?: string;
-}
-
-interface UpdateAddressUseCaseResponse {
-  address: {
-    id: string;
-    userId: string;
-    street: string;
-    number: string;
-    complement?: string;
-    city: string;
-    state: string;
-    country: string;
-    zipCode: string;
-  };
-}
+// Type aliases for backward compatibility
+type UpdateAddressUseCaseRequest = UpdateAddressRequest;
+type UpdateAddressUseCaseResponse = UpdateAddressResponse;
 
 export class UpdateAddressUseCase {
   constructor(private addressesRepository: AddressesRepository) {}

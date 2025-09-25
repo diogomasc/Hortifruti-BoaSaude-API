@@ -1,18 +1,10 @@
 import type { ProductsRepository, ProductImagesRepository } from "../repositories/products-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
+import { ListProductImagesRequest, ListProductImagesResponse } from "../types";
 
-interface ListProductImagesUseCaseRequest {
-  productId: string;
-  producerId: string;
-}
-
-interface ListProductImagesUseCaseResponse {
-  images: Array<{
-    id: string;
-    productId: string;
-    imageUrl: string;
-  }>;
-}
+// Type aliases for backward compatibility
+type ListProductImagesUseCaseRequest = ListProductImagesRequest;
+type ListProductImagesUseCaseResponse = ListProductImagesResponse;
 
 export class ListProductImagesUseCase {
   constructor(

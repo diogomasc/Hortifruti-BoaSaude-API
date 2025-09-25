@@ -1,33 +1,11 @@
 import type { ProductsRepository } from "../repositories/products-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 import type { UsersRepository } from "../repositories/users-repository";
+import type { CreateProductRequest, CreateProductResponse } from "../types";
 
-interface CreateProductUseCaseRequest {
-  title: string;
-  description: string;
-  price: string;
-  category: string;
-  producerId: string;
-  quantity: number;
-}
-
-interface CreateProductUseCaseResponse {
-  product: {
-    id: string;
-    title: string;
-    description: string;
-    price: string;
-    category: string;
-    producerId: string;
-    quantity: number;
-    createdAt: Date;
-    images: Array<{
-      id: string;
-      productId: string;
-      imageUrl: string;
-    }>;
-  };
-}
+// Use centralized types
+type CreateProductUseCaseRequest = CreateProductRequest;
+type CreateProductUseCaseResponse = CreateProductResponse;
 
 export class CreateProductUseCase {
   constructor(

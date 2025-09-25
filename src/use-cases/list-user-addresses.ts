@@ -1,31 +1,10 @@
 import type { AddressesRepository } from "../repositories/addresses-repository";
+import { ListUserAddressesRequest, ListUserAddressesResponse } from "../types";
 
-interface ListUserAddressesUseCaseRequest {
-  userId: string;
-  search?: string;
-  limit?: number;
-  offset?: number;
-}
+// Type aliases for backward compatibility
+type ListUserAddressesUseCaseRequest = ListUserAddressesRequest;
+type ListUserAddressesUseCaseResponse = ListUserAddressesResponse;
 
-interface ListUserAddressesUseCaseResponse {
-  addresses: {
-    id: string;
-    userId: string;
-    street: string;
-    number: string;
-    complement?: string;
-    city: string;
-    state: string;
-    country: string;
-    zipCode: string;
-  }[];
-  pagination: {
-    total: number;
-    limit: number;
-    offset: number;
-    hasNext: boolean;
-  };
-}
 
 export class ListUserAddressesUseCase {
   constructor(private addressesRepository: AddressesRepository) {}

@@ -1,23 +1,9 @@
-import { OrdersRepository, OrderWithItems } from "../repositories/orders-repository";
+import { OrdersRepository } from "../repositories/orders-repository";
+import { OrderWithItems, ListOrdersRequest, ListOrdersResponse } from "../types";
 
-interface ListOrdersUseCaseRequest {
-  userId: string;
-  userRole: "consumer" | "producer" | "admin";
-  status?: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED" | "PAUSED" | "CANCELLED";
-  search?: string;
-  limit?: number;
-  offset?: number;
-}
-
-interface ListOrdersUseCaseResponse {
-  orders: OrderWithItems[];
-  pagination: {
-    total: number;
-    limit: number;
-    offset: number;
-    hasNext: boolean;
-  };
-}
+// Type aliases for backward compatibility
+type ListOrdersUseCaseRequest = ListOrdersRequest;
+type ListOrdersUseCaseResponse = ListOrdersResponse;
 
 export class ListOrdersUseCase {
   constructor(private ordersRepository: OrdersRepository) {}

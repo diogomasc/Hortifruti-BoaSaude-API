@@ -1,29 +1,9 @@
 import type { AddressesRepository } from "../repositories/addresses-repository";
+import { CreateAddressRequest, CreateAddressResponse } from "../types";
 
-interface CreateAddressUseCaseRequest {
-  userId: string;
-  street: string;
-  number: string;
-  complement?: string;
-  city: string;
-  state: string;
-  country: string;
-  zipCode: string;
-}
-
-interface CreateAddressUseCaseResponse {
-  address: {
-    id: string;
-    userId: string;
-    street: string;
-    number: string;
-    complement?: string;
-    city: string;
-    state: string;
-    country: string;
-    zipCode: string;
-  };
-}
+// Type aliases for backward compatibility
+type CreateAddressUseCaseRequest = CreateAddressRequest;
+type CreateAddressUseCaseResponse = CreateAddressResponse;
 
 export class CreateAddressUseCase {
   constructor(private addressesRepository: AddressesRepository) {}

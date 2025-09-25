@@ -1,52 +1,29 @@
 import type { UsersRepository } from "../repositories/users-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 import { UserAlreadyExistsError } from "./errors/user-already-exists-error";
+import { UpdateUserProfileRequest, UpdateUserProfileResponse } from "../types";
 
-interface UpdateUserProfileUseCaseRequest {
-  userId: string;
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-  cpf?: string;
-  birthDate?: string;
-  cnpj?: string;
-  shopName?: string;
-  shopDescription?: string;
-}
+// Type aliases for backward compatibility
+type UpdateUserProfileUseCaseRequest = UpdateUserProfileRequest;
+type UpdateUserProfileUseCaseResponse = UpdateUserProfileResponse;
 
-interface UpdateUserProfileUseCaseResponse {
-  user: {
-    id: string;
-    email: string;
-    role: "consumer" | "producer" | "admin";
-    firstName: string;
-    lastName: string;
-    phone?: string;
-    cpf?: string;
-    birthDate?: string;
-    cnpj?: string;
-    shopName?: string;
-    shopDescription?: string;
-    isActive: boolean;
-    createdAt: Date;
-  };
-}
 
 export class UpdateUserProfileUseCase {
   constructor(private usersRepository: UsersRepository) {}
 
   async execute({
     userId,
-    email,
-    firstName,
-    lastName,
-    phone,
-    cpf,
-    birthDate,
-    cnpj,
-    shopName,
-    shopDescription,
+    data: {
+      email,
+      firstName,
+      lastName,
+      phone,
+      cpf,
+      birthDate,
+      cnpj,
+      shopName,
+      shopDescription,
+    },
   }: UpdateUserProfileUseCaseRequest): Promise<UpdateUserProfileUseCaseResponse> {
     const existingUser = await this.usersRepository.findById(userId);
 

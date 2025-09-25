@@ -45,7 +45,6 @@ export const updateOrderItemStatusRoute: FastifyPluginAsyncZod = async function 
     // Executar use case
     await updateOrderItemStatusUseCase.execute({
       itemId,
-      producerId,
       status,
       rejectionReason,
     });

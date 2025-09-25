@@ -1,33 +1,4 @@
-export interface User {
-  id: string;
-  email: string;
-  passwordHash: string;
-  role: "consumer" | "producer" | "admin";
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  cpf?: string;
-  birthDate?: string;
-  cnpj?: string;
-  shopName?: string;
-  shopDescription?: string;
-  isActive: boolean;
-  createdAt: Date;
-}
-
-export interface CreateUserData {
-  email: string;
-  passwordHash: string;
-  role: "consumer" | "producer" | "admin";
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  cpf?: string;
-  birthDate?: string;
-  cnpj?: string;
-  shopName?: string;
-  shopDescription?: string;
-}
+import { User, CreateUserData, UserRole } from '../types';
 
 export interface UsersRepository {
   findById(id: string): Promise<User | null>;
