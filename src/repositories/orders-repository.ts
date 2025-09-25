@@ -11,7 +11,7 @@ export interface CreateOrderRequest {
   }[];
   // Campos de recorrência
   isRecurring?: boolean;
-  frequency?: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+  frequency?: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
   customDays?: number; // Para recorrência personalizada em dias
 }
 
@@ -54,7 +54,7 @@ export interface OrderWithItems {
   completedAt: Date | null;
   // Campos de recorrência
   isRecurring: boolean;
-  frequency: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
+  frequency: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
   customDays: number | null;
   nextDeliveryDate: Date | null;
   pausedAt: Date | null;
@@ -114,7 +114,7 @@ export interface FindItemsByProducerIdRequest {
 export interface UpdateOrderRecurrenceRequest {
   orderId: string;
   isRecurring?: boolean;
-  frequency?: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
+  frequency?: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
   customDays?: number | null;
 }
 

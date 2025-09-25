@@ -30,7 +30,7 @@ export const getOrderByIdSchema = {
           completedAt: z.string().nullable(),
           // Campos de recorrência
           isRecurring: z.boolean(),
-          frequency: z.enum(["WEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"]).nullable(),
+          frequency: z.enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"]).nullable(),
           customDays: z.number().nullable(),
           nextDeliveryDate: z.string().nullable(),
           pausedAt: z.string().nullable(),

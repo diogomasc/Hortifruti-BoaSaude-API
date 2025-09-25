@@ -339,7 +339,7 @@ Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
 
 {
-  "isRecurring": true,
+  "isRecurring": false,
   "frequency": "CUSTOM",
   "customDays": 15
 }

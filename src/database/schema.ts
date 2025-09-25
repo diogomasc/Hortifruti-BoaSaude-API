@@ -152,6 +152,7 @@ export const orderItemStatus = pgEnum("order_item_status", [
 // Enum para frequência de recorrência (usado em pedidos recorrentes)
 export const subscriptionFrequency = pgEnum("subscription_frequency", [
   "WEEKLY",
+  "BIWEEKLY",
   "MONTHLY",
   "QUARTERLY",
   "CUSTOM",

@@ -8,6 +8,21 @@ import { DrizzleUsersRepository } from "../../../../repositories/drizzle-users-r
 import { ResourceNotFoundError } from "../../../../use-cases/errors/resource-not-found-error";
 import { InvalidRoleError } from "../../../../use-cases/errors/invalid-role-error";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
+// Função utilitária para normalizar dados de recorrência
+function normalizeRecurrenceData(data: {
+  isRecurring: boolean;
+  frequency?: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+  customDays?: number;
+}) {
+  if (!data.isRecurring) {
+    return {
+      isRecurring: false,
+      frequency: undefined,
+      customDays: undefined,
+    };
+  }
+  return data;
+}
 
 // Schema para documentação Swagger
 export const createOrderSchema = {
@@ -32,10 +47,10 @@ export const createOrderSchema = {
           })
         )
         .min(1, "Pelo menos um item deve ser fornecido"),
-      // Campos de recorrência
-      isRecurring: z.boolean().optional().default(false),
+      // Campos de recorrência (usando utilitário)
+      isRecurring: z.boolean(),
       frequency: z
-        .enum(["WEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"])
+        .enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"])
         .optional(),
       customDays: z
         .number()
@@ -139,14 +154,21 @@ export async function createOrder(
       usersRepository
     );
 
+    // Normalizar dados de recorrência
+    const normalizedRecurrence = normalizeRecurrenceData({
+      isRecurring,
+      frequency,
+      customDays,
+    });
+
     // Executar use case
     const { order } = await createOrderUseCase.execute({
       consumerId,
       deliveryAddressId,
       items,
-      isRecurring,
-      frequency,
-      customDays,
+      isRecurring: normalizedRecurrence.isRecurring,
+      frequency: normalizedRecurrence.frequency,
+      customDays: normalizedRecurrence.customDays,
     });
 
     return reply.status(201).send({

@@ -14,7 +14,7 @@ interface CreateOrderUseCaseRequest {
   }[];
   // Campos de recorrência
   isRecurring?: boolean;
-  frequency?: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+  frequency?: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
   customDays?: number;
 }
 
@@ -36,7 +36,7 @@ interface CreateOrderUseCaseResponse {
     completedAt: Date | null;
     // Campos de recorrência
     isRecurring: boolean;
-    frequency: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
+    frequency: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
     customDays: number | null;
     nextDeliveryDate: Date | null;
     pausedAt: Date | null;

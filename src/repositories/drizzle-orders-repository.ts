@@ -36,6 +36,9 @@ export class DrizzleOrdersRepository implements OrdersRepository {
           case "WEEKLY":
             nextDeliveryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
             break;
+          case "BIWEEKLY":
+            nextDeliveryDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+            break;
           case "MONTHLY":
             nextDeliveryDate = new Date(now);
             nextDeliveryDate.setMonth(now.getMonth() + 1);
@@ -548,6 +551,9 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       switch (data.frequency) {
         case "WEEKLY":
           nextDeliveryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+          break;
+        case "BIWEEKLY":
+          nextDeliveryDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
           break;
         case "MONTHLY":
           nextDeliveryDate = new Date(now);

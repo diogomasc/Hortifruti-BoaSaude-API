@@ -8,7 +8,7 @@ interface ManageOrderUseCaseRequest {
   action?: "pause" | "resume" | "cancel";
   // Campos opcionais para atualizar recorrência
   isRecurring?: boolean;
-  frequency?: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+  frequency?: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
   customDays?: number;
 }
 

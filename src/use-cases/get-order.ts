@@ -26,7 +26,7 @@ interface GetOrderUseCaseResponse {
     completedAt: Date | null;
     // Campos de recorrência
     isRecurring: boolean;
-    frequency: "WEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
+    frequency: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM" | null;
     customDays: number | null;
     nextDeliveryDate: Date | null;
     pausedAt: Date | null;

@@ -6,6 +6,31 @@ import { ResourceNotFoundError } from "../../../../use-cases/errors/resource-not
 import { NotAllowedError } from "../../../../use-cases/errors/not-allowed-error";
 import { InvalidStatusTransitionError } from "../../../../use-cases/errors/invalid-status-transition-error";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
+// Schema para validação de recorrência em atualizações
+const updateOrderRecurrenceSchema = z
+  .object({
+    isRecurring: z.boolean().optional(),
+    frequency: z
+      .enum(["WEEKLY", "BIWEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"])
+      .optional(),
+    customDays: z
+      .number()
+      .int()
+      .positive("Dias personalizados deve ser um número positivo")
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      // Se frequency for CUSTOM, customDays é obrigatório
+      if (data.frequency === "CUSTOM" && !data.customDays) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Para frequency CUSTOM, customDays é obrigatório.",
+    }
+  );
 
 // Schema para documentação Swagger
 export const manageOrderSchema = {
@@ -24,30 +49,8 @@ export const manageOrderSchema = {
           message: "Ação deve ser pause, resume ou cancel",
         })
         .optional(),
-      // Campos opcionais para atualizar recorrência
-      isRecurring: z.boolean().optional(),
-      frequency: z
-        .enum(["WEEKLY", "MONTHLY", "QUARTERLY", "CUSTOM"])
-        .optional(),
-      customDays: z
-        .number()
-        .int()
-        .positive("Dias personalizados deve ser um número positivo")
-        .optional(),
     })
-    .refine(
-      (data) => {
-        // Se frequency for CUSTOM, customDays é obrigatório
-        if (data.frequency === "CUSTOM" && !data.customDays) {
-          return false;
-        }
-
-        return true;
-      },
-      {
-        message: "Para frequency CUSTOM, customDays é obrigatório.",
-      }
-    ),
+    .merge(updateOrderRecurrenceSchema),
   response: {
     200: z
       .object({
@@ -129,7 +132,7 @@ export async function manageOrder(
         resume: "retomado",
         cancel: "cancelado",
       };
-      messages.push(`${actionMessages[action]}`);
+      messages.push(`${actionMessages[action as keyof typeof actionMessages]}`);
     }
 
     // Adicionar mensagem sobre recorrência
@@ -148,7 +151,7 @@ export async function manageOrder(
           QUARTERLY: "trimestral",
         };
         messages.push(
-          `frequência atualizada para ${frequencyLabels[frequency]}`
+          `frequência atualizada para ${frequencyLabels[frequency as keyof typeof frequencyLabels]}`
         );
       }
     }
