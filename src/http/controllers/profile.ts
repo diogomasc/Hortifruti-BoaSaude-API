@@ -36,32 +36,24 @@ export const profileRoute: FastifyPluginAsyncZod = async (server) => {
       },
     },
     async (request, reply) => {
-      try {
-        const { sub } = getAuthenticatedUserFromRequest(request);
+      const { sub } = getAuthenticatedUserFromRequest(request);
 
-        const getUserProfileUseCase = makeGetUserProfileUseCase();
+      const getUserProfileUseCase = makeGetUserProfileUseCase();
 
-        const { user } = await getUserProfileUseCase.execute({
-          userId: sub,
-        });
+      const { user } = await getUserProfileUseCase.execute({
+        userId: sub,
+      });
 
-        return reply.status(200).send({
-          user: {
-            id: user.id,
-            name: user.firstName + " " + user.lastName,
-            email: user.email,
-            role: user.role,
-            isActive: user.isActive,
-            createdAt: user.createdAt,
-          },
-        });
-      } catch (err) {
-        if (err instanceof ResourceNotFoundError) {
-          return reply.status(404).send({ message: err.message });
-        }
-
-        throw err;
-      }
+      return reply.status(200).send({
+        user: {
+          id: user.id,
+          name: user.firstName + " " + user.lastName,
+          email: user.email,
+          role: user.role,
+          isActive: user.isActive,
+          createdAt: user.createdAt,
+        },
+      });
     }
   );
 };

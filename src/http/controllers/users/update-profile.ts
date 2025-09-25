@@ -3,7 +3,10 @@ import { makeUpdateUserProfileUseCase } from "../../../use-cases/factories/make-
 import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
 import { UserAlreadyExistsError } from "../../../use-cases/errors/user-already-exists-error";
 import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
-import { updateUserProfileBodySchema, updateUserProfileResponseSchema } from "../../schemas/users";
+import {
+  updateUserProfileBodySchema,
+  updateUserProfileResponseSchema,
+} from "../../schemas/users";
 
 export const updateUserProfileRoute: FastifyPluginAsyncZod = async (server) => {
   server.put(
@@ -32,40 +35,28 @@ export const updateUserProfileRoute: FastifyPluginAsyncZod = async (server) => {
         shopDescription,
       } = request.body;
 
-      try {
-        const { sub: userId } = getAuthenticatedUserFromRequest(request);
+      const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
-        const updateUserProfileUseCase = makeUpdateUserProfileUseCase();
+      const updateUserProfileUseCase = makeUpdateUserProfileUseCase();
 
-        const { user } = await updateUserProfileUseCase.execute({
-          userId,
-          data: {
-            email,
-            firstName,
-            lastName,
-            phone,
-            cpf,
-            birthDate,
-            cnpj,
-            shopName,
-            shopDescription,
-          },
-        });
+      const { user } = await updateUserProfileUseCase.execute({
+        userId,
+        data: {
+          email,
+          firstName,
+          lastName,
+          phone,
+          cpf,
+          birthDate,
+          cnpj,
+          shopName,
+          shopDescription,
+        },
+      });
 
-        return reply.status(200).send({
-          user,
-        });
-      } catch (err) {
-        if (err instanceof ResourceNotFoundError) {
-          return reply.status(404).send({ message: err.message });
-        }
-
-        if (err instanceof UserAlreadyExistsError) {
-          return reply.status(409).send({ message: err.message });
-        }
-
-        throw err;
-      }
+      return reply.status(200).send({
+        user,
+      });
     }
   );
 };

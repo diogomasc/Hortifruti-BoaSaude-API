@@ -25,24 +25,16 @@ export const deleteAddressRoute: FastifyPluginAsyncZod = async (server) => {
     async (request, reply) => {
       const { id } = request.params;
 
-      try {
-        const { sub: userId } = getAuthenticatedUserFromRequest(request);
+      const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
-        const deleteAddressUseCase = makeDeleteAddressUseCase();
+      const deleteAddressUseCase = makeDeleteAddressUseCase();
 
-        await deleteAddressUseCase.execute({
-          addressId: id,
-          userId,
-        });
+      await deleteAddressUseCase.execute({
+        addressId: id,
+        userId,
+      });
 
-        return reply.status(204).send();
-      } catch (err) {
-        if (err instanceof ResourceNotFoundError) {
-          return reply.status(404).send({ message: "Endereço não encontrado ou não pertence ao usuário" });
-        }
-
-        throw err;
-      }
+      return reply.status(204).send();
     }
   );
 };

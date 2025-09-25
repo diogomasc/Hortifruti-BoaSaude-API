@@ -21,7 +21,8 @@ export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
       },
     },
     async (request, reply) => {
-      const { search, category, producerId, limit, offset, sortByPrice } = request.query;
+      const { search, category, producerId, limit, offset, sortByPrice } =
+        request.query;
 
       const conditions: SQL[] = [];
 
@@ -59,7 +60,9 @@ export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
           })
           .from(products)
           .leftJoin(productImages, eq(productImages.productId, products.id))
-          .orderBy(sortByPrice === "asc" ? asc(products.price) : desc(products.price))
+          .orderBy(
+            sortByPrice === "asc" ? asc(products.price) : desc(products.price)
+          )
           .offset(calculatedOffset)
           .limit(limit)
           .where(and(...conditions)),
@@ -68,10 +71,10 @@ export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
 
       // Agrupar produtos com suas imagens
       const productsMap = new Map();
-      
+
       result.forEach((row) => {
         const productId = row.id;
-        
+
         if (!productsMap.has(productId)) {
           productsMap.set(productId, {
             id: row.id,
@@ -85,7 +88,7 @@ export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
             images: [],
           });
         }
-        
+
         if (row.images && row.images.id) {
           productsMap.get(productId).images.push(row.images);
         }

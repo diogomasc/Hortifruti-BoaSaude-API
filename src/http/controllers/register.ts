@@ -101,36 +101,23 @@ export const registerRoute: FastifyPluginAsyncZod = async (server) => {
       },
     },
     async (request, reply) => {
-      try {
-        // Instanciar dependências
-        const usersRepository = new DrizzleUsersRepository();
-        const walletsRepository = new DrizzleWalletsRepository();
-        const registerUseCase = new RegisterUseCase(
-          usersRepository,
-          walletsRepository
-        );
+      // Instanciar dependências
+      const usersRepository = new DrizzleUsersRepository();
+      const walletsRepository = new DrizzleWalletsRepository();
+      const registerUseCase = new RegisterUseCase(
+        usersRepository,
+        walletsRepository
+      );
 
-        // Executar use case
-        const { user } = await registerUseCase.execute(request.body);
+      // Executar use case
+      const { user } = await registerUseCase.execute(request.body);
 
-        return reply.status(201).send({
-          user: {
-            ...user,
-            createdAt: user.createdAt.toISOString(),
-          },
-        });
-      } catch (error) {
-        if (error instanceof UserAlreadyExistsError) {
-          return reply.status(400).send({
-            message: "Informações inválidas",
-          });
-        }
-
-        console.error("Erro ao criar usuário:", error);
-        return reply.status(400).send({
-          message: "Informações inválidas",
-        });
-      }
+      return reply.status(201).send({
+        user: {
+          ...user,
+          createdAt: user.createdAt.toISOString(),
+        },
+      });
     }
   );
 };

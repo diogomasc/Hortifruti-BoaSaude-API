@@ -25,63 +25,32 @@ export const updateOrderItemStatusRoute: FastifyPluginAsyncZod = async function 
       },
     },
     async (request, reply) => {
-  try {
-    const { orderId, itemId } = request.params;
-    const { status, rejectionReason } = request.body;
+      const { orderId, itemId } = request.params;
+      const { status, rejectionReason } = request.body;
 
-    // Obter ID do usuário autenticado
-    const producerId = request.user?.sub;
+      // Obter ID do usuário autenticado
+      const producerId = request.user?.sub;
 
-    if (!producerId) {
-      return reply
-        .status(401)
-        .send({ message: "Token de autenticação inválido" });
-    }
+      if (!producerId) {
+        return reply
+          .status(401)
+          .send({ message: "Token de autenticação inválido" });
+      }
 
-    // Instanciar use case
-    const ordersRepository = new DrizzleOrdersRepository();
-        const updateOrderItemStatusUseCase = new UpdateOrderItemStatusUseCase(ordersRepository);
+      // Instanciar use case
+      const ordersRepository = new DrizzleOrdersRepository();
+      const updateOrderItemStatusUseCase = new UpdateOrderItemStatusUseCase(ordersRepository);
 
-    // Executar use case
-    await updateOrderItemStatusUseCase.execute({
-      itemId,
-      status,
-      rejectionReason,
-    });
-
-    return reply.status(200).send({
-      message: "Status do item atualizado com sucesso",
-    });
-  } catch (error) {
-    if (error instanceof ResourceNotFoundError) {
-      return reply.status(404).send({
-        message: "Item do pedido não encontrado",
+      // Executar use case
+      await updateOrderItemStatusUseCase.execute({
+        itemId,
+        status,
+        rejectionReason,
       });
-    }
 
-    if (error instanceof NotAllowedError) {
-      return reply.status(403).send({
-        message:
-          "Acesso negado. Apenas o produtor dono do item pode atualizar seu status",
+      return reply.status(200).send({
+        message: "Status do item atualizado com sucesso",
       });
-    }
-
-    if (error instanceof InvalidStatusTransitionError) {
-      return reply.status(400).send({
-        message: "Transição de status inválida. O item não está mais pendente",
-      });
-    }
-
-    if (error instanceof Error) {
-      return reply.status(400).send({
-        message: error.message,
-      });
-    }
-
-    return reply.status(500).send({
-      message: "Erro interno do servidor",
-    });
-  }
     }
   );
 };

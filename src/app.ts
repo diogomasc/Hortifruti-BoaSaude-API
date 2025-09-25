@@ -12,6 +12,7 @@ import fastifyCors from "@fastify/cors";
 import { appRoutes } from "./http/routes";
 import { env } from "./env";
 import { join } from "path";
+import { globalErrorHandler } from "./http/middlewares/global-error-handler";
 
 export function buildApp() {
   const app = Fastify({
@@ -71,6 +72,9 @@ export function buildApp() {
   app.setValidatorCompiler(validatorCompiler);
   // Converte os dados de saída
   app.setSerializerCompiler(serializerCompiler);
+
+  // Registrar middleware global de tratamento de erros
+  app.setErrorHandler(globalErrorHandler);
 
   app.register(appRoutes);
 

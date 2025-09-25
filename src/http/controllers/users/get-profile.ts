@@ -18,25 +18,17 @@ export const getUserProfileRoute: FastifyPluginAsyncZod = async (server) => {
       },
     },
     async (request, reply) => {
-      try {
-        const { sub: userId } = getAuthenticatedUserFromRequest(request);
+      const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
-        const getUserCompleteProfileUseCase = makeGetUserCompleteProfileUseCase();
+      const getUserCompleteProfileUseCase = makeGetUserCompleteProfileUseCase();
 
-        const { user } = await getUserCompleteProfileUseCase.execute({
-          userId,
-        });
+      const { user } = await getUserCompleteProfileUseCase.execute({
+        userId,
+      });
 
-        return reply.status(200).send({
-          user,
-        });
-      } catch (err) {
-        if (err instanceof ResourceNotFoundError) {
-          return reply.status(404).send({ message: err.message });
-        }
-
-        throw err;
-      }
+      return reply.status(200).send({
+        user,
+      });
     }
   );
 };

@@ -32,7 +32,9 @@ export const toggleUserActiveStatusRoute: FastifyPluginAsyncZod =
               }),
             }),
             400: errorResponseSchema.describe("Dados inválidos"),
-            401: errorResponseSchema.describe("Token não fornecido ou inválido"),
+            401: errorResponseSchema.describe(
+              "Token não fornecido ou inválido"
+            ),
             404: errorResponseSchema.describe("Usuário não encontrado"),
           },
         },
@@ -40,27 +42,19 @@ export const toggleUserActiveStatusRoute: FastifyPluginAsyncZod =
       async (request, reply) => {
         const { isActive } = request.body;
 
-        try {
-          const { sub: userId } = getAuthenticatedUserFromRequest(request);
+        const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
-          const toggleUserActiveStatusUseCase =
-            makeToggleUserActiveStatusUseCase();
+        const toggleUserActiveStatusUseCase =
+          makeToggleUserActiveStatusUseCase();
 
-          const { user } = await toggleUserActiveStatusUseCase.execute({
-            userId,
-            isActive,
-          });
+        const { user } = await toggleUserActiveStatusUseCase.execute({
+          userId,
+          isActive,
+        });
 
-          return reply.status(200).send({
-            user,
-          });
-        } catch (err) {
-          if (err instanceof ResourceNotFoundError) {
-            return reply.status(404).send({ message: err.message });
-          }
-
-          throw err;
-        }
+        return reply.status(200).send({
+          user,
+        });
       }
     );
   };

@@ -28,7 +28,8 @@ export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
       const user = getAuthenticatedUserFromRequest(request);
 
       // Calcular offset baseado na página ou usar o offset fornecido diretamente
-      const calculatedOffset = offset !== undefined ? offset : (page - 1) * limit;
+      const calculatedOffset =
+        offset !== undefined ? offset : (page - 1) * limit;
 
       const conditions: SQL[] = [eq(products.producerId, user.sub)];
 

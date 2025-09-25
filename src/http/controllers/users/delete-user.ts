@@ -23,23 +23,15 @@ export const deleteUserRoute: FastifyPluginAsyncZod = async function (server) {
       },
     },
     async (request, reply) => {
-      try {
-        const { sub: userId } = getAuthenticatedUserFromRequest(request);
+      const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
-        const deleteUserUseCase = makeDeleteUserUseCase();
+      const deleteUserUseCase = makeDeleteUserUseCase();
 
-        await deleteUserUseCase.execute({
-          userId,
-        });
+      await deleteUserUseCase.execute({
+        userId,
+      });
 
-        return reply.status(204).send();
-      } catch (err) {
-        if (err instanceof ResourceNotFoundError) {
-          return reply.status(404).send({ message: err.message });
-        }
-
-        throw err;
-      }
+      return reply.status(204).send();
     }
   );
 };

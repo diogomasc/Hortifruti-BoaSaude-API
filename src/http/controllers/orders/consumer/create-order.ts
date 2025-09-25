@@ -7,7 +7,10 @@ import { DrizzleUsersRepository } from "../../../../repositories/drizzle-users-r
 import { ResourceNotFoundError } from "../../../../use-cases/errors/resource-not-found-error";
 import { InvalidRoleError } from "../../../../use-cases/errors/invalid-role-error";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
-import { createOrderBodySchema, createOrderResponseSchema } from "../../../schemas/orders";
+import {
+  createOrderBodySchema,
+  createOrderResponseSchema,
+} from "../../../schemas/orders";
 // Função utilitária para normalizar dados de recorrência
 function normalizeRecurrenceData(data: {
   isRecurring: boolean;
@@ -24,9 +27,7 @@ function normalizeRecurrenceData(data: {
   return data;
 }
 
-export const createOrderRoute: FastifyPluginAsyncZod = async function (
-  app
-) {
+export const createOrderRoute: FastifyPluginAsyncZod = async function (app) {
   app.post(
     "/",
     {
@@ -41,68 +42,44 @@ export const createOrderRoute: FastifyPluginAsyncZod = async function (
       },
     },
     async (request, reply) => {
-      try {
-        const { deliveryAddressId, items, isRecurring, frequency, customDays } =
-          request.body;
-        const { sub: consumerId } = getAuthenticatedUserFromRequest(request);
+      const { deliveryAddressId, items, isRecurring, frequency, customDays } =
+        request.body;
+      const { sub: consumerId } = getAuthenticatedUserFromRequest(request);
 
-        // Instanciar repositórios
-        const ordersRepository = new DrizzleOrdersRepository();
-        const addressesRepository = new DrizzleAddressesRepository();
-        const productsRepository = new DrizzleProductsRepository();
-        const usersRepository = new DrizzleUsersRepository();
+      // Instanciar repositórios
+      const ordersRepository = new DrizzleOrdersRepository();
+      const addressesRepository = new DrizzleAddressesRepository();
+      const productsRepository = new DrizzleProductsRepository();
+      const usersRepository = new DrizzleUsersRepository();
 
-        // Instanciar use case
-        const createOrderUseCase = new CreateOrderUseCase(
-          ordersRepository,
-          addressesRepository,
-          productsRepository,
-          usersRepository
-        );
+      // Instanciar use case
+      const createOrderUseCase = new CreateOrderUseCase(
+        ordersRepository,
+        addressesRepository,
+        productsRepository,
+        usersRepository
+      );
 
-        // Normalizar dados de recorrência
-        const normalizedRecurrence = normalizeRecurrenceData({
-          isRecurring,
-          frequency,
-          customDays,
-        });
+      // Normalizar dados de recorrência
+      const normalizedRecurrence = normalizeRecurrenceData({
+        isRecurring,
+        frequency,
+        customDays,
+      });
 
-        // Executar use case
-        const { order } = await createOrderUseCase.execute({
-          consumerId,
-          deliveryAddressId,
-          items,
-          isRecurring: normalizedRecurrence.isRecurring,
-          frequency: normalizedRecurrence.frequency,
-          customDays: normalizedRecurrence.customDays,
-        });
+      // Executar use case
+      const { order } = await createOrderUseCase.execute({
+        consumerId,
+        deliveryAddressId,
+        items,
+        isRecurring: normalizedRecurrence.isRecurring,
+        frequency: normalizedRecurrence.frequency,
+        customDays: normalizedRecurrence.customDays,
+      });
 
-        return reply.status(201).send({
-          order,
-        });
-      } catch (error) {
-        if (error instanceof ResourceNotFoundError) {
-          return reply.status(404).send({
-            message: error.message,
-          });
-        }
-
-        if (error instanceof InvalidRoleError) {
-          return reply.status(403).send({
-            message: error.message,
-          });
-        }
-
-        if (error instanceof Error) {
-          return reply.status(400).send({
-            message: error.message,
-          });
-        }
-
-        return reply.status(500).send({
-          message: "Erro interno do servidor",
-        });
-      }
+      return reply.status(201).send({
+        order,
+      });
     }
   );
 };

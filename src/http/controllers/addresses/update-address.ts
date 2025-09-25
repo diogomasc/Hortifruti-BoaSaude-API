@@ -29,37 +29,25 @@ export const updateAddressRoute: FastifyPluginAsyncZod = async (server) => {
       const { street, number, complement, city, state, country, zipCode } =
         request.body;
 
-      try {
-        const { sub: userId } = getAuthenticatedUserFromRequest(request);
+      const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
-        const updateAddressUseCase = makeUpdateAddressUseCase();
+      const updateAddressUseCase = makeUpdateAddressUseCase();
 
-        const { address } = await updateAddressUseCase.execute({
-          addressId: id,
-          userId,
-          street,
-          number,
-          complement,
-          city,
-          state,
-          country,
-          zipCode,
-        });
+      const { address } = await updateAddressUseCase.execute({
+        addressId: id,
+        userId,
+        street,
+        number,
+        complement,
+        city,
+        state,
+        country,
+        zipCode,
+      });
 
-        return reply.status(200).send({
-          address,
-        });
-      } catch (err) {
-        if (err instanceof ResourceNotFoundError) {
-          return reply
-            .status(404)
-            .send({
-              message: "Endereço não encontrado ou não pertence ao usuário",
-            });
-        }
-
-        throw err;
-      }
+      return reply.status(200).send({
+        address,
+      });
     }
   );
 };

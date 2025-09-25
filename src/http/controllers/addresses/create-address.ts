@@ -25,28 +25,24 @@ export const createAddressRoute: FastifyPluginAsyncZod = async (server) => {
       const { street, number, complement, city, state, country, zipCode } =
         request.body;
 
-      try {
-        const { sub: userId } = getAuthenticatedUserFromRequest(request);
+      const { sub: userId } = getAuthenticatedUserFromRequest(request);
 
-        const createAddressUseCase = makeCreateAddressUseCase();
+      const createAddressUseCase = makeCreateAddressUseCase();
 
-        const { address } = await createAddressUseCase.execute({
-          userId,
-          street,
-          number,
-          complement,
-          city,
-          state,
-          country,
-          zipCode,
-        });
+      const { address } = await createAddressUseCase.execute({
+        userId,
+        street,
+        number,
+        complement,
+        city,
+        state,
+        country,
+        zipCode,
+      });
 
-        return reply.status(201).send({
-          address,
-        });
-      } catch (err) {
-        throw err;
-      }
+      return reply.status(201).send({
+        address,
+      });
     }
   );
 };

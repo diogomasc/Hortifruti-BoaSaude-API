@@ -36,32 +36,24 @@ export const loginRoute: FastifyPluginAsyncZod = async (server) => {
     async (request, reply) => {
       const { email, password } = request.body;
 
-      try {
-        const authenticateUseCase = makeAuthenticateUseCase();
+      const authenticateUseCase = makeAuthenticateUseCase();
 
-        const { user, token } = await authenticateUseCase.execute({
-          email,
-          password,
-        });
+      const { user, token } = await authenticateUseCase.execute({
+        email,
+        password,
+      });
 
-        return reply.status(200).send({
-          user: {
-            id: user.id,
-            name: user.firstName + " " + user.lastName,
-            email: user.email,
-            role: user.role,
-            isActive: user.isActive,
-            createdAt: user.createdAt,
-          },
-          token,
-        });
-      } catch (err) {
-        if (err instanceof InvalidCredentialsError) {
-          return reply.status(400).send({ message: err.message });
-        }
-
-        throw err;
-      }
+      return reply.status(200).send({
+        user: {
+          id: user.id,
+          name: user.firstName + " " + user.lastName,
+          email: user.email,
+          role: user.role,
+          isActive: user.isActive,
+          createdAt: user.createdAt,
+        },
+        token,
+      });
     }
   );
 };

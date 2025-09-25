@@ -48,7 +48,7 @@ export const addProductImageRoute: FastifyPluginAsyncZod = async (server) => {
       // Verificar tipo do arquivo
       const allowedMimeTypes = [
         "image/jpeg",
-        "image/jpg", 
+        "image/jpg",
         "image/png",
         "image/webp",
       ];
@@ -63,7 +63,7 @@ export const addProductImageRoute: FastifyPluginAsyncZod = async (server) => {
       await mkdir(uploadsDir, { recursive: true });
 
       // Gerar nome único para o arquivo
-      const fileExtension = data.filename?.split('.').pop() || 'jpg';
+      const fileExtension = data.filename?.split(".").pop() || "jpg";
       const fileName = `${randomUUID()}.${fileExtension}`;
       const filePath = join(uploadsDir, fileName);
 

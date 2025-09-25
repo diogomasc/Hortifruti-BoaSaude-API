@@ -5,7 +5,11 @@ import { ResourceNotFoundError } from "../../../../use-cases/errors/resource-not
 import { NotAllowedError } from "../../../../use-cases/errors/not-allowed-error";
 import { InvalidStatusTransitionError } from "../../../../use-cases/errors/invalid-status-transition-error";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
-import { orderParamsSchema, manageOrderBodySchema, manageOrderResponseSchema } from "../../../schemas/orders";
+import {
+  orderParamsSchema,
+  manageOrderBodySchema,
+  manageOrderResponseSchema,
+} from "../../../schemas/orders";
 
 export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
   app.patch(
@@ -23,98 +27,70 @@ export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request, reply) => {
-  try {
-    const { orderId } = request.params;
-    const { action, isRecurring, frequency, customDays } = request.body;
-    const { sub: consumerId } = getAuthenticatedUserFromRequest(request);
+      const { orderId } = request.params;
+      const { action, isRecurring, frequency, customDays } = request.body;
+      const { sub: consumerId } = getAuthenticatedUserFromRequest(request);
 
-    // Instanciar use case
-    const ordersRepository = new DrizzleOrdersRepository();
-    const manageOrderUseCase = new ManageOrderUseCase(ordersRepository);
+      // Instanciar use case
+      const ordersRepository = new DrizzleOrdersRepository();
+      const manageOrderUseCase = new ManageOrderUseCase(ordersRepository);
 
-    // Executar use case
-    await manageOrderUseCase.execute({
-      orderId,
-      consumerId,
-      action,
-      isRecurring,
-      frequency,
-      customDays,
-    });
+      // Executar use case
+      await manageOrderUseCase.execute({
+        orderId,
+        consumerId,
+        action,
+        isRecurring,
+        frequency,
+        customDays,
+      });
 
-    // Construir mensagem detalhada baseada nas alterações
-    const messages = [];
+      // Construir mensagem detalhada baseada nas alterações
+      const messages = [];
 
-    // Adicionar mensagem da ação se executada
-    if (action) {
-      const actionMessages = {
-        pause: "pausado",
-        resume: "retomado",
-        cancel: "cancelado",
-      };
-      messages.push(`${actionMessages[action as keyof typeof actionMessages]}`);
-    }
-
-    // Adicionar mensagem sobre recorrência
-    if (isRecurring === false) {
-      messages.push("recorrência desativada");
-    } else if (frequency !== undefined || customDays !== undefined) {
-      if (frequency === "CUSTOM" && customDays) {
-        messages.push(
-          `frequência atualizada para personalizada (${customDays} dias)`
-        );
-      } else if (frequency && frequency !== "CUSTOM") {
-        const frequencyLabels = {
-          WEEKLY: "semanal",
-          BIWEEKLY: "quinzenal",
-          MONTHLY: "mensal",
-          QUARTERLY: "trimestral",
+      // Adicionar mensagem da ação se executada
+      if (action) {
+        const actionMessages = {
+          pause: "pausado",
+          resume: "retomado",
+          cancel: "cancelado",
         };
         messages.push(
-          `frequência atualizada para ${
-            frequencyLabels[frequency as keyof typeof frequencyLabels]
-          }`
+          `${actionMessages[action as keyof typeof actionMessages]}`
         );
       }
-    }
 
-    const message =
-      messages.length > 0
-        ? `Pedido ${messages.join(" e ")} com sucesso`
-        : "Pedido atualizado com sucesso";
+      // Adicionar mensagem sobre recorrência
+      if (isRecurring === false) {
+        messages.push("recorrência desativada");
+      } else if (frequency !== undefined || customDays !== undefined) {
+        if (frequency === "CUSTOM" && customDays) {
+          messages.push(
+            `frequência atualizada para personalizada (${customDays} dias)`
+          );
+        } else if (frequency && frequency !== "CUSTOM") {
+          const frequencyLabels = {
+            WEEKLY: "semanal",
+            BIWEEKLY: "quinzenal",
+            MONTHLY: "mensal",
+            QUARTERLY: "trimestral",
+          };
+          messages.push(
+            `frequência atualizada para ${
+              frequencyLabels[frequency as keyof typeof frequencyLabels]
+            }`
+          );
+        }
+      }
 
-    return reply.status(200).send({
-      message,
-    });
-  } catch (error) {
-    if (error instanceof ResourceNotFoundError) {
-      return reply.status(404).send({
-        message: error.message,
+      const message =
+        messages.length > 0
+          ? `Pedido ${messages.join(" e ")} com sucesso`
+          : "Pedido atualizado com sucesso";
+
+      return reply.status(200).send({
+        message,
       });
-    }
-
-    if (error instanceof NotAllowedError) {
-      return reply.status(403).send({
-        message: error.message,
-      });
-    }
-
-    if (error instanceof InvalidStatusTransitionError) {
-      return reply.status(400).send({
-        message: error.message,
-      });
-    }
-
-    if (error instanceof Error) {
-      return reply.status(400).send({
-        message: error.message,
-      });
-    }
-
-    return reply.status(500).send({
-      message: "Erro interno do servidor",
-    });
-  }
     }
   );
 };

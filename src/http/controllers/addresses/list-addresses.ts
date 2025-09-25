@@ -22,26 +22,22 @@ export const listAddressesRoute: FastifyPluginAsyncZod = async (server) => {
       },
     },
     async (request, reply) => {
-      try {
-        const { sub: userId } = getAuthenticatedUserFromRequest(request);
-        const { search, limit, offset } = request.query;
+      const { sub: userId } = getAuthenticatedUserFromRequest(request);
+      const { search, limit, offset } = request.query;
 
-        const listUserAddressesUseCase = makeListUserAddressesUseCase();
+      const listUserAddressesUseCase = makeListUserAddressesUseCase();
 
-        const { addresses, pagination } = await listUserAddressesUseCase.execute({
-          userId,
-          search,
-          limit,
-          offset,
-        });
+      const { addresses, pagination } = await listUserAddressesUseCase.execute({
+        userId,
+        search,
+        limit,
+        offset,
+      });
 
-        return reply.status(200).send({
-          addresses,
-          pagination,
-        });
-      } catch (err) {
-        throw err;
-      }
+      return reply.status(200).send({
+        addresses,
+        pagination,
+      });
     }
   );
 };

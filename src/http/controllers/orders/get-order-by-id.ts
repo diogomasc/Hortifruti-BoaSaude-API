@@ -19,9 +19,13 @@ export const getOrderByIdRoute: FastifyPluginAsyncZod = async function (
         description:
           "Obtém os detalhes completos de um pedido específico pelo seu ID, incluindo informações de recorrência e detalhes dos itens. O usuário só pode acessar seus próprios pedidos.",
         security: [{ bearerAuth: [] }],
-        params: uuidParamsSchema.extend({
-          orderId: uuidParamsSchema.shape.id.describe("ID do pedido deve ser um UUID válido"),
-        }).omit({ id: true }),
+        params: uuidParamsSchema
+          .extend({
+            orderId: uuidParamsSchema.shape.id.describe(
+              "ID do pedido deve ser um UUID válido"
+            ),
+          })
+          .omit({ id: true }),
         response: {
           200: z
             .object({
@@ -97,75 +101,53 @@ export const getOrderByIdRoute: FastifyPluginAsyncZod = async function (
                 .optional(),
             })
             .describe("ID inválido ou erro de validação"),
-          401: errorResponseSchema.describe("Token de autenticação inválido ou não fornecido"),
+          401: errorResponseSchema.describe(
+            "Token de autenticação inválido ou não fornecido"
+          ),
           403: errorResponseSchema.describe(
-              "Acesso negado - usuário não autorizado a acessar este pedido"
-            ),
+            "Acesso negado - usuário não autorizado a acessar este pedido"
+          ),
           404: errorResponseSchema.describe("Pedido não encontrado"),
           500: errorResponseSchema.describe("Erro interno do servidor"),
         },
       },
     },
     async (request, reply) => {
-      try {
-        const { orderId } = request.params;
-        const { sub: userId, role: userRole } =
-          getAuthenticatedUserFromRequest(request);
+      const { orderId } = request.params;
+      const { sub: userId, role: userRole } =
+        getAuthenticatedUserFromRequest(request);
 
-        // Instanciar repositório
-        const ordersRepository = new DrizzleOrdersRepository();
+      // Instanciar repositório
+      const ordersRepository = new DrizzleOrdersRepository();
 
-        // Instanciar use case
-        const getOrderUseCase = new GetOrderUseCase(ordersRepository);
+      // Instanciar use case
+      const getOrderUseCase = new GetOrderUseCase(ordersRepository);
 
-        // Executar use case
-        const { order } = await getOrderUseCase.execute({
-          orderId,
-          userId,
-          userRole,
-        });
+      // Executar use case
+      const { order } = await getOrderUseCase.execute({
+        orderId,
+        userId,
+        userRole,
+      });
 
-        // Converter datas para strings
-        const formattedOrder = {
-          ...order,
-          createdAt: order.createdAt.toISOString(),
-          updatedAt: order.updatedAt.toISOString(),
-          completedAt: order.completedAt?.toISOString() || null,
-          nextDeliveryDate: order.nextDeliveryDate?.toISOString() || null,
-          pausedAt: order.pausedAt?.toISOString() || null,
-          cancelledAt: order.cancelledAt?.toISOString() || null,
-          items: order.items.map((item) => ({
-            ...item,
-            updatedAt: item.updatedAt.toISOString(),
-          })),
-        };
+      // Converter datas para strings
+      const formattedOrder = {
+        ...order,
+        createdAt: order.createdAt.toISOString(),
+        updatedAt: order.updatedAt.toISOString(),
+        completedAt: order.completedAt?.toISOString() || null,
+        nextDeliveryDate: order.nextDeliveryDate?.toISOString() || null,
+        pausedAt: order.pausedAt?.toISOString() || null,
+        cancelledAt: order.cancelledAt?.toISOString() || null,
+        items: order.items.map((item) => ({
+          ...item,
+          updatedAt: item.updatedAt.toISOString(),
+        })),
+      };
 
-        return reply.status(200).send({
-          order: formattedOrder,
-        });
-      } catch (error) {
-        if (error instanceof ResourceNotFoundError) {
-          return reply.status(404).send({
-            message: error.message,
-          });
-        }
-
-        if (error instanceof NotAllowedError) {
-          return reply.status(403).send({
-            message: error.message,
-          });
-        }
-
-        if (error instanceof Error) {
-          return reply.status(400).send({
-            message: error.message,
-          });
-        }
-
-        return reply.status(500).send({
-          message: "Erro interno do servidor",
-        });
-      }
+      return reply.status(200).send({
+        order: formattedOrder,
+      });
     }
   );
 };

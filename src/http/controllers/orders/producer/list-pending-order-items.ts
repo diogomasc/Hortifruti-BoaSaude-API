@@ -21,7 +21,6 @@ export const listPendingOrderItemsRoute: FastifyPluginAsyncZod = async function 
       },
     },
     async (request, reply) => {
-  try {
     // Obter ID do usuário autenticado
     const { sub: producerId } = getAuthenticatedUserFromRequest(request);
 
@@ -93,17 +92,6 @@ export const listPendingOrderItemsRoute: FastifyPluginAsyncZod = async function 
         hasNext,
       },
     });
-  } catch (error) {
-    if (error instanceof Error) {
-      return reply.status(400).send({
-        message: error.message,
-      });
-    }
-
-    return reply.status(500).send({
-      message: "Erro interno do servidor",
-    });
-  }
     }
   );
 };
