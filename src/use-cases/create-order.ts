@@ -107,6 +107,9 @@ export class CreateOrderUseCase {
       customDays,
     });
 
+    // Nota: A quantidade dos produtos será decrementada apenas quando o produtor aprovar os itens
+    // Isso é feito no use case update-order-item-status
+
     return {
       order,
     };

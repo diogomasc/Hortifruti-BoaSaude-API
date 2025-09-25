@@ -1,6 +1,8 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { UpdateOrderItemStatusUseCase } from "../../../../use-cases/update-order-item-status";
 import { DrizzleOrdersRepository } from "../../../../repositories/drizzle-orders-repository";
+import { DrizzleWalletsRepository } from "../../../../repositories/drizzle-wallets-repository";
+import { DrizzleProductsRepository } from "../../../../repositories/drizzle-products-repository";
 import {
   orderItemParamsSchema,
   updateOrderItemStatusBodySchema,
@@ -39,8 +41,12 @@ export const updateOrderItemStatusRoute: FastifyPluginAsyncZod =
 
         // Instanciar use case
         const ordersRepository = new DrizzleOrdersRepository();
+        const walletsRepository = new DrizzleWalletsRepository();
+        const productsRepository = new DrizzleProductsRepository();
         const updateOrderItemStatusUseCase = new UpdateOrderItemStatusUseCase(
-          ordersRepository
+          ordersRepository,
+          walletsRepository,
+          productsRepository
         );
 
         // Executar use case

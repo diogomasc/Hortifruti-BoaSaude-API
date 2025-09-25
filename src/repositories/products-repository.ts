@@ -16,6 +16,7 @@ export interface ProductsRepository {
     total: number;
   }>;
   update(id: string, data: UpdateProductData): Promise<Product | null>;
+  updateQuantity(id: string, quantity: number): Promise<Product | null>;
   delete(id: string): Promise<void>;
 }
 

@@ -183,6 +183,20 @@ export class DrizzleProductsRepository implements ProductsRepository {
     return mapDrizzleProductToProduct(updatedProduct, mappedImages);
   }
 
+  async updateQuantity(id: string, quantity: number): Promise<Product | null> {
+    const [updatedProduct] = await db
+      .update(products)
+      .set({ quantity })
+      .where(eq(products.id, id))
+      .returning();
+
+    if (!updatedProduct) {
+      return null;
+    }
+
+    return mapDrizzleProductToProduct(updatedProduct, []);
+  }
+
   async delete(id: string): Promise<void> {
     await db.delete(products).where(eq(products.id, id));
   }
