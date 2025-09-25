@@ -1,1 +1,0 @@
-ALTER TYPE "public"."subscription_frequency" ADD VALUE 'BIWEEKLY' BEFORE 'MONTHLY';

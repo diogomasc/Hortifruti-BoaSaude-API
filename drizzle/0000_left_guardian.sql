@@ -1,7 +1,7 @@
 CREATE TYPE "public"."order_item_status" AS ENUM('PENDING', 'APPROVED', 'REJECTED');--> statement-breakpoint
 CREATE TYPE "public"."order_status" AS ENUM('PENDING', 'COMPLETED', 'REJECTED', 'PARTIALLY_COMPLETED', 'PAUSED', 'CANCELLED');--> statement-breakpoint
 CREATE TYPE "public"."product_categories" AS ENUM('frutas', 'legumes', 'verduras', 'ervas', 'graos', 'tuberculos', 'hortalicas', 'organicos', 'ovos', 'mel', 'cogumelos', 'temperos', 'sementes', 'castanhas', 'integrais', 'conservas', 'compotas', 'polpa_fruta', 'polpa_vegetal', 'sazonal', 'flores_comestiveis', 'vegano', 'kits', 'outros');--> statement-breakpoint
-CREATE TYPE "public"."subscription_frequency" AS ENUM('WEEKLY', 'MONTHLY', 'QUARTERLY', 'CUSTOM');--> statement-breakpoint
+CREATE TYPE "public"."subscription_frequency" AS ENUM('WEEKLY', 'BIWEEKLY', 'MONTHLY', 'QUARTERLY', 'CUSTOM');--> statement-breakpoint
 CREATE TYPE "public"."user_roles" AS ENUM('consumer', 'producer', 'admin');--> statement-breakpoint
 CREATE TABLE "addresses" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,

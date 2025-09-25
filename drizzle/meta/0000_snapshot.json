@@ -1,5 +1,5 @@
 {
-  "id": "2b15bedc-bdc1-447a-9e82-d0cf9cfe67af",
+  "id": "91f5cfd9-5505-42ea-8cf6-15e857bcc63d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -742,6 +742,7 @@
       "schema": "public",
       "values": [
         "WEEKLY",
+        "BIWEEKLY",
         "MONTHLY",
         "QUARTERLY",
         "CUSTOM"
