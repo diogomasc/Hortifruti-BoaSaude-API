@@ -5,18 +5,17 @@
 @baseUrl = http://localhost:3333
 
 # Tokens de autenticação (serão atualizados após login)
-@consumerToken = 
-@producer1Token = 
-@producer2Token = 
-
+@consumerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NDFiM2M5Zi1lMDc4LTQxZTgtOTkzMC01Mzc5ZWM0ZWYyN2UiLCJyb2xlIjoiY29uc3VtZXIiLCJpYXQiOjE3NTg4MTIxNzMsImV4cCI6MTc1OTQxNjk3M30.SneDayPX3bfHJl5FP6HN-38n93X5v45Gj_wHEOrxPJY
+@producer1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNjRmYTlkZS04MDVmLTQ1NjItOWJlNi1mM2MwYzY5MmI5NTIiLCJyb2xlIjoicHJvZHVjZXIiLCJpYXQiOjE3NTg4MTI2NTEsImV4cCI6MTc1OTQxNzQ1MX0.7hlXLAjmdiDZ6jsyf8XQ4Rz6mCTPxQ4EjvAAQbDiJLg
+@producer2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjJmZjNiOS1kNjE0LTRmZDAtOTU3Yi0xZDc1M2QzN2I2ZTEiLCJyb2xlIjoicHJvZHVjZXIiLCJpYXQiOjE3NTg4MTI3MTksImV4cCI6MTc1OTQxNzUxOX0.DJn2w5p9By3cKj589QaFIITI4LSo8LlhdPl9tsbGDAM
 # IDs que serão preenchidos durante a demonstração
-@addressId = 
-@product1Id = 
-@product2Id = 
-@product3Id = 
-@product4Id = 
-@orderId = 
-@orderItemId = 
+@addressId = e89493b3-67e1-4cd7-9982-49da594cd522
+@product1Id = 49c53fdd-e268-4767-97cd-53222b406bf6
+@product2Id = 04686989-57f2-4f4e-8e20-b57d7ccb24d4
+@product3Id = 3527fefd-0c08-45be-9eb8-60275b1504c3
+@product4Id = 6eb4bfba-79ae-4a78-951d-ef1899c3f27f
+@orderId = 21b36be2-a99f-42b5-8d20-a77e4842cec1
+@orderItemId = 217320de-dc1a-4884-8b8b-78d565e1c588
 
 ### ========================================
 ### DEMONSTRAÇÃO COMPLETA DA API HORTIFRUTI BOA SAÚDE
@@ -230,7 +229,7 @@ Content-Type: application/json
 
 ###
 
-### 5.2 Criar Pedido Único Misto (Consumidor)
+### 5.2 Criar Pedido Único Misto com Recorrencia (Consumidor)
 POST {{baseUrl}}/orders/
 Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
@@ -250,7 +249,9 @@ Content-Type: application/json
       "productId": "{{product4Id}}",
       "quantity": 1
     }
-  ]
+  ],
+  "isRecurring": true,
+  "frequency": "WEEKLY"
 }
 
 # 📋 COPIE o orderId retornado e cole na variável @orderId
@@ -258,7 +259,7 @@ Content-Type: application/json
 
 ###
 
-### 5.3 Criar Pedido Recorrente Semanal (Consumidor)
+### 5.3 Criar Pedido sem recorrencia (Consumidor)
 POST {{baseUrl}}/orders/
 Authorization: Bearer {{consumerToken}}
 Content-Type: application/json
@@ -275,8 +276,7 @@ Content-Type: application/json
       "quantity": 2
     }
   ],
-  "isRecurring": true,
-  "frequency": "WEEKLY"
+  "isRecurring": false
 }
 
 ###
@@ -304,7 +304,7 @@ Content-Type: application/json
 ###
 
 ### 6.3 Aprovar Item do Pedido - Produtor 1
-PATCH {{baseUrl}}/orders/{{orderId}}/items/{{orderItemId}}/status/
+PUT {{baseUrl}}/orders/{{orderId}}/items/{{orderItemId}}/status
 Authorization: Bearer {{producer1Token}}
 Content-Type: application/json
 
@@ -315,7 +315,7 @@ Content-Type: application/json
 ###
 
 ### 6.4 Exemplo de Rejeição - Produtor 2
-# PATCH {{baseUrl}}/orders/{{orderId}}/items/{{orderItemId}}/status
+# PUT {{baseUrl}}/orders/{{orderId}}/items/{{orderItemId}}/status
 # Authorization: Bearer {{producer2Token}}
 # Content-Type: application/json
 # 
