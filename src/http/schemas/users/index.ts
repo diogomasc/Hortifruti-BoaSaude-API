@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { errorResponseSchema } from "../common";
+import { USER_ROLES_ARRAY } from "../../../constants";
 
 // Schema base do usuário
 export const userBaseSchema = z.object({
@@ -9,7 +10,7 @@ export const userBaseSchema = z.object({
   lastName: z.string().describe("Sobrenome"),
   phone: z.string().optional().describe("Telefone do usuário"),
   role: z
-    .enum(["consumer", "producer", "admin"])
+    .enum(USER_ROLES_ARRAY as [string, ...string[]])
     .describe("Papel do usuário no sistema"),
   isActive: z.boolean().describe("Status de ativação da conta"),
   createdAt: z.date().describe("Data de criação da conta"),

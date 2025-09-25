@@ -1,15 +1,13 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { ManageOrderUseCase } from "../../../../use-cases/manage-order";
 import { DrizzleOrdersRepository } from "../../../../repositories/drizzle-orders-repository";
-import { ResourceNotFoundError } from "../../../../use-cases/errors/resource-not-found-error";
-import { NotAllowedError } from "../../../../use-cases/errors/not-allowed-error";
-import { InvalidStatusTransitionError } from "../../../../use-cases/errors/invalid-status-transition-error";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import {
   orderParamsSchema,
   manageOrderBodySchema,
   manageOrderResponseSchema,
 } from "../../../schemas/orders";
+import { ORDER_ACTIONS, FREQUENCY } from "../../../../constants";
 
 export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
   app.patch(
@@ -39,9 +37,9 @@ export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
       await manageOrderUseCase.execute({
         orderId,
         consumerId,
-        action,
+        action: action as typeof ORDER_ACTIONS.PAUSE | typeof ORDER_ACTIONS.RESUME | typeof ORDER_ACTIONS.CANCEL,
         isRecurring,
-        frequency,
+        frequency: frequency as typeof FREQUENCY.WEEKLY | typeof FREQUENCY.BIWEEKLY | typeof FREQUENCY.MONTHLY | typeof FREQUENCY.QUARTERLY,
         customDays,
       });
 
@@ -51,9 +49,9 @@ export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
       // Adicionar mensagem da ação se executada
       if (action) {
         const actionMessages = {
-          pause: "pausado",
-          resume: "retomado",
-          cancel: "cancelado",
+          [ORDER_ACTIONS.PAUSE]: "pausado",
+          [ORDER_ACTIONS.RESUME]: "retomado",
+          [ORDER_ACTIONS.CANCEL]: "cancelado",
         };
         messages.push(
           `${actionMessages[action as keyof typeof actionMessages]}`
@@ -64,16 +62,16 @@ export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
       if (isRecurring === false) {
         messages.push("recorrência desativada");
       } else if (frequency !== undefined || customDays !== undefined) {
-        if (frequency === "CUSTOM" && customDays) {
+        if (frequency === FREQUENCY.CUSTOM && customDays) {
           messages.push(
             `frequência atualizada para personalizada (${customDays} dias)`
           );
-        } else if (frequency && frequency !== "CUSTOM") {
+        } else if (frequency && frequency !== FREQUENCY.CUSTOM) {
           const frequencyLabels = {
-            WEEKLY: "semanal",
-            BIWEEKLY: "quinzenal",
-            MONTHLY: "mensal",
-            QUARTERLY: "trimestral",
+            [FREQUENCY.WEEKLY]: "semanal",
+            [FREQUENCY.BIWEEKLY]: "quinzenal",
+            [FREQUENCY.MONTHLY]: "mensal",
+            [FREQUENCY.QUARTERLY]: "trimestral",
           };
           messages.push(
             `frequência atualizada para ${

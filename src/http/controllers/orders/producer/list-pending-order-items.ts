@@ -3,6 +3,7 @@ import { ListPendingOrderItemsUseCase } from "../../../../use-cases/list-pending
 import { DrizzleOrdersRepository } from "../../../../repositories/drizzle-orders-repository";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import { listPendingOrderItemsQuerySchema, listPendingOrderItemsResponseSchema } from "../../../schemas/orders";
+import { OrderItemStatus } from "../../../../types";
 
 export const listPendingOrderItemsRoute: FastifyPluginAsyncZod = async function (
   app
@@ -26,7 +27,7 @@ export const listPendingOrderItemsRoute: FastifyPluginAsyncZod = async function 
 
     // Extrair parâmetros de query
     const { status, search, limit, offset } = request.query as {
-      status?: "PENDING" | "APPROVED" | "REJECTED";
+      status?: OrderItemStatus;
       search?: string;
       limit: number;
       offset: number;

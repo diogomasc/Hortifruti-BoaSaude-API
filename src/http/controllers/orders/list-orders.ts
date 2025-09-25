@@ -6,6 +6,7 @@ import {
   listOrdersQuerySchema,
   listOrdersResponseSchema,
 } from "../../schemas/orders";
+import { OrderStatus } from "../../../constants";
 
 export const listOrdersRoute: FastifyPluginAsyncZod = async function (server) {
   server.get(
@@ -38,7 +39,7 @@ export const listOrdersRoute: FastifyPluginAsyncZod = async function (server) {
       const { orders, pagination } = await listOrdersUseCase.execute({
         userId,
         userRole,
-        status,
+        status: status as OrderStatus,
         search,
         limit,
         offset,

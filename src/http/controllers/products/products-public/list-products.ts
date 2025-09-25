@@ -6,6 +6,7 @@ import {
   listProductsQuerySchema,
   listProductsResponseSchema,
 } from "../../../schemas/products";
+import { ProductCategory } from "../../../../constants/product-categories";
 
 export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
@@ -31,7 +32,7 @@ export const listProductsRoute: FastifyPluginAsyncZod = async (server) => {
       }
 
       if (category) {
-        conditions.push(eq(products.category, category));
+        conditions.push(eq(products.category, category as ProductCategory));
       }
 
       if (producerId) {

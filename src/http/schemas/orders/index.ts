@@ -1,25 +1,11 @@
 import { z } from "zod";
 import { paginationSchema, errorResponseSchema, validationErrorResponseSchema } from "../common";
+import { ORDER_STATUS_ARRAY, ORDER_ITEM_STATUS_ARRAY, FREQUENCY_ARRAY, ORDER_ACTIONS_ARRAY, FREQUENCY } from "../../../constants";
 
-// Enums para status
-export const orderStatusEnum = z.enum([
-  "PENDING",
-  "COMPLETED",
-  "REJECTED",
-  "PARTIALLY_COMPLETED",
-  "PAUSED",
-  "CANCELLED",
-]);
-
-export const orderItemStatusEnum = z.enum(["PENDING", "APPROVED", "REJECTED"]);
-
-export const frequencyEnum = z.enum([
-  "WEEKLY",
-  "BIWEEKLY",
-  "MONTHLY",
-  "QUARTERLY",
-  "CUSTOM",
-]);
+// Enums para status usando as constantes
+export const orderStatusEnum = z.enum(ORDER_STATUS_ARRAY as [string, ...string[]]);
+export const orderItemStatusEnum = z.enum(ORDER_ITEM_STATUS_ARRAY as [string, ...string[]]);
+export const frequencyEnum = z.enum(FREQUENCY_ARRAY as [string, ...string[]]);
 
 // Schema base do item do pedido
 export const orderItemBaseSchema = z.object({
@@ -124,7 +110,7 @@ export const createOrderBodySchema = z
         return false;
       }
       // Se frequency for CUSTOM, customDays é obrigatório
-      if (data.frequency === "CUSTOM" && !data.customDays) {
+      if (data.frequency === FREQUENCY.CUSTOM && !data.customDays) {
         return false;
       }
       return true;
@@ -139,7 +125,7 @@ export const createOrderBodySchema = z
 export const manageOrderBodySchema = z
   .object({
     action: z
-      .enum(["pause", "resume", "cancel"], {
+      .enum(ORDER_ACTIONS_ARRAY as [string, ...string[]], {
         message: "Ação deve ser pause, resume ou cancel",
       })
       .optional(),
@@ -155,9 +141,9 @@ export const manageOrderBodySchema = z
   .refine(
     (data) => {
       // Se frequency for CUSTOM, customDays é obrigatório
-      if (data.frequency === "CUSTOM" && !data.customDays) {
-        return false;
-      }
+    if (data.frequency === FREQUENCY.CUSTOM && !data.customDays) {
+      return false;
+    }
       return true;
     },
     {
@@ -168,14 +154,14 @@ export const manageOrderBodySchema = z
 // Schema para atualização de status de item do pedido (body)
 export const updateOrderItemStatusBodySchema = z
   .object({
-    status: z.enum(["APPROVED", "REJECTED"], {
+    status: z.enum([ORDER_ITEM_STATUS_ARRAY[1], ORDER_ITEM_STATUS_ARRAY[2]] as [string, ...string[]], {
       message: "Status deve ser APPROVED ou REJECTED",
     }),
     rejectionReason: z.string().optional(),
   })
   .refine(
     (data) => {
-      if (data.status === "REJECTED" && !data.rejectionReason) {
+      if (data.status === ORDER_ITEM_STATUS_ARRAY[2] && !data.rejectionReason) {
         return false;
       }
       return true;

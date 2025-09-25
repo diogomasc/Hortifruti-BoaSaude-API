@@ -4,17 +4,16 @@ import { DrizzleOrdersRepository } from "../../../../repositories/drizzle-orders
 import { DrizzleAddressesRepository } from "../../../../repositories/drizzle-addresses-repository";
 import { DrizzleProductsRepository } from "../../../../repositories/drizzle-products-repository";
 import { DrizzleUsersRepository } from "../../../../repositories/drizzle-users-repository";
-import { ResourceNotFoundError } from "../../../../use-cases/errors/resource-not-found-error";
-import { InvalidRoleError } from "../../../../use-cases/errors/invalid-role-error";
 import { getAuthenticatedUserFromRequest } from "../../../middlewares/get-authenticated-user-from-request";
 import {
   createOrderBodySchema,
   createOrderResponseSchema,
 } from "../../../schemas/orders";
+import { Frequency } from "../../../../constants";
 // Função utilitária para normalizar dados de recorrência
 function normalizeRecurrenceData(data: {
   isRecurring: boolean;
-  frequency?: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+  frequency?: Frequency;
   customDays?: number;
 }) {
   if (!data.isRecurring) {
@@ -63,7 +62,7 @@ export const createOrderRoute: FastifyPluginAsyncZod = async function (app) {
       // Normalizar dados de recorrência
       const normalizedRecurrence = normalizeRecurrenceData({
         isRecurring,
-        frequency,
+        frequency: frequency as Frequency,
         customDays,
       });
 

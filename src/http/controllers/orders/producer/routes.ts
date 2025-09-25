@@ -5,7 +5,7 @@ import { listPendingOrderItemsRoute } from "./list-pending-order-items";
 
 /**
  * Rotas específicas para produtores (Orders - Producer)
- * 
+ *
  * Estas rotas permitem aos produtores:
  * - Visualizar itens de pedidos pendentes de aprovação
  * - Aprovar ou rejeitar itens específicos de pedidos

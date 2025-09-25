@@ -25,6 +25,7 @@ import {
   UpdateOrderRecurrenceRequest,
   FindItemsByProducerIdRequest
 } from "./orders-repository";
+import { FREQUENCY, ORDER_STATUS, ORDER_ITEM_STATUS } from "../constants";
 
 export class DrizzleOrdersRepository implements OrdersRepository {
   async create(data: CreateOrderRequest): Promise<OrderWithItems> {
@@ -40,21 +41,21 @@ export class DrizzleOrdersRepository implements OrdersRepository {
       if (data.isRecurring && data.frequency) {
         const now = new Date();
         switch (data.frequency) {
-          case "WEEKLY":
+          case FREQUENCY.WEEKLY:
             nextDeliveryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
             break;
-          case "BIWEEKLY":
+          case FREQUENCY.BIWEEKLY:
             nextDeliveryDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
             break;
-          case "MONTHLY":
+          case FREQUENCY.MONTHLY:
             nextDeliveryDate = new Date(now);
             nextDeliveryDate.setMonth(now.getMonth() + 1);
             break;
-          case "QUARTERLY":
+          case FREQUENCY.QUARTERLY:
             nextDeliveryDate = new Date(now);
             nextDeliveryDate.setMonth(now.getMonth() + 3);
             break;
-          case "CUSTOM":
+          case FREQUENCY.CUSTOM:
             if (data.customDays) {
               nextDeliveryDate = new Date(now.getTime() + data.customDays * 24 * 60 * 60 * 1000);
             }
@@ -263,20 +264,14 @@ export class DrizzleOrdersRepository implements OrdersRepository {
 
   async updateStatus(
     id: string,
-    status:
-      | "PENDING"
-      | "COMPLETED"
-      | "REJECTED"
-      | "PARTIALLY_COMPLETED"
-      | "PAUSED"
-      | "CANCELLED"
+    status: OrderStatus
   ): Promise<void> {
     const updateData: any = {
       status,
       updatedAt: new Date(),
     };
 
-    if (status === "COMPLETED") {
+    if (status === ORDER_STATUS.COMPLETED) {
       updateData.completedAt = new Date();
     }
 
@@ -595,34 +590,34 @@ export class DrizzleOrdersRepository implements OrdersRepository {
 
   async recalculateOrderStatus(
     orderId: string
-  ): Promise<"PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED"> {
+  ): Promise<OrderStatus> {
     const items = await db
       .select()
       .from(orderItems)
       .where(eq(orderItems.orderId, orderId));
 
     if (items.length === 0) {
-      return "PENDING";
+      return ORDER_STATUS.PENDING;
     }
 
-    const approvedItems = items.filter((item) => item.status === "APPROVED");
-    const rejectedItems = items.filter((item) => item.status === "REJECTED");
-    const pendingItems = items.filter((item) => item.status === "PENDING");
+    const approvedItems = items.filter((item) => item.status === ORDER_ITEM_STATUS.APPROVED);
+    const rejectedItems = items.filter((item) => item.status === ORDER_ITEM_STATUS.REJECTED);
+    const pendingItems = items.filter((item) => item.status === ORDER_ITEM_STATUS.PENDING);
 
-    let newStatus: "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED";
+    let newStatus: OrderStatus;
 
     if (pendingItems.length > 0) {
       // Se ainda há itens pendentes, o pedido permanece PENDING
-      newStatus = "PENDING";
+      newStatus = ORDER_STATUS.PENDING;
     } else if (approvedItems.length === items.length) {
       // Todos os itens foram aprovados
-      newStatus = "COMPLETED";
+      newStatus = ORDER_STATUS.COMPLETED;
     } else if (rejectedItems.length === items.length) {
       // Todos os itens foram rejeitados
-      newStatus = "REJECTED";
+      newStatus = ORDER_STATUS.REJECTED;
     } else {
       // Alguns aprovados, alguns rejeitados
-      newStatus = "PARTIALLY_COMPLETED";
+      newStatus = ORDER_STATUS.PARTIALLY_COMPLETED;
     }
 
     await this.updateStatus(orderId, newStatus);

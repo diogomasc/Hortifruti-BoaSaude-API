@@ -5,6 +5,7 @@ import { UsersRepository } from "../repositories/users-repository";
 import { ResourceNotFoundError } from "./errors/resource-not-found-error";
 import { InvalidRoleError } from "./errors/invalid-role-error";
 import { CreateOrderRequest, CreateOrderResponse } from "../types";
+import { USER_ROLES, FREQUENCY } from "../constants";
 
 // Type aliases for backward compatibility
 type CreateOrderUseCaseRequest = CreateOrderRequest;
@@ -32,7 +33,7 @@ export class CreateOrderUseCase {
       throw new ResourceNotFoundError("Usuário não encontrado");
     }
 
-    if (user.role !== "consumer") {
+    if (user.role !== USER_ROLES.CONSUMER) {
       throw new InvalidRoleError("Apenas consumidores podem criar pedidos");
     }
 
@@ -77,18 +78,18 @@ export class CreateOrderUseCase {
     if (isRecurring && frequency) {
       const now = new Date();
       switch (frequency) {
-        case "WEEKLY":
+        case FREQUENCY.WEEKLY:
           nextDeliveryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
           break;
-        case "MONTHLY":
+        case FREQUENCY.MONTHLY:
           nextDeliveryDate = new Date(now);
           nextDeliveryDate.setMonth(now.getMonth() + 1);
           break;
-        case "QUARTERLY":
+        case FREQUENCY.QUARTERLY:
           nextDeliveryDate = new Date(now);
           nextDeliveryDate.setMonth(now.getMonth() + 3);
           break;
-        case "CUSTOM":
+        case FREQUENCY.CUSTOM:
           if (customDays) {
             nextDeliveryDate = new Date(now.getTime() + customDays * 24 * 60 * 60 * 1000);
           }

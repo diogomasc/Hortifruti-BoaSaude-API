@@ -9,6 +9,7 @@ import { addProductImageRoute } from "./image-products/add-product-image";
 import { deleteProductImageRoute } from "./image-products/delete-product-image";
 import { listProductImagesRoute } from "./image-products/list-product-images";
 import { verifyUserRole } from "../../middlewares/verify-user-role";
+import { USER_ROLES } from "../../../constants";
 
 export async function productsRoutes(app: FastifyInstance) {
   // Registrar todas as rotas públicas de produtos (sem autenticação)
@@ -17,7 +18,7 @@ export async function productsRoutes(app: FastifyInstance) {
 
   // Registrar rotas que requerem autenticação de produtor
   await app.register(async function (app) {
-    app.addHook("preHandler", verifyUserRole("producer"));
+    app.addHook("preHandler", verifyUserRole(USER_ROLES.PRODUCER));
 
     await app.register(listProducerProductsRoute);
     await app.register(createProductRoute);

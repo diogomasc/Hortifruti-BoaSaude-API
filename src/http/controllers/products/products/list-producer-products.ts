@@ -7,6 +7,7 @@ import {
   listProducerProductsQuerySchema,
   listProducerProductsResponseSchema,
 } from "../../../schemas/products";
+import { ProductCategory } from "../../../../constants/product-categories";
 
 export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
   server
@@ -38,7 +39,7 @@ export const listProducerProductsRoute: FastifyPluginAsyncZod = async (
       }
 
       if (category) {
-        conditions.push(eq(products.category, category));
+        conditions.push(eq(products.category, category as ProductCategory));
       }
 
       const [result, total] = await Promise.all([

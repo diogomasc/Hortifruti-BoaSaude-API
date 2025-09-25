@@ -1,7 +1,8 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { verifyJWT } from "./get-authenticated-user-from-request";
+import { UserRole } from "../../types";
 
-export function verifyUserRole(role: "consumer" | "producer" | "admin") {
+export function verifyUserRole(role: UserRole) {
   return async function (request: FastifyRequest, reply: FastifyReply) {
     // Primeiro verifica se o usuário está autenticado (JWT válido)
     await verifyJWT(request, reply);

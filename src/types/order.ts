@@ -1,8 +1,8 @@
 // Order-related types
+import { OrderStatus, OrderItemStatus, Frequency, UserRole, ORDER_ITEM_STATUS, ORDER_ACTIONS } from '../constants';
 
-export type OrderStatus = "PENDING" | "COMPLETED" | "REJECTED" | "PARTIALLY_COMPLETED" | "PAUSED" | "CANCELLED";
-export type OrderItemStatus = "PENDING" | "APPROVED" | "REJECTED";
-export type OrderFrequency = "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+export type { OrderStatus, OrderItemStatus };
+export type OrderFrequency = Frequency;
 
 export interface OrderItem {
   id: string;
@@ -99,7 +99,7 @@ export interface CreateOrderData {
 
 export interface UpdateOrderItemStatusData {
   itemId: string;
-  status: "APPROVED" | "REJECTED";
+  status: typeof ORDER_ITEM_STATUS.APPROVED | typeof ORDER_ITEM_STATUS.REJECTED;
   rejectionReason?: string;
 }
 
@@ -139,7 +139,7 @@ export interface CreateOrderResponse {
 export interface GetOrderRequest {
   orderId: string;
   userId: string;
-  userRole: "consumer" | "producer" | "admin";
+  userRole: UserRole;
 }
 
 export interface GetOrderResponse {
@@ -148,7 +148,7 @@ export interface GetOrderResponse {
 
 export interface ListOrdersRequest {
   userId: string;
-  userRole: "consumer" | "producer" | "admin";
+  userRole: UserRole;
   status?: OrderStatus;
   search?: string;
   limit?: number;
@@ -168,15 +168,15 @@ export interface ListOrdersResponse {
 export interface ManageOrderRequest {
   orderId: string;
   consumerId: string;
-  action?: "pause" | "resume" | "cancel";
+  action?: typeof ORDER_ACTIONS.PAUSE | typeof ORDER_ACTIONS.RESUME | typeof ORDER_ACTIONS.CANCEL;
   isRecurring?: boolean;
-  frequency?: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+  frequency?: Frequency;
   customDays?: number;
 }
 
 export interface UpdateOrderItemStatusRequest {
   itemId: string;
-  status: "APPROVED" | "REJECTED";
+  status: typeof ORDER_ITEM_STATUS.APPROVED | typeof ORDER_ITEM_STATUS.REJECTED;
   rejectionReason?: string;
 }
 

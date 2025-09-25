@@ -1,6 +1,7 @@
 // User-related types
+import { UserRole } from '../constants';
 
-export type UserRole = "consumer" | "producer" | "admin";
+export type { UserRole };
 
 export interface User {
   id: string;
@@ -88,7 +89,7 @@ export interface GetUserCompleteProfileResponse {
   user: {
     id: string;
     email: string;
-    role: "consumer" | "producer" | "admin";
+    role: UserRole;
     firstName: string;
     lastName: string;
     phone?: string;

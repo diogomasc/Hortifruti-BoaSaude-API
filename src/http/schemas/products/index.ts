@@ -1,33 +1,9 @@
 import { z } from "zod";
 import { errorResponseSchema, uuidParamsSchema, paginationSchema } from "../common";
+import { PRODUCT_CATEGORIES_ARRAY } from "../../../constants";
 
-// Enum para categorias de produtos
-export const productCategoryEnum = z.enum([
-  "frutas",
-  "legumes",
-  "verduras",
-  "ervas",
-  "graos",
-  "tuberculos",
-  "hortalicas",
-  "organicos",
-  "ovos",
-  "mel",
-  "cogumelos",
-  "temperos",
-  "sementes",
-  "castanhas",
-  "integrais",
-  "conservas",
-  "compotas",
-  "polpa_fruta",
-  "polpa_vegetal",
-  "sazonal",
-  "flores_comestiveis",
-  "vegano",
-  "kits",
-  "outros",
-]);
+// Enum para categorias de produtos usando as constantes
+export const productCategoryEnum = z.enum(PRODUCT_CATEGORIES_ARRAY as [string, ...string[]]);
 
 // Schema para imagem de produto
 export const productImageSchema = z.object({

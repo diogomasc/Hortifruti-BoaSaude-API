@@ -1,4 +1,5 @@
 // Common and utility types
+import { UserRole, Frequency, OrderDirection } from "../constants";
 
 export interface PaginationParams {
   page?: number;
@@ -57,7 +58,7 @@ export interface ErrorResponse {
 // JWT payload type
 export interface JWTPayload {
   sub: string; // user id
-  role: "consumer" | "producer" | "admin";
+  role: UserRole;
   iat?: number;
   exp?: number;
 }
@@ -79,7 +80,7 @@ export interface UploadedFile {
 // Recurrence types
 export interface RecurrenceData {
   isRecurring: boolean;
-  frequency?: "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "CUSTOM";
+  frequency?: Frequency;
   customDays?: number;
   nextDeliveryDate?: Date;
 }
@@ -94,7 +95,7 @@ export interface FindManyParams extends PaginationParams {
   search?: string;
   filters?: Record<string, any>;
   orderBy?: string;
-  orderDirection?: "asc" | "desc";
+  orderDirection?: OrderDirection;
 }
 
 export interface FindManyResult<T> {
