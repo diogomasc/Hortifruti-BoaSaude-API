@@ -1,10 +1,10 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { RegisterUseCase } from "../../use-cases/register";
-import { DrizzleUsersRepository } from "../../repositories/drizzle-users-repository";
-import { DrizzleWalletsRepository } from "../../repositories/drizzle-wallets-repository";
-import { UserAlreadyExistsError } from "../../use-cases/errors/user-already-exists-error";
-import { errorResponseSchema } from "../schemas/common";
+import { RegisterUseCase } from "../../../use-cases/register";
+import { DrizzleUsersRepository } from "../../../repositories/drizzle-users-repository";
+import { DrizzleWalletsRepository } from "../../../repositories/drizzle-wallets-repository";
+import { UserAlreadyExistsError } from "../../../use-cases/errors/user-already-exists-error";
+import { errorResponseSchema } from "../../schemas/common";
 
 const registerBodySchema = z
   .object({

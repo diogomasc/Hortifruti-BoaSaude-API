@@ -1,10 +1,10 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { ResourceNotFoundError } from "../../use-cases/errors/resource-not-found-error";
-import { makeGetUserProfileUseCase } from "../../use-cases/factories/make-get-user-profile-use-case";
-import { getAuthenticatedUserFromRequest } from "../middlewares/get-authenticated-user-from-request";
-import { verifyJWT } from "../middlewares/get-authenticated-user-from-request";
-import { errorResponseSchema } from "../schemas/common";
+import { ResourceNotFoundError } from "../../../use-cases/errors/resource-not-found-error";
+import { makeGetUserProfileUseCase } from "../../../use-cases/factories/make-get-user-profile-use-case";
+import { getAuthenticatedUserFromRequest } from "../../middlewares/get-authenticated-user-from-request";
+import { verifyJWT } from "../../middlewares/get-authenticated-user-from-request";
+import { errorResponseSchema } from "../../schemas/common";
 
 export const profileRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(

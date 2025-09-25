@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { registerRoute } from "./controllers/register";
-import { loginRoute } from "./controllers/login";
-import { profileRoute } from "./controllers/profile";
+import { registerRoute } from "./controllers/auth/register";
+import { loginRoute } from "./controllers/auth/login";
+import { profileRoute } from "./controllers/users/profile";
 import { usersRoutes } from "./controllers/users/routes";
 import { productsRoutes } from "./controllers/products/routes";
 import { ordersRoutes } from "./controllers/orders/routes";
