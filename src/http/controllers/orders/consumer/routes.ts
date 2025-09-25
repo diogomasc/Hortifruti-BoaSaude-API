@@ -1,7 +1,7 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { verifyJWT } from "../../../middlewares/get-authenticated-user-from-request";
-import { createOrder, createOrderSchema } from "./create-order";
-import { manageOrder, manageOrderSchema } from "./manage-order";
+import { createOrderRoute } from "./create-order";
+import { manageOrderRoute } from "./manage-order";
 
 /**
  * Rotas específicas para consumidores (Orders - Consumer)
@@ -16,8 +16,8 @@ export const consumerOrdersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook("onRequest", verifyJWT);
 
   // POST /orders → Cria um novo pedido vinculado ao usuário autenticado
-  app.post("/", { schema: createOrderSchema }, createOrder);
+  app.register(createOrderRoute, { prefix: "/" });
 
   // PATCH /orders/{orderId}/manage → Gerencia pedido (pausar, retomar, cancelar)
-  app.patch("/:orderId/manage", { schema: manageOrderSchema }, manageOrder);
+  app.register(manageOrderRoute);
 };

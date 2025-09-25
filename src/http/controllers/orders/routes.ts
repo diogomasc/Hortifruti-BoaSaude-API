@@ -1,8 +1,8 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { consumerOrdersRoutes } from "./consumer/routes";
 import { producerOrdersRoutes } from "./producer/routes";
-import { listOrders, listOrdersSchema } from "./list-orders";
-import { getOrderById, getOrderByIdSchema } from "./get-order-by-id";
+import { listOrdersRoute } from "./list-orders";
+import { getOrderByIdRoute } from "./get-order-by-id";
 
 /**
  * Rotas principais de pedidos organizadas por tipo de usuário
@@ -23,8 +23,8 @@ export const ordersRoutes: FastifyPluginAsyncZod = async (app) => {
   await app.register(producerOrdersRoutes);
 
   // GET /orders → Lista todos os pedidos do usuário autenticado
-  await app.get("/", { schema: listOrdersSchema }, listOrders);
+  await app.register(listOrdersRoute);
 
   // GET /orders/{orderId} → Obtém detalhes de um pedido específico
-  await app.get("/:orderId", { schema: getOrderByIdSchema }, getOrderById);
+  await app.register(getOrderByIdRoute);
 };

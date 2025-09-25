@@ -1,4 +1,4 @@
-import type { FastifyRequest, FastifyReply, FastifyInstance } from "fastify";
+import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { ManageOrderUseCase } from "../../../../use-cases/manage-order";
 import { DrizzleOrdersRepository } from "../../../../repositories/drizzle-orders-repository";
@@ -32,80 +32,77 @@ const updateOrderRecurrenceSchema = z
     }
   );
 
-// Schema para documentação Swagger
-export const manageOrderSchema = {
-  tags: ["Orders - Only Consumer"],
-  summary: "Gerenciar pedido",
-  description:
-    "Permite pausar, retomar, cancelar um pedido ou atualizar sua recorrência. Apenas consumidores podem gerenciar seus próprios pedidos.",
-  security: [{ bearerAuth: [] }],
-  params: z.object({
-    orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
-  }),
-  body: z
-    .object({
-      action: z
-        .enum(["pause", "resume", "cancel"], {
-          message: "Ação deve ser pause, resume ou cancel",
-        })
-        .optional(),
-    })
-    .merge(updateOrderRecurrenceSchema),
-  response: {
-    200: z
-      .object({
-        message: z.string(),
-      })
-      .describe("Pedido gerenciado com sucesso"),
-    400: z
-      .object({
-        message: z.string(),
-        errors: z
-          .array(
-            z.object({
-              code: z.string(),
-              expected: z.string().optional(),
-              received: z.string().optional(),
-              path: z.array(z.union([z.string(), z.number()])),
+export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
+  app.patch(
+    "/:orderId/manage",
+    {
+      schema: {
+        tags: ["Orders - Only Consumer"],
+        summary: "Gerenciar pedido",
+        description:
+          "Permite pausar, retomar, cancelar um pedido ou atualizar sua recorrência. Apenas consumidores podem gerenciar seus próprios pedidos.",
+        security: [{ bearerAuth: [] }],
+        params: z.object({
+          orderId: z.string().uuid("ID do pedido deve ser um UUID válido"),
+        }),
+        body: z
+          .object({
+            action: z
+              .enum(["pause", "resume", "cancel"], {
+                message: "Ação deve ser pause, resume ou cancel",
+              })
+              .optional(),
+          })
+          .merge(updateOrderRecurrenceSchema),
+        response: {
+          200: z
+            .object({
               message: z.string(),
             })
-          )
-          .optional(),
-      })
-      .describe("Dados inválidos ou erro de validação"),
-    401: z
-      .object({
-        message: z.string(),
-      })
-      .describe("Token de autenticação inválido ou não fornecido"),
-    403: z
-      .object({
-        message: z.string(),
-      })
-      .describe("Acesso negado - usuário não autorizado"),
-    404: z
-      .object({
-        message: z.string(),
-      })
-      .describe("Pedido não encontrado"),
-    500: z
-      .object({
-        message: z.string(),
-      })
-      .describe("Erro interno do servidor"),
-  },
-};
-
-export async function manageOrder(
-  request: FastifyRequest,
-  reply: FastifyReply
-) {
+            .describe("Pedido gerenciado com sucesso"),
+          400: z
+            .object({
+              message: z.string(),
+              errors: z
+                .array(
+                  z.object({
+                    code: z.string(),
+                    expected: z.string().optional(),
+                    received: z.string().optional(),
+                    path: z.array(z.union([z.string(), z.number()])),
+                    message: z.string(),
+                  })
+                )
+                .optional(),
+            })
+            .describe("Dados inválidos ou erro de validação"),
+          401: z
+            .object({
+              message: z.string(),
+            })
+            .describe("Token de autenticação inválido ou não fornecido"),
+          403: z
+            .object({
+              message: z.string(),
+            })
+            .describe("Acesso negado - usuário não autorizado"),
+          404: z
+            .object({
+              message: z.string(),
+            })
+            .describe("Pedido não encontrado"),
+          500: z
+            .object({
+              message: z.string(),
+            })
+            .describe("Erro interno do servidor"),
+        },
+      },
+    },
+    async (request, reply) => {
   try {
-    const { orderId } = request.params as z.infer<
-      typeof manageOrderSchema.params
-    >;
-    const { action, isRecurring, frequency, customDays } =
-      request.body as z.infer<typeof manageOrderSchema.body>;
+    const { orderId } = request.params;
+    const { action, isRecurring, frequency, customDays } = request.body;
     const { sub: consumerId } = getAuthenticatedUserFromRequest(request);
 
     // Instanciar use case
@@ -195,8 +192,6 @@ export async function manageOrder(
       message: "Erro interno do servidor",
     });
   }
-}
-
-export async function manageOrderPlugin(app: FastifyInstance) {
-  app.patch("/:orderId/manage", manageOrder);
-}
+    }
+  );
+};
