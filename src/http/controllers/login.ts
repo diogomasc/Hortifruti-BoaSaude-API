@@ -9,7 +9,7 @@ const loginBodySchema = z.object({
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
-export const loginController: FastifyPluginAsyncZod = async (server) => {
+export const loginRoute: FastifyPluginAsyncZod = async (server) => {
   server.post(
     "/login",
     {

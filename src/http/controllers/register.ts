@@ -73,7 +73,7 @@ const registerBodySchema = z
     }
   );
 
-export const registerController: FastifyPluginAsyncZod = async (server) => {
+export const registerRoute: FastifyPluginAsyncZod = async (server) => {
   server.post(
     "/register",
     {

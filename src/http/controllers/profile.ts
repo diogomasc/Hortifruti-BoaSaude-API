@@ -6,7 +6,7 @@ import { getAuthenticatedUserFromRequest } from "../middlewares/get-authenticate
 import { verifyJWT } from "../middlewares/get-authenticated-user-from-request";
 import { errorResponseSchema } from "../schemas/common";
 
-export const profileController: FastifyPluginAsyncZod = async (server) => {
+export const profileRoute: FastifyPluginAsyncZod = async (server) => {
   server.get(
     "/profile",
     {
