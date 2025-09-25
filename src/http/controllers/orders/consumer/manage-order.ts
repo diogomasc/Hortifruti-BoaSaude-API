@@ -10,7 +10,7 @@ import {
 import { ORDER_ACTIONS, FREQUENCY } from "../../../../constants";
 
 export const manageOrderRoute: FastifyPluginAsyncZod = async (app) => {
-  app.patch(
+  app.put(
     "/:orderId/manage",
     {
       schema: {

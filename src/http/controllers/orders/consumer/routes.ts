@@ -18,6 +18,6 @@ export const consumerOrdersRoutes: FastifyPluginAsyncZod = async (app) => {
   // POST /orders → Cria um novo pedido vinculado ao usuário autenticado
   app.register(createOrderRoute);
 
-  // PATCH /orders/{orderId}/manage → Gerencia pedido (pausar, retomar, cancelar)
+  // PUT /orders/{orderId}/manage → Gerencia pedido (pausar, retomar, cancelar)
   app.register(manageOrderRoute);
 };
